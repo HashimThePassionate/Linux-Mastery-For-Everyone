@@ -177,3 +177,79 @@ The `/etc/shells` file lists shells that can be used as login shells for users. 
 - Paths like `/usr/bin/sh` may be symbolic links to other shells (e.g., `/bin/sh`).
 
 ---
+
+# 🔍 **Shell Connections: TTY vs. PTS**
+
+Shell connections link users to the system’s shell. There are two main types:
+
+### 1. TTY (Teletypewriter) 🖨️
+
+- **Definition**: A native connection directly tied to the computer’s hardware, such as physical or virtual consoles.
+- **Characteristics**: Historically linked to teletypewriters, TTYs are used for direct terminal access via keyboards or serial ports.
+- **Example**: Physical console access or virtual terminals (e.g., `Ctrl+Alt+F1` on Linux).
+
+### 2. PTS (Pseudo Terminal Slave) 🌐
+
+- **Definition**: An emulated connection created by software like SSH, Telnet, or terminal emulators (e.g., xterm).
+- **Characteristics**: PTS is the "slave" part of a pseudo-terminal pair (PTY), where a program (e.g., SSH client) acts as the master to manage input/output.
+- **Example**: SSH sessions or GUI terminal windows.
+
+### Key Difference
+
+- **TTY**: Native, hardware-based, used for direct console access.
+- **PTS**: Emulated, software-based, used for remote or virtual terminal sessions.
+
+## 🐳 Docker Context
+
+In Docker containers:
+
+- **PTS Dominates**: Containers typically use PTS connections because they run in virtualized environments and rely on pseudo-terminals allocated by flags like `-it`.
+- **TTY Rare**: True TTY connections (hardware-based) are uncommon in containers due to their isolated nature.
+
+## 🚀 Checking Shell Connections in Docker
+
+To identify whether you're using a TTY or PTS connection in your Ubuntu container, follow these steps:
+
+### 1. Start or Access the Container
+
+- **Start a Stopped Container**:
+
+  ```bash
+  docker start -ai my-ubuntu
+  ```
+
+  - `-ai`: Attaches the terminal in interactive mode.
+
+- **Access a Running Container**:
+
+  ```bash
+  docker exec -it my-ubuntu bash
+  ```
+
+  - `-it`: Allocates a pseudo-terminal (PTS) and opens a Bash shell.
+
+### 2. Identify the Terminal
+
+Inside the container, run:
+
+```bash
+tty
+```
+
+**Sample Output**:
+
+```
+/dev/pts/0
+```
+
+This indicates a **PTS** connection, as Docker’s `-t` flag allocates a pseudo-terminal.
+
+### 3. List Terminal Devices
+
+To see available terminal devices:
+
+```bash
+ls /dev
+```
+
+Look for `/dev/pts/` entries (e.g., `pts/0`, `pts/1`), which represent PTS devices. A `/dev/tty` may appear but is typically symbolic in containers.
