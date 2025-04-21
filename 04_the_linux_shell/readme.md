@@ -101,3 +101,79 @@ To confirm which shell binary you’re running:
   ```
 
 ---
+
+# 🚀 Starting or Accessing the Ubuntu Container
+
+To work with the `my-ubuntu` container, use one of these commands depending on its state:
+
+### 1. Start an Existing Container
+
+If the `my-ubuntu` container is stopped, start it in interactive mode:
+
+```bash
+docker start -ai my-ubuntu
+```
+
+#### 🔍 Command Breakdown
+
+- `docker start`: Starts a stopped container.
+- `-ai`: Attaches the terminal in interactive mode (`-i`) with a pseudo-TTY (`-a`).
+- `my-ubuntu`: The name of the container.
+
+### 2. Access a Running Container
+
+If the `my-ubuntu` container is already running, open a new Bash session inside it:
+
+```bash
+docker exec -it my-ubuntu bash
+```
+
+#### 🔍 Command Breakdown
+
+- `docker exec`: Runs a command inside a running container.
+- `-it`: Enables interactive mode with a terminal.
+- `my-ubuntu`: The name of the container.
+- `bash`: Launches the Bash shell.
+
+Upon starting or accessing, you'll see a prompt like:
+
+```bash
+root@f69c4124e2e7:/#
+```
+
+This indicates you're the `root` user in the container's root directory (`/`). The string `f69c4124e2e7` is part of the container's unique ID.
+
+## 📋 Checking Installed Shells
+
+To list all valid login shells installed in the container, run:
+
+```bash
+cat /etc/shells
+```
+
+### 📜 Sample Output
+
+The output will resemble:
+
+```plaintext
+# /etc/shells: valid login shells
+/bin/sh
+/usr/bin/sh
+/bin/bash
+/usr/bin/bash
+/bin/rbash
+/usr/bin/rbash
+/usr/bin/dash
+```
+
+### 🧠 Understanding the Output
+
+The `/etc/shells` file lists shells that can be used as login shells for users. Here's what each shell means:
+
+- `/bin/sh`: The Bourne shell, a lightweight shell often used for scripting. 🛠️
+- `/bin/bash`: The Bourne Again Shell, a feature-rich shell and the default in most Ubuntu systems. 🌟
+- `/bin/rbash`: Restricted Bash, a limited version of Bash for enhanced security. 🔒
+- `/usr/bin/dash`: The Debian Almquist Shell, a fast and lightweight shell for system scripts. ⚡
+- Paths like `/usr/bin/sh` may be symbolic links to other shells (e.g., `/bin/sh`).
+
+---
