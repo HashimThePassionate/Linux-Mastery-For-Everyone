@@ -390,3 +390,147 @@ this is a future presentation
 The new text is appended to the end of the file.
 
 ---
+
+# **Listing Files** 📋🔎
+
+## Introduction to the `ls` Command 📜
+
+The `ls` command is essential for listing files and directories in Linux. We’ve previously used `ls -l` for long-format listing. This section explores additional options for `ls`, demonstrating their usage inside a Docker container in the `/home/packt` directory, which contains two files: `art-file` (57 bytes) and `new-report` (0 bytes).
+
+---
+
+## Exploring `ls` Command Options 🛠️
+
+### 1. `ls -lh`: Human-Readable File Sizes 📏
+
+The `-l` option provides a long-format listing, and `-h` displays file sizes in a human-readable format (e.g., kilobytes or megabytes instead of bytes).
+
+**Command:**
+
+```bash
+ls -lh
+```
+
+**Output:**
+
+```
+total 4.0K
+-rw-r--r-- 1 root root 57 Apr 28 11:49 art-file  
+-rw-r--r-- 1 root root  0 Apr 28 11:43 new-report
+```
+
+**Explanation:**
+
+- `total 4.0K`: Total size of the directory (4 kilobytes, excluding hidden files).
+- `57` and `0`: File sizes in bytes (human-readable format via `-h`).
+- Other fields (permissions, owner, group, etc.) are in long format due to `-l`.
+
+---
+
+### 2. `ls -la`: Show All Files (Including Hidden) 🕵️
+
+The `-a` option includes hidden files (those starting with `.`), and `-l` provides a long-format listing.
+
+**Command:**
+
+```bash
+ls -la
+```
+
+**Output:**
+
+```
+total 12
+drwxr-xr-x 2 root root 4096 Apr 28 11:48 .
+drwxr-xr-x 1 root root 4096 Apr 28 11:42 ..
+-rw-r--r-- 1 root root   57 Apr 28 11:49 art-file
+-rw-r--r-- 1 root root    0 Apr 28 11:43 new-report
+```
+
+**Explanation:**
+
+- `total 12`: Total size (12 kilobytes), including hidden directories (`.` and `..`).
+- `drwxr-xr-x`: Permissions for directories (`.` is the current directory, `..` is the parent).
+- `4096`: Default size of directories in Linux.
+- `.` and `..`: Hidden entries representing the current (`/home/packt`) and parent (`/home`) directories.
+
+---
+
+### 3. `ls -ltr`: Sort by Modification Time (Reverse Order) ⏰
+
+The `-t` option sorts files by modification time (newest first), and `-r` reverses the order (oldest first). The `-l` option provides a long-format listing.
+
+**Command:**
+
+```bash
+ls -ltr
+```
+
+**Output:**
+
+```
+total 4
+-rw-r--r-- 1 root root  0 Apr 28 11:43 new-report
+-rw-r--r-- 1 root root 57 Apr 28 11:49 art-file
+```
+
+**Explanation:**
+
+- `new-report` (11:43) is older than `art-file` (11:49).
+- Normally, `-t` shows newest first, but `-r` reverses it, so `new-report` appears first.
+
+---
+
+### 4. `ls -lS`: Sort by File Size 📦
+
+The `-S` option sorts files by size (largest first), and `-l` provides a long-format listing.
+
+**Command:**
+
+```bash
+ls -lS
+```
+
+**Output:**
+
+```
+total 4
+-rw-r--r-- 1 root root 57 Apr 28 11:49 art-file
+-rw-r--r-- 1 root root  0 Apr 28 11:43 new-report
+```
+
+**Explanation:**
+
+- `art-file` (57 bytes) is larger than `new-report` (0 bytes), so it appears first.
+
+---
+
+### 5. `ls -R`: Recursive Listing 🌳
+
+The `-R` option lists the contents of the current directory and its subdirectories recursively.
+
+**Command:**
+
+```bash
+ls -R
+```
+
+**Output:**
+
+```
+.:
+art-file  new-report
+```
+
+**Explanation:**
+
+- `.:` represents the current directory (`/home/packt`).
+- Only `art-file` and `new-report` are present since there are no subdirectories.
+
+---
+
+## Long Listing with `ls -la` 📋
+
+The `ls -la` command, often called "long listing," is a widely used method to list files. It shows detailed information (via `-l`) and includes hidden files (via `-a`). The output above for `ls -la` is an example of long listing, showing permissions, ownership, sizes, timestamps, and hidden entries like `.` and `..`.
+
+---
