@@ -2,6 +2,15 @@
 
 Selecting the right Linux distribution depends on your goals, environment, and preferences. Below are key factors to consider, simple explanations, and guidance on when to choose certain distros.
 
+# Table of Contents 🐧
+
+- [Platform](#-1-platform) 📋
+- [Infrastructure & Deployment](#-2-infrastructure--deployment) 🌐
+- [Performance](#-3-performance) 🚀
+- [Security](#-4-security) 🔒
+- [Reliability & Stability](#-5-reliability--stability) 🔄
+- [Quick Distro Guide](#-quick-distro-guide) 🎯
+- 
 ---
 
 ## 📋 1. Platform
