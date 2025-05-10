@@ -6,30 +6,30 @@
 - [Understanding File Paths](#understanding-file-paths-) 🛤️
   - [Types of Paths](#types-of-paths)
 - [Practical Example: Working with Paths in a Docker Container](#practical-example-working-with-paths-in-a-docker-container-) 🐳
-  - [Step 1: Check Your Current Directory](#step-1-check-your-current-directory)
-  - [Step 2: Create a File](#step-2-create-a-file)
-  - [Step 3: Add Content to the File](#step-3-add-content-to-the-file)
-  - [Step 4: View the File Using Absolute and Relative Paths](#step-4-view-the-file-using-absolute-and-relative-paths)
+  - [Step 1: Check Your Current Directory](#step-1-check-your-current-directory-)
+  - [Step 2: Create a File](#step-2-create-a-file-)
+  - [Step 3: Add Content to the File](#step-3-add-content-to-the-file-)
+  - [Step 4: View the File Using Absolute and Relative Paths](#step-4-view-the-file-using-absolute-and-relative-path-)
 - [Working with Relative Paths: Special Characters](#working-with-relative-paths-special-characters-) 🎯
-  - [Example: Accessing `/etc/passwd` Using a Relative Path](#example-accessing-etcpasswd-using-a-relative-path)
+  - [Example: Accessing `/etc/passwd` Using a Relative Path](#example-accessing-etcpasswd-using-a-relative-path-)
 - [Understanding the Example in Figure 2.7](#understanding-the-example-in-figure-27-) 📈
 - [Pro Tip: Use Tab for Autocompletion](#pro-tip-use-tab-for-autocompletion-) ✅
-- [Creating Files](#-creating-files-) 📄✨
-  - [Introduction to File Creation](#introduction-to-file-creation)
-  - [Method 1: Creating Files with `touch`](#method-1-creating-files-with-touch)
-  - [Updating Timestamps with `touch`](#updating-timestamps-with-touch)
-  - [Method 2: Creating Files with `echo` and Redirection](#method-2-creating-files-with-echo-and-redirection)
+- [Creating Files](#creating-files-) 📄✨
+  - [Introduction to File Creation](#introduction-to-file-creation-)
+  - [Method 1: Creating Files with `touch`](#method-1-creating-files-with-touch-)
+  - [Updating Timestamps with `touch`](#updating-timestamps-with-touch-)
+  - [Method 2: Creating Files with `echo` and Redirection](#method-2-creating-files-with-echo-and-redirection-)
 - [Listing Files](#-listing-files-) 📋🔎
-  - [Introduction to the `ls` Command](#introduction-to-the-ls-command)
-  - [Exploring `ls` Command Options](#exploring-ls-command-options)
-    - [`ls -lh`: Human-Readable File Sizes](#1-ls--lh-human-readable-file-sizes)
-    - [`ls -la`: Show All Files (Including Hidden)](#2-ls--la-show-all-files-including-hidden)
-    - [`ls -ltr`: Sort by Modification Time (Reverse Order)](#3-ls--ltr-sort-by-modification-time-reverse-order)
-    - [`ls -lS`: Sort by File Size](#4-ls--ls-sort-by-file-size)
-    - [`ls -R`: Recursive Listing](#5-ls--r-recursive-listing)
-  - [Long Listing with `ls -la`](#long-listing-with-ls--la)
+  - [Introduction to the `ls` Command](#introduction-to-the-ls-command-)
+  - [Exploring `ls` Command Options](#exploring-ls-command-options-)
+    - [`ls -lh`: Human-Readable File Sizes](#1-ls--lh-human-readable-file-sizes-)
+    - [`ls -la`: Show All Files (Including Hidden)](#2-ls--la-show-all-files-including-hidden-)
+    - [`ls -ltr`: Sort by Modification Time (Reverse Order)](#3-ls--ltr-sort-by-modification-time-reverse-order-)
+    - [`ls -lS`: Sort by File Size](#4-ls--ls-sort-by-file-size-)
+    - [`ls -R`: Recursive Listing](#5-ls--r-recursive-listing-)
+  - [Long Listing with `ls -la`](#long-listing-with-ls--la-)
 - [Copying and Moving Files](#-copying-and-moving-files-) 📂
-  - [Copying Files and Directories with `cp`](#-copying-files-and-directories-with-cp)
+  - [Copying Files and Directories with `cp`](#-copying-files-and-directories-with-cp-)
     - [Basic File Copy Example](#-basic-file-copy-example)
     - [Copying Multiple Files](#-copying-multiple-files)
   - [`cp` Command Options](#-cp-command-options)
@@ -43,13 +43,13 @@
     - [Moving Directories](#-moving-directories)
   - [Useful Tips for `cp` and `mv`](#-useful-tips-for-cp-and-mv)
   - [Summary](#-summary)
-- [Understanding Linux Links](#-understanding-linux-links) 🖇️
-  - [Symbolic Links (Soft Links)](#1-symbolic-links-soft-links)
-    - [Characteristics of Symbolic Links](#characteristics-of-symbolic-links)
-    - [Command to Create a Symbolic Link](#command-to-create-a-symbolic-link)
-    - [Example: Creating a Symbolic Link](#example-creating-a-symbolic-link)
-    - [Verifying Symbolic Links with `readlink`](#verifying-symbolic-links-with-readlink)
-  - [Hard Links](#2-hard-links)
+- [Understanding Linux Links](#-understanding-linux-links-) 🖇️
+  - [Symbolic Links (Soft Links)](#1-symbolic-links-soft-links-)
+    - [Characteristics of Symbolic Links](#characteristics-of-symbolic-links-)
+    - [Command to Create a Symbolic Link](#command-to-create-a-symbolic-link-)
+    - [Example: Creating a Symbolic Link](#example-creating-a-symbolic-link-)
+    - [Verifying Symbolic Links with `readlink`](#verifying-symbolic-links-with-readlink-)
+  - [Hard Links](#2-hard-links-)
     - [Characteristics of Hard Links](#characteristics-of-hard-links)
     - [Command to Create a Hard Link](#command-to-create-a-hard-link)
     - [Example: Creating a Hard Link](#example-creating-a-hard-link)
@@ -256,7 +256,7 @@ When working with paths, use the `Tab` key for autocompletion:
 
 ---
 
-# **Creating Files** 📄✨
+# **Creating Files** ✨
 
 ## Introduction to File Creation 🖥️
 
