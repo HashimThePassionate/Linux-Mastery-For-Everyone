@@ -1,5 +1,14 @@
 # **Linux Operating System** 🐧
 
+# 📚 Table of Contents 🐧
+
+- [What Is Linux?](#-what-is-linux) 📜
+- [Quick History](#-quick-history) 🗓️
+- [Why Use Linux?](#-why-use-linux) 💡
+- [Supported Platforms](#-supported-platforms) 🔌
+- [Linux vs. Unix](#-vs-unix) 🐢
+- [Main Components](#-main-components) 📂
+
 ---
 
 ## 📜 What Is Linux?
