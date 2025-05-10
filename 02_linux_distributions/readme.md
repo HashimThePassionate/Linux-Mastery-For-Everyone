@@ -1,4 +1,18 @@
 # **Exploring Linux Distributions** 🐧📦
+# Table of Contents 🐧
+
+- [What Is a Linux Distribution?](#-what-is-a-linux-distribution) 📖
+- [Key Components Explained](#-key-components-explained) 🛠️
+- [Distribution Architecture](#-distribution-architecture) 📊
+- [Popular Linux Distributions](#-popular-linux-distributions) 🌍
+  - [Fedora, CentOS Stream & RHEL](#-fedora-centos-stream--rhel) 🍂
+  - [Debian](#-debian) 📦
+  - [Ubuntu](#-ubuntu) 🦄
+  - [Linux Mint](#-linux-mint) 🍃
+  - [openSUSE](#-opensuse) 💎
+- [Key Differences Between Distros](#-key-differences-between-distros) 🔑
+- [Choosing the Right Distro](#-choosing-the-right-distro) 🎯
+
 
 ## 📖 What Is a Linux Distribution?
 A **Linux distribution** (or **distro**) is an installation bundle—usually an ISO image—that includes:
