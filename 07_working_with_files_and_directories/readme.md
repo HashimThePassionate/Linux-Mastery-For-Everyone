@@ -1,5 +1,75 @@
 # **Working with Files and Directories** 📁
 
+# Table of Contents 🐧
+
+- [Introduction to Files and Directories](#introduction-to-files-and-directories-) 📝
+- [Understanding File Paths](#understanding-file-paths-) 🛤️
+  - [Types of Paths](#types-of-paths)
+- [Practical Example: Working with Paths in a Docker Container](#practical-example-working-with-paths-in-a-docker-container-) 🐳
+  - [Step 1: Check Your Current Directory](#step-1-check-your-current-directory)
+  - [Step 2: Create a File](#step-2-create-a-file)
+  - [Step 3: Add Content to the File](#step-3-add-content-to-the-file)
+  - [Step 4: View the File Using Absolute and Relative Paths](#step-4-view-the-file-using-absolute-and-relative-paths)
+- [Working with Relative Paths: Special Characters](#working-with-relative-paths-special-characters-) 🎯
+  - [Example: Accessing `/etc/passwd` Using a Relative Path](#example-accessing-etcpasswd-using-a-relative-path)
+- [Understanding the Example in Figure 2.7](#understanding-the-example-in-figure-27-) 📈
+- [Pro Tip: Use Tab for Autocompletion](#pro-tip-use-tab-for-autocompletion-) ✅
+- [Creating Files](#-creating-files-) 📄✨
+  - [Introduction to File Creation](#introduction-to-file-creation)
+  - [Method 1: Creating Files with `touch`](#method-1-creating-files-with-touch)
+  - [Updating Timestamps with `touch`](#updating-timestamps-with-touch)
+  - [Method 2: Creating Files with `echo` and Redirection](#method-2-creating-files-with-echo-and-redirection)
+- [Listing Files](#-listing-files-) 📋🔎
+  - [Introduction to the `ls` Command](#introduction-to-the-ls-command)
+  - [Exploring `ls` Command Options](#exploring-ls-command-options)
+    - [`ls -lh`: Human-Readable File Sizes](#1-ls--lh-human-readable-file-sizes)
+    - [`ls -la`: Show All Files (Including Hidden)](#2-ls--la-show-all-files-including-hidden)
+    - [`ls -ltr`: Sort by Modification Time (Reverse Order)](#3-ls--ltr-sort-by-modification-time-reverse-order)
+    - [`ls -lS`: Sort by File Size](#4-ls--ls-sort-by-file-size)
+    - [`ls -R`: Recursive Listing](#5-ls--r-recursive-listing)
+  - [Long Listing with `ls -la`](#long-listing-with-ls--la)
+- [Copying and Moving Files](#-copying-and-moving-files-) 📂
+  - [Copying Files and Directories with `cp`](#-copying-files-and-directories-with-cp)
+    - [Basic File Copy Example](#-basic-file-copy-example)
+    - [Copying Multiple Files](#-copying-multiple-files)
+  - [`cp` Command Options](#-cp-command-options)
+    - [`cp -a` (Archive Mode)](#1-cp--a-archive-mode)
+    - [`cp -r` (Recursive Copy)](#2-cp--r-recursive-copy)
+    - [`cp -p` (Preserve Mode)](#3-cp--p-preserve-mode)
+    - [`cp -R` (Recursive Copy with Directory Creation)](#4-cp--r-recursive-copy-with-directory-creation)
+  - [Moving Files and Directories with `mv`](#-moving-files-and-directories-with-mv)
+    - [Renaming Files or Directories](#-renaming-files-or-directories)
+    - [Moving Files](#-moving-files)
+    - [Moving Directories](#-moving-directories)
+  - [Useful Tips for `cp` and `mv`](#-useful-tips-for-cp-and-mv)
+  - [Summary](#-summary)
+- [Understanding Linux Links](#-understanding-linux-links) 🖇️
+  - [Symbolic Links (Soft Links)](#1-symbolic-links-soft-links)
+    - [Characteristics of Symbolic Links](#characteristics-of-symbolic-links)
+    - [Command to Create a Symbolic Link](#command-to-create-a-symbolic-link)
+    - [Example: Creating a Symbolic Link](#example-creating-a-symbolic-link)
+    - [Verifying Symbolic Links with `readlink`](#verifying-symbolic-links-with-readlink)
+  - [Hard Links](#2-hard-links)
+    - [Characteristics of Hard Links](#characteristics-of-hard-links)
+    - [Command to Create a Hard Link](#command-to-create-a-hard-link)
+    - [Example: Creating a Hard Link](#example-creating-a-hard-link)
+  - [Symbolic Links vs. Hard Links: A Comparison](#symbolic-links-vs-hard-links-a-comparison)
+  - [When to Use Each Type?](#when-to-use-each-type)
+  - [Practical Tips and Best Practices](#practical-tips-and-best-practices)
+- [Deleting Files and Directories](#-deleting-files-and-directories-) 📁🗑️
+  - [Basic `rm` Command (No Options)](#1-basic-rm-command-no-options)
+  - [`rm -i` (Interactive Mode)](#2-rm--i-interactive-mode)
+  - [`rm -f` (Force Delete)](#3-rm--f-force-delete)
+  - [`rm -r` (Recursive Delete)](#4-rm--r-recursive-delete)
+  - [Important Tips for Safe Usage](#important-tips-for-safe-usage)
+- [Creating and Deleting Directories](#-creating-and-deleting-directories-) 📂🗑️
+  - [`mkdir` Command (Create Directories)](#1-mkdir-command-create-directories)
+    - [Basic `mkdir` (Create a Single Directory)](#basic-mkdir-create-a-single-directory)
+    - [`mkdir -p` (Create Nested Directories)](#mkdir--p-create-nested-directories)
+  - [`rmdir` Command (Delete Empty Directories)](#2-rmdir-command-delete-empty-directories)
+    - [Basic `rmdir` (Delete an Empty Directory)](#basic-rmdir-delete-an-empty-directory)
+    - [Limitations and Alternatives](#limitations-and-alternatives)
+
 ## Introduction to Files and Directories 📝
 
 In Linux, everything is treated as a file—even directories! 🗂️ Understanding how to work with files and directories is a fundamental skill for navigating and managing a Linux system. This involves using various commands for basic operations like creating, viewing, locating, and linking files, as well as understanding file properties.
