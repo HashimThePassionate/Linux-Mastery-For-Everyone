@@ -2,6 +2,40 @@
 
 The Linux filesystem is a structured and logical way to organize and store files on a disk or partition. It’s the backbone of how Linux manages data, treating everything as a file—whether it’s a document, directory, or even a hardware device like a USB drive. This guide will break down the Linux filesystem, its hierarchical directory structure, and how to explore it using the command line, with examples and insights for beginners. Let’s dive in! 🚀
 
+# Table of Contents 🐧
+
+- [What is the Linux Filesystem?](#what-is-the-linux-filesystem-) 💾
+- [Directory Structure: The Hierarchical Tree](#directory-structure-the-hierarchical-tree-) 🌳
+  - [Key Directories and Their Purposes](#key-directories-and-their-purposes-) 📍
+- [Exploring the Linux Filesystem from the Command Line](#exploring-the-linux-filesystem-from-the-command-line-) 🖥️
+  - [Setting Up a Docker Container](#1-setting-up-a-docker-container-) 🐳
+  - [Installing the `tree` Command](#2-installing-the-tree-command-) 🌴
+  - [Exploring with `ls -la`](#3-exploring-with-ls--la-) 🔍
+  - [Exploring with `tree`](#4-exploring-with-tree-) 🌲
+  - [Diving Deeper: Exploring `/etc` with `tree`](#5-diving-deeper-exploring-etc-with-tree-) 🗂️
+- [Important Note](#important-note-) ⚠️
+- [Tips for Beginners](#tips-for-beginners-) 🌟
+- [Linux Root Filesystem: Tree Structure](#-linux-root-filesystem-tree-structure-) 🌳
+- [Detailed Explanation of Each Directory](#detailed-explanation-of-each-directory-) 📋
+  - [/ (Root Directory)](#1--root-directory-) 🌟
+  - [/bin (Essential Command Binaries)](#2-bin-essential-command-binaries-) 🛠️
+  - [/boot (Static Files of the Boot Loader)](#3-boot-static-files-of-the-boot-loader-) 🥾
+  - [/dev (Device Files)](#4-dev-device-files-) 💾
+  - [/etc (Host-Specific System Configuration)](#5-etc-host-specific-system-configuration-) ⚙️
+  - [/home (User Home Directory)](#6-home-user-home-directory-) 🏠
+  - [/lib (Essential Shared Libraries and Kernel Modules)](#7-lib-essential-shared-libraries-and-kernel-modules-) 📚
+  - [/media (Mount Point for Removable Media)](#8-media-mount-point-for-removable-media-) 📀
+  - [/mnt (Mount Point for Temporary Filesystems)](#9-mnt-mount-point-for-temporary-filesystems-) 🗄️
+  - [/opt (Add-on Application Software Packages)](#10-opt-add-on-application-software-packages-) 📦
+  - [/proc (Virtual Filesystem Managed by the Kernel)](#11-proc-virtual-filesystem-managed-by-the-kernel-) 📈
+  - [/sbin (Essential System Binaries)](#12-sbin-essential-system-binaries-) 🔧
+  - [/srv (Data for Services Provided by This System)](#13-srv-data-for-services-provided-by-this-system-) 🌐
+  - [/tmp (Temporary Files)](#14-tmp-temporary-files-) 🗑️
+  - [/usr (Secondary Hierarchy)](#15-usr-secondary-hierarchy-) 📂
+  - [/var (Variable Data)](#16-var-variable-data-) 📈
+- [Important Notes](#important-notes-) ⚠️
+- [Tips for Beginners](#tips-for-beginners-) 🌈
+
 ---
 
 ## What is the Linux Filesystem? 💾
@@ -426,5 +460,3 @@ This structure forms the backbone of the Linux filesystem, with each directory s
 2. **Practice Safely**: Use a Docker container or virtual machine to experiment without risking your main system. 🧪
 3. **Consult Man Pages**: Run `man ls` or `man tree` to access detailed documentation for any command. 📖
 4. **Start Small**: Begin exploring user-friendly directories like `/home` or `/etc` before tackling complex ones like `/proc` or `/dev`.
-
----
