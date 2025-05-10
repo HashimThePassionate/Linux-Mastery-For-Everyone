@@ -4,8 +4,21 @@
 2. 👤 Check your username inside the container
 3. 🐚 Verify your default shell
 
-Let's dive in! 🎉
+# Table of Contents 🐧
 
+- [Pull & Run Ubuntu Container](#1-pull--run-ubuntu-container) 📥
+- [Check Your Username](#2-check-your-username) 👤
+- [Verify Your Default Shell](#3-verify-your-default-shell) 🐚
+- [Starting or Accessing the Ubuntu Container](#-starting-or-accessing-the-ubuntu-container) 🚀
+  - [Start an Existing Container](#1-start-an-existing-container)
+  - [Access a Running Container](#2-access-a-running-container)
+- [Checking Installed Shells](#-checking-installed-shells) 📋
+- [Shell Connections: TTY vs. PTS](#-shell-connections-tty-vs-pts) 🔍
+  - [TTY (Teletypewriter)](#1-tty-teletypewriter-)
+  - [PTS (Pseudo Terminal Slave)](#2-pts-pseudo-terminal-slave-)
+  - [Key Difference](#key-difference)
+  - [Docker Context](#docker-context)
+  - [Checking Shell Connections in Docker](#-checking-shell-connections-in-docker)
 ---
 
 ## 🐳 1. Pull & Run Ubuntu Container
