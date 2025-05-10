@@ -1,11 +1,41 @@
 # **The Command-Line Prompt** 🖥️
 
+# Table of Contents 🐧
+
+- [The Command-Line Prompt](#the-command-line-prompt) 🖥️
+  - [Examples of Prompts](#examples-of-prompts)
+- [Shell Command Types](#-shell-command-types) 🛠️
+  - [Internal Commands](#1-internal-commands)
+  - [External Commands](#2-external-commands)
+  - [Checking Command Types](#checking-command-types)
+- [Docker Context](#-docker-context) 🐳
+- [Checking Prompt and Command Types in Docker](#-checking-prompt-and-command-types-in-docker) 🚀
+- [Linux Command Structure](#-linux-command-structure) 📖
+  - [Components](#components)
+  - [Example](#example)
+- [The `ls` Command](#-the-ls-command) 📋
+  - [Basic Usage](#basic-usage)
+  - [Using Options: `-l` for Long Listing](#using-options--l-for-long-listing)
+  - [Using Arguments: Targeting a Directory](#using-arguments-targeting-a-directory)
+- [Docker Context](#-docker-context-1) 🐳
+- [Consulting Linux Manual Pages](#-consulting-linux-manual-pages) 📖
+  - [What Are Manual Pages?](#-what-are-manual-pages) 📚
+  - [Manual Page Structure](#-manual-page-structure) 🗂️
+  - [Quick Reference with `--help`](#-quick-reference-with---help) 🚀
+  - [Docker Context](#-docker-context-2) 🐳
+  - [Installing Man Pages in Docker](#installing-man-pages-in-docker)
+  - [Exploring a Manual Page: Example with `pwd`](#-exploring-a-manual-page-example-with-pwd) 🔍
+  - [Practical Usage in Docker](#-practical-usage-in-docker) 🛠️
+  - [Why Manual Pages Matter](#-why-manual-pages-matter) 🌟
+  - [Tips for Using Man Pages](#-tips-for-using-man-pages) 💡
+
 The **command-line prompt** (or shell prompt) is where you enter commands. It typically displays:
 
 - **Username**: The current user (e.g., `packt`).
 - **Hostname**: The system’s name (e.g., `saturn` or a container ID).
 - **Current Directory**: The working directory (e.g., `~` for home).
 - **User Indicator**: `$` for regular users, `#` for root users.
+
 
 ### Examples of Prompts
 
