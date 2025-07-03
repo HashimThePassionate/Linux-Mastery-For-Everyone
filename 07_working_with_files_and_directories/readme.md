@@ -89,7 +89,7 @@ There are two types of paths in Linux:
 1. **Absolute Path** 🌍: Starts from the root directory (`/`) and provides the full path to the file.
    - Example: `/home/packt/poem`
 2. **Relative Path** 📍: Refers to a file relative to your current working directory (checked using the `pwd` command).
-   - Example: If your current directory is `/home/packt`, the relative path to `poem` is simply `poem`.
+   - Example: If your current directory is `/home/packt`, the relative path to `packt` is simply `/home/packt`.
 
 ---
 
