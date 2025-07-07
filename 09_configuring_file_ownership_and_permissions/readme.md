@@ -1,5 +1,24 @@
 # 🔐 **File Permissions, Compression in Linux**
 
+## 📑 Table of Contents
+
+- [🔐 **File Permissions, Compression in Linux**](#-file-permissions-compression-in-linux)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [📋 **Types of Permissions and Their Meanings**](#-types-of-permissions-and-their-meanings)
+  - [🔍 **Format of Permissions**](#-format-of-permissions)
+    - [**Explanation with a Real Example**](#explanation-with-a-real-example)
+    - [**Permissions in Octal Numbers**](#permissions-in-octal-numbers)
+    - [**Commands to Manage Permissions**](#commands-to-manage-permissions)
+  - [**Exercise: Convert Permissions to Octal**](#exercise-convert-permissions-to-octal)
+- [**Commands for File Compression, Uncompression, and Archiving**](#commands-for-file-compression-uncompression-and-archiving)
+      - [**Tar Command for Compressing and Uncompressing**](#tar-command-for-compressing-and-uncompressing)
+      - [**Example: Creating an Archive**](#example-creating-an-archive)
+      - [**Adding Compression**](#adding-compression)
+      - [**Uncompressing an Archive**](#uncompressing-an-archive)
+      - [**Additional Details**](#additional-details)
+
+---
+
 In Linux, every file and directory has a security system that is based on "permissions" and "ownership." This system decides who can access the file and how—whether they can only read it, edit it, or run it (like a program). These permissions are divided into three categories:
 
 1. 👤 **Owner/User**: This is the person who created the file. As I mentioned earlier, the one who creates the file becomes its owner. The owner has the most control.
@@ -160,31 +179,28 @@ Now let’s solve the exercise you provided. We will convert each permission int
 
 ---
 
-# 📦 **Commands for File Compression, Uncompression, and Archiving**
+# **Commands for File Compression, Uncompression, and Archiving**
 
-In Linux, the main tool for archiving files is called `tar`, which stands for "tape archive." This tool was initially used in Unix to write files to external tape devices for archiving. Nowadays, in Linux, this tool is also used to write to a file in a compressed format. Apart from tar archives, some other popular formats are `gzip` and `bzip` for compressed archives, along with the popular `zip` from Windows. Now let's look at the `tar` command in detail.
+In Linux, the main tool for archiving files is called `tar`, which stands for "tape archive." This tool was initially used in Unix to write files to external tape devices for archiving. Nowadays, in Linux, this tool is also used to write to a file in a compressed format. Apart from tar archives, some other popular formats are `gzip` and `bzip` for compressed archives, along with the popular `zip` from Windows. Now let’s look at the `tar` command in detail.
 
-### 🔧 **Tar Command for Compressing and Uncompressing**
+#### **Tar Command for Compressing and Uncompressing**
 The `tar` command is used with options and does not offer compression by default. If we want compression, we need to use specific options. Here are some of the most useful arguments that can be used with `tar`:
+- `tar -c`: Creates an archive.
+- `tar -r`: Appends files to an already existing archive.
+- `tar -u`: Appends only the files that have changed to an existing archive.
+- `tar -A`: Appends one archive to the end of another archive.
+- `tar -t`: Lists the contents of the archive.
+- `tar -x`: Extracts the archive contents.
+- `tar -z`: Uses gzip compression for the archive.
+- `tar -j`: Uses bzip2 compression for the archive.
+- `tar -v`: Uses verbose mode by printing extra information on the screen.
+- `tar -p`: Restores the original permissions and ownership for the extracted files.
+- `tar -f`: Specifies the name of the output file.
 
-| Option | Description |
-|--------|-------------|
-| `tar -c` | Creates an archive |
-| `tar -r` | Appends files to an already existing archive |
-| `tar -u` | Appends only the files that have changed to an existing archive |
-| `tar -A` | Appends one archive to the end of another archive |
-| `tar -t` | Lists the contents of the archive |
-| `tar -x` | Extracts the archive contents |
-| `tar -z` | Uses gzip compression for the archive |
-| `tar -j` | Uses bzip2 compression for the archive |
-| `tar -v` | Uses verbose mode by printing extra information on the screen |
-| `tar -p` | Restores the original permissions and ownership for the extracted files |
-| `tar -f` | Specifies the name of the output file |
+Yes, in your daily tasks, you will have to use these arguments in combination with each other.
 
-> 💡 In your daily tasks, you will have to use these arguments in combination with each other.
-
-### 📝 **Example: Creating an Archive**
-Let's look at an example. If we want to create an archive of the `files` directory, we use the `-cvf` arguments combined. Check this out:
+#### **Example: Creating an Archive**
+Let’s look at an example. If we want to create an archive of the `files` directory, we use the `-cvf` arguments combined. Check this out:
 
 ```bash
 root@7e56c80bcd77:/home/packt# ls
@@ -207,9 +223,9 @@ Here:
 - `-c`: Created a new archive.
 - `-v`: Verbose mode showed the name of each file being added to the archive.
 - `-f`: Specified the file name, which is `files-archive.tar`.
-- ⚠️ But this archive is not compressed. It only collected the files in one place.
+- But this archive is not compressed. It only collected the files in one place.
 
-### 🗜️ **Adding Compression**
+#### **Adding Compression**
 If we want compression, we need to add the `-z` or `-j` option. Now we will use the `-z` option, which provides the `gzip` compression algorithm. See the following example and compare the size of the two archive files:
 
 ```bash
@@ -235,11 +251,11 @@ root@7e56c80bcd77:/home/packt# ls -l files-archive-gzipped.tar.gz files-archive.
 
 Here:
 - `-z`: Added `gzip` compression.
-- 📉 A new file `files-archive-gzipped.tar.gz` was created, with a size of only 189 bytes, while the previous `files-archive.tar` was 10240 bytes. This shows how much space compression can save.
-- 💡 It's important to use an extension like `.tar.gz` so the file type is clear.
+- A new file `files-archive-gzipped.tar.gz` was created, with a size of only 189 bytes, while the previous `files-archive.tar` was 10240 bytes. This shows how much space compression can save.
+- It’s important to use an extension like `.tar.gz` so the file type is clear.
 
-### 📂 **Uncompressing an Archive**
-Now, if we want to open the archive (uncompress it), we use the `-x` option (mentioned at the beginning of this subsection). Let's uncompress the `files-archive.tar` file we created earlier and use the `-C` option to specify a target directory where the uncompressed files will go. This target directory needs to be created beforehand. Let's do this with the following commands:
+#### **Uncompressing an Archive**
+Now, if we want to open the archive (uncompress it), we use the `-x` option (mentioned at the beginning of this subsection). Let’s uncompress the `files-archive.tar` file we created earlier and use the `-C` option to specify a target directory where the uncompressed files will go. This target directory needs to be created beforehand. Let’s do this with the following commands:
 
 ```bash
 root@7e56c80bcd77:/home/packt# mkdir uncompressed-directory
@@ -282,9 +298,9 @@ Here:
 - `-z`: Handled the `gzip` compressed file.
 - `-C`: Specified the target directory where the files will be extracted (`uncompressed-directory`).
 
-### ⭐ **Additional Tips**
-- 🔍 If you want to list what's inside the archive, run `tar -tvf files-archive.tar`. This will only show the contents without extracting them.
-- 💾 Compression saves space, but you'll need the original space when extracting.
-- 🏷️ Always use extensions like `.tar`, `.tar.gz`, or `.tar.bz2` so the file type is clear.
+#### **Additional Details**
+- If you want to list what’s inside the archive, run `tar -tvf files-archive.tar`. This will only show the contents without extracting them.
+- Compression saves space, but you’ll need the original space when extracting.
+- Always use extensions like `.tar`, `.tar.gz`, or `.tar.bz2` so the file type is clear.
 
 ---
