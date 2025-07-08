@@ -1,5 +1,26 @@
 #  **Commands for Text Manipulation** 🛠️
 
+## 📑 Table of Contents
+
+1. [Commands for Text Manipulation](#commands-for-text-manipulation-)
+2. [grep — Text Search Tool](#grep--text-search-tool-)
+3. [Examples](#examples)
+4. [Preparing Sample Files](#️-preparing-sample-files)
+5. [grep — Simple but Powerful Search](#-1-grep--simple-but-powerful-search)
+   - [Key Options](#key-options)
+   - [Examples](#examples-1)
+6. [The tee Command](#the-tee-command-)
+   - [Definition](#-definition)
+   - [Prerequisites: Create Sample Files](#️-prerequisites-create-sample-files)
+   - [Hands-On Examples](#-hands-on-examples)
+     - [Capture and Display Line Count](#1-capture-and-display-line-count)
+     - [Append New Content to a File](#2-append-new-content-to-a-file)
+     - [Log Warnings from a System File](#3-log-warnings-from-a-system-file)
+     - [Broadcast Output to Multiple Files](#4-broadcast-output-to-multiple-files)
+     - [Using sudo tee for Protected Files](#5-using-sudo-tee-for-protected-files)
+
+---
+
 Linux offers a rich set of **text-manipulation** utilities that let you process, filter, and transform text directly from the command line. These tools are indispensable for system administration, scripting, and data processing, enabling you to work efficiently without leaving your terminal.
 
 
