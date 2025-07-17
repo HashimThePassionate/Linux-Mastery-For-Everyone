@@ -1,5 +1,34 @@
 # 📦 **Linux Software Package Types**
 
+## 📑 Table of Contents
+
+- [📦 **Linux Software Package Types**](#-linux-software-package-types)
+  - [📑 Table of Contents](#-table-of-contents)
+  - [🔍 Definition of a Package Manager \& Repository](#-definition-of-a-package-manager--repository)
+  - [🏛️ Traditional Package Formats](#️-traditional-package-formats)
+    - [1. **DEB** (Debian / Ubuntu)](#1-deb-debian--ubuntu)
+      - [Anatomy of a DEB Package](#anatomy-of-a-deb-package)
+    - [🔧 Inspecting a DEB Package: Step-by-Step](#-inspecting-a-deb-package-step-by-step)
+- [📦 **RPM Package Anatomy**](#-rpm-package-anatomy)
+  - [🔍 1. Download the RPM](#-1-download-the-rpm)
+  - [⚙️ 2. Inspecting Package Metadata](#️-2-inspecting-package-metadata)
+    - [2.1 Query Basic Info](#21-query-basic-info)
+  - [🎯 3. Listing Package Contents](#-3-listing-package-contents)
+  - [🧩 4. Viewing Installation Scripts](#-4-viewing-installation-scripts)
+  - [🛠️ 5. Extracting the Payload](#️-5-extracting-the-payload)
+- [**Snap and Flatpak Package Types**  🚀](#snap-and-flatpak-package-types--)
+  - [🔍 Definition](#-definition)
+  - [🌐 Why Snaps and Flatpaks?](#-why-snaps-and-flatpaks)
+  - [⚙️ Snap Packages](#️-snap-packages)
+    - [🗂️ Anatomy](#️-anatomy)
+    - [🔧 Common Commands](#-common-commands)
+  - [📦 Flatpak Packages](#-flatpak-packages)
+    - [🗂️ Anatomy](#️-anatomy-1)
+    - [🔧 Common Commands](#-common-commands-1)
+  - [🔄 Key Differences](#-key-differences)
+
+---
+
 When you install or remove applications on Linux, you work with **software packages**—archived bundles containing executables, libraries, metadata, and installation scripts. Packages are stored in **repositories**, centrally maintained collections of software for each distribution.
 
 
@@ -199,5 +228,104 @@ RPM payloads are stored as a compressed **cpio** archive. You can extract them w
 
 **Result**
 All files (e.g., `/opt/1Password/...`) appear under `rpm_extract/opt/1Password`.
+
+---
+
+# **Snap and Flatpak Package Types**  🚀
+
+## 🔍 Definition
+
+**Snap** and **Flatpak** are modern Linux package formats that bundle applications and all their needed libraries into a single, isolated file. This makes it easy to install the same app on many different Linux distributions without worrying about missing dependencies. Think of them like “app containers” for your desktop or server! 📦🛡️
+
+## 🌐 Why Snaps and Flatpaks?
+
+* **Cross-distribution support**: One Snap or Flatpak works on Ubuntu, Fedora, Debian, openSUSE, and more—no separate `.deb` or `.rpm` files required.
+* **Sandboxed**: Apps run in a controlled environment, limiting their access to your system for extra security 🔒.
+* **Easy updates**: Automatic, atomic updates mean you always get the latest version or can roll back if something breaks 🔄.
+
+## ⚙️ Snap Packages
+
+### 🗂️ Anatomy
+
+* **SquashFS file**: An immutable (read-only) compressed filesystem containing the app.
+* **`meta/` directory**: Inside the Snap, you’ll find metadata (app name, version, permissions) and hooks (scripts that run before or after install).
+
+### 🔧 Common Commands
+
+1. **Install a Snap**
+
+   ```bash
+   sudo snap install vlc
+   ```
+2. **List installed Snaps**
+
+   ```bash
+   snap list
+   ```
+3. **Update all Snaps**
+
+   ```bash
+   sudo snap refresh
+   ```
+4. **Remove a Snap**
+
+   ```bash
+   sudo snap remove vlc
+   ```
+5. **View Snap details**
+
+   ```bash
+   snap info vlc
+   ```
+
+## 📦 Flatpak Packages
+
+### 🗂️ Anatomy
+
+* **OSTree repository**: Flatpaks use a Git-like storage (libostree) to manage versions of app files.
+* **Bubblewrap sandbox**: Each Flatpak runs in its own container using user-namespace isolation.
+
+### 🔧 Common Commands
+
+1. **Add Flathub (main repository)**
+
+   ```bash
+   flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+   ```
+2. **Install a Flatpak**
+
+   ```bash
+   flatpak install flathub com.spotify.Client
+   ```
+3. **List installed Flatpaks**
+
+   ```bash
+   flatpak list
+   ```
+4. **Update all Flatpaks**
+
+   ```bash
+   flatpak update
+   ```
+5. **Run a Flatpak app**
+
+   ```bash
+   flatpak run com.spotify.Client
+   ```
+6. **Uninstall a Flatpak**
+
+   ```bash
+   flatpak uninstall com.spotify.Client
+   ```
+
+## 🔄 Key Differences
+
+| Feature        | Snap                    | Flatpak                        |
+| -------------- | ----------------------- | ------------------------------ |
+| Origin         | Canonical (Ubuntu)      | GNOME/Red Hat community        |
+| Scope          | Desktop, server, IoT    | Desktop only                   |
+| Store          | Snap Store              | Flathub (and others)           |
+| Isolation tech | AppArmor (on Ubuntu)    | Bubblewrap                     |
+| Base system    | Built-in SquashFS image | OSTree versioned content store |
 
 ---
