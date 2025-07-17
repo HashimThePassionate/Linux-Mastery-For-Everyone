@@ -1,5 +1,5 @@
 #  **Commands for Text Manipulation** 🛠️
-
+ 
 ## 📑 Table of Contents
 
 - [**Commands for Text Manipulation** 🛠️](#commands-for-text-manipulation-️)
