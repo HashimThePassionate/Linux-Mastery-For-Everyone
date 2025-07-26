@@ -74,7 +74,7 @@ In Linux, the **root** user is the default superuser account with unrestricted p
 
 ## 🔍 Checking Your `sudo` Privileges
 
-While logged in as your regular user (e.g. `julian` on host `neptune`), run:
+While logged in as your regular user (e.g. `alex` on host `neptune`), run:
 
 ```bash
 sudo -v
@@ -88,7 +88,7 @@ sudo -v
 * **Failure:**
 
   ```text
-  Sorry, user julian may not run sudo on neptune.
+  Sorry, user alex may not run sudo on neptune.
   ```
 
   This means your account is **not** in the sudoers list.
@@ -135,48 +135,48 @@ sudo useradd [OPTIONS] USERNAME
 #### Basic Usage
 
 ```bash
-sudo useradd julian
+sudo useradd alex
 ```
 
 * **What it does:**
 
-  * Adds a record for `julian` in `/etc/passwd`
+  * Adds a record for `alex` in `/etc/passwd`
   * **Does not** create the home directory by default
   * Leaves GECOS/comment, password, and shell at defaults
 
 #### Inspecting the Entry
 
 ```bash
-sudo cat /etc/passwd | grep julian
-# julian:x:1003:1003::/home/julian:/bin/sh
+sudo cat /etc/passwd | grep alex
+# alex:x:1003:1003::/home/alex:/bin/sh
 ```
 
 Each colon-separated field means:
 
-1. `julian` → **Username**
+1. `alex` → **Username**
 2. `x` → **Password placeholder** (actual hash lives in `/etc/shadow`)
 3. `1003` → **UID**
 4. `1003` → **GID**
 5. (empty) → **GECOS/comment** (full name, etc.)
-6. `/home/julian` → **Home directory** (not created yet!)
+6. `/home/alex` → **Home directory** (not created yet!)
 7. `/bin/sh` → **Login shell**
 
 Alternatively, use `getent` and `id`:
 
 ```bash
-getent passwd julian
-# julian:x:1003:1003::/home/julian:/bin/sh
+getent passwd alex
+# alex:x:1003:1003::/home/alex:/bin/sh
 
-id julian
-# uid=1003(julian) gid=1003(julian) groups=1003(julian)
+id alex
+# uid=1003(alex) gid=1003(alex) groups=1003(alex)
 ```
 
 #### Create Home Directory
 
-By default, `useradd` does *not* make `/home/julian`. To create it:
+By default, `useradd` does *not* make `/home/alex`. To create it:
 
 ```bash
-sudo useradd -m julian
+sudo useradd -m alex
 ```
 
 * `-m` / `--create-home` → create the home directory with default skeleton files from `/etc/skel`
@@ -186,7 +186,7 @@ sudo useradd -m julian
 Add a “comment” (GECOS) to store the full name:
 
 ```bash
-sudo useradd -m -c "Julian" julian
+sudo useradd -m -c "alex" alex
 ```
 
 * `-c` / `--comment "TEXT"` → populates the GECOS field (e.g. display name)
@@ -196,7 +196,7 @@ sudo useradd -m -c "Julian" julian
 Until you set a password, the user cannot log in (SSH/GUI). Do:
 
 ```bash
-sudo passwd julian
+sudo passwd alex
 # New password: 
 # Retype new password: 
 # passwd: password updated successfully
@@ -206,8 +206,8 @@ sudo passwd julian
 * Only root/sudoers can read `/etc/shadow`
 
 ```bash
-sudo getent shadow julian
-# julian:$6$…hashed…:18295:0:99999:7:::
+sudo getent shadow alex
+# alex:$6$…hashed…:18295:0:99999:7:::
 ```
 
 ### 2. Creating Users with `adduser`
@@ -247,6 +247,128 @@ getent passwd alex
 > **Note:** On Fedora, `adduser` may run non-interactively—check your distro’s behavior.
 
 ---
+
+#  **Creating a Superuser and Viewing Users in Linux** 👤
+
+## 🚀 Creating a Superuser
+
+### What is a Superuser?
+- When a regular user is given the power to run `sudo`, they become a **superuser**—a user with elevated/root privileges.
+
+### **How to Promote a User to Superuser (Sudoer)**
+Suppose you have a user (e.g., `alex`) that you want to grant superuser privileges.
+
+#### **Step 1: Add User to Sudo Group**
+On **Ubuntu** and most Debian-based systems, simply add the user to the `sudo` group:
+
+```bash
+sudo usermod -aG sudo alex
+```
+
+* `-aG` = append (`-a`) the user to the specified group (`-G`), which is `sudo` here.
+
+
+#### **Step 2: Verify Sudo Group Membership**
+
+Check if the user has been added to the `sudo` group:
+
+```bash
+id alex
+```
+
+**Example Output:**
+
+```
+uid=1003(alex) gid=1003(alex) groups=1003(alex),27(sudo)
+```
+
+* The presence of `sudo` in the `groups` list confirms the user is now a sudoer.
+
+#### **Step 3: Test Sudo Access**
+
+Switch to the user and test sudo privileges:
+
+```bash
+su - alex
+```
+
+* Enter the password for `alex`.
+* Once logged in, run:
+
+```bash
+sudo -v
+```
+
+* If no errors appear, the user has sudo access!
+
+## 👀 Viewing Users on the System
+
+There are multiple ways to view users on a Linux system. The user data is stored in files like `/etc/passwd` and `/etc/shadow`.
+
+### **1. View All Usernames**
+
+#### **a) Using /etc/passwd**
+
+```bash
+cat /etc/passwd | cut -d: -f1 | less
+```
+
+* `cat /etc/passwd`: Display contents of user info file.
+* `cut -d: -f1`: Split each line by `:` and show only the first field (username).
+* `less`: Paginate output for easier reading (`Q` to exit).
+
+#### **b) Using /etc/shadow**
+
+```bash
+sudo cat /etc/shadow | cut -d: -f1 | less
+```
+
+* Requires `sudo` since `/etc/shadow` is protected (contains password hashes).
+
+#### **c) Using getent (Recommended)**
+
+```bash
+getent passwd
+```
+
+* Shows all user information in `/etc/passwd`.
+
+To list only the usernames (one per line):
+
+```bash
+getent passwd | cut -d: -f1
+```
+
+Or, for `/etc/shadow`:
+
+```bash
+sudo getent shadow | cut -d: -f1
+```
+
+To display usernames in columns for better readability:
+
+```bash
+sudo getent shadow | cut -d: -f1 | less | column
+```
+
+---
+
+## 💡 **Sample Output**
+
+```
+root    daemon  bin     sys     sync    games   man     lp      mail
+news    uucp    proxy   www-data    backup  list    irc     nobody
+systemd-timesync systemd-network  systemd-resolve  systemd-bus-proxy
+ubuntu  alex  alex    zeeshan mustamin ju hashim
+```
+
+## 🛡️ **Note**
+
+* Use `sudo` with care. Giving sudo privileges grants **root-level control** over the system.
+* Only trusted users should be added to the `sudo` group.
+
+---
+
 
 
 
