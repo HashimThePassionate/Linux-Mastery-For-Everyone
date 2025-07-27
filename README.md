@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="./assests/linux-logo.png-1.png" alt="Linux Logo" width="400"/>
+  <img src="./assests/linux-logo.png.svg" alt="Linux Logo" width="400"/>
 </h1>
 
 <p align="center"><i>Your complete guide to mastering Linux using Docker containers</i></p>
