@@ -11,21 +11,20 @@
   <img src="https://img.shields.io/github/stars/HashimThePassionate/Linux-Mastery-For-Everyone?style=social" />
 </p>
 
-## 📘 About the Project
+##  About the Project 📘
 
 > 🐧 **Linux Mastery for Everyone** provides a practical, containerized environment to learn Linux administration — right from your local machine.  
 No need to dual-boot or run heavy VMs — just Docker, and you're good to go!
 
 
-## 📚 Table of Contents
+##  Table of Contents 📚
 
-- [📘 About the Project](#-about-the-project)
-- [📚 Table of Contents](#-table-of-contents)
+- [About the Project 📘](#about-the-project-)
+- [Table of Contents 📚](#table-of-contents-)
 - [What You Will Learn 🔁](#what-you-will-learn-)
-- [⚙️ Prerequisites ✔️](#️-prerequisites-️)
-- [🤝 Contributing](#-contributing)
-  - [📌 Steps to Contribute:](#-steps-to-contribute)
-- [📄 License](#-license)
+- [Prerequisites ✔️](#prerequisites-️)
+- [Contributing  🤝](#contributing--)
+- [License 📄](#license-)
 
 
 ##  What You Will Learn 🔁
@@ -50,7 +49,7 @@ No need to dual-boot or run heavy VMs — just Docker, and you're good to go!
 | 🔧 17 | Ansible Automation           | Write and run playbooks for real infrastructure |
 
 
-## ⚙️ Prerequisites ✔️
+## Prerequisites ✔️
 
 - 🐳 **Docker installed**  
   ▶ [Install Docker (YouTube Guide)](https://www.youtube.com/watch?si=DglDYuvf-zvFY9bS&v=R4uy6Oqiy5I&feature=youtu.be)
@@ -59,12 +58,10 @@ No need to dual-boot or run heavy VMs — just Docker, and you're good to go!
   ▶ [Git Mastery Repo](https://github.com/HashimThePassionate/learn-git-mastery)
 
 
-## 🤝 Contributing
+## Contributing  🤝
 
 We love contributions! 🙌  
 Whether you're fixing typos, updating scripts, or adding new modules — you're welcome!
-
-### 📌 Steps to Contribute:
 
 1. **Fork** this repository  
 2. Create your feature branch:  
@@ -79,7 +76,7 @@ Whether you're fixing typos, updating scripts, or adding new modules — you're 
 Please follow good commit hygiene and keep PRs clean. For major features, open an issue first to discuss.
 
 
-## 📄 License
+##  License 📄
 
 This repository is licensed under the **MIT License**.
 See [`LICENSE`](./LICENSE) for more details.
