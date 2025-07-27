@@ -1,91 +1,86 @@
-# **Linux Mastery in Docker**🐳🐧
+<h1 align="center">
+  <img src="./assests/linux-logo.png" alt="Linux Logo" width="400"/>
+</h1>
 
-**Description:**
-This repository covers all the fundamental and advanced topics of Linux system administration, with practical exercises carried out inside Docker containers. You don’t need to worry about hardware or virtual machines—just a consistent, isolated environment where you can learn and practice Linux commands and concepts.
+<p align="center"><i>Your complete guide to mastering Linux using Docker containers</i></p>
 
-## What You Will Learn 📖
+<p align="center">
+  <img src="https://img.shields.io/github/license/HashimThePassionate/Linux-Mastery-For-Everyone" />
+  <img src="https://img.shields.io/github/repo-size/HashimThePassionate/Linux-Mastery-For-Everyone" />
+  <img src="https://img.shields.io/github/last-commit/HashimThePassionate/Linux-Mastery-For-Everyone" />
+  <img src="https://img.shields.io/github/stars/HashimThePassionate/Linux-Mastery-For-Everyone?style=social" />
+</p>
 
-- **Installing Linux**
+## 📘 About the Project
 
-  - Install Linux on docker
+> 🐧 **Linux Mastery for Everyone** provides a practical, containerized environment to learn Linux administration — right from your local machine.  
+No need to dual-boot or run heavy VMs — just Docker, and you're good to go!
 
-- **The Linux Shell and Filesystem**
 
-  - Command-line fundamentals and filesystem hierarchy
-  - Use of VI/VIM text editor
+## 📚 Table of Contents
 
-- **Linux Software Management**
+- [📘 About the Project](#-about-the-project)
+- [📚 Table of Contents](#-table-of-contents)
+- [What You Will Learn 🔁](#what-you-will-learn-)
+- [⚙️ Prerequisites ✔️](#️-prerequisites-️)
+- [🤝 Contributing](#-contributing)
+  - [📌 Steps to Contribute:](#-steps-to-contribute)
+- [📄 License](#-license)
 
-  - Package management with distribution-specific tools (apt, yum, zypper)
-  - Building custom packages
 
-- **Managing Users and Groups**
+##  What You Will Learn 🔁
+| 📌  | Topic                         | Description |
+|----|-------------------------------|-------------|
+| 🐧 1  | Installing Linux              | Set up Linux directly inside Docker |
+| 🗂️ 2 | Shell & Filesystem           | Shell navigation, file hierarchy, and VIM usage |
+| 📦 3 | Software Management          | Use `apt`, `yum`, `zypper`, and build your own packages |
+| 👥 4 | User & Group Management      | Manage `/etc/passwd`, `/etc/group`, file permissions, sticky bits |
+| 🔁 5 | Process Management           | Daemons, signals, and service managers |
+| 💽 6 | Disk Management              | Mounting, partitioning, and LVM basics |
+| 🌐 7 | Networking                   | IP configuration, interfaces, and CLI tools |
+| ⚙️ 8 | Shell Scripting              | Automate with Bash scripting |
+| 🔐 9 | System Security              | Basics of SELinux and AppArmor |
+| 🛠️ 10 | Troubleshooting              | Journaling, backup/restore, and system recovery |
+| 🧱 11 | Virtualization (Theory)      | KVM and Linux-based VM concepts |
+| 🐳 12 | Docker Mastery               | Containers, volumes, networking, images |
+| 🖥️ 13 | Server Setup                 | DNS, DHCP, SSH, Samba, NFS configuration |
+| ☁️ 14 | Cloud Fundamentals           | DevOps, IaaS, PaaS, and CaaS concepts |
+| 🚀 15 | Deploying on AWS & Azure     | Launch and manage Linux VMs in the cloud |
+| 🧩 16 | Kubernetes Essentials        | Pods, services, security, and deployments |
+| 🔧 17 | Ansible Automation           | Write and run playbooks for real infrastructure |
 
-  - User and group administration (`/etc/passwd`, `/etc/group`)
-  - File permissions and special attributes
 
-- **Working with Processes, Daemons, and Signals**
+## ⚙️ Prerequisites ✔️
 
-  - Process management, services, and signal handling
+- 🐳 **Docker installed**  
+  ▶ [Install Docker (YouTube Guide)](https://www.youtube.com/watch?si=DglDYuvf-zvFY9bS&v=R4uy6Oqiy5I&feature=youtu.be)
 
-- **Working with Disks and Filesystems**
+- 🧠 **Basic Git knowledge**  
+  ▶ [Git Mastery Repo](https://github.com/HashimThePassionate/learn-git-mastery)
 
-  - Disk partitioning, mounting, and Logical Volume Management (LVM)
 
-- **Networking with Linux**
+## 🤝 Contributing
 
-  - Configure network settings via CLI and basic GUI tools
+We love contributions! 🙌  
+Whether you're fixing typos, updating scripts, or adding new modules — you're welcome!
 
-- **Linux Shell Scripting**
+### 📌 Steps to Contribute:
 
-  - Automate tasks with Bash scripts
+1. **Fork** this repository  
+2. Create your feature branch:  
 
-- **Securing Linux**
+```bash
+   git checkout -b feature/my-topic
+```
 
-  - Fundamentals of SELinux and AppArmor
+3. Commit and push your changes
+4. Open a Pull Request (PR)
 
-- **Disaster Recovery, Diagnostics, and Troubleshooting**
+Please follow good commit hygiene and keep PRs clean. For major features, open an issue first to discuss.
 
-  - System backup & restore, and common issue diagnosis
 
-- **Working with Virtual Machines**
+## 📄 License
 
-  - Set up and manage KVM virtual machines theory
-
-- **Managing Containers with Docker**
-
-  - Deploy and manage applications with Docker tools
-
-- **Configuring Linux Servers**
-
-  - Configure DNS, DHCP, SSH, Samba, and NFS servers
-
-- **Introduction to Cloud Computing**
-
-  - Overview of IaaS, PaaS, CaaS, DevOps, and cloud management tools
-
-- **Deploying to the Cloud with AWS and Azure**
-
-  - Launch and manage Linux instances on AWS and Azure
-
-- **Deploying Applications with Kubernetes**
-
-  - Kubernetes basics, deployments, networking, and security
-
-- **Infrastructure and Automation with Ansible**
-
-  - Write and run Ansible playbooks for infrastructure automation
-
-## Prerequisites ✔️
-
-- Docker installed (on Windows, macOS, or Linux) [Docker installation on windows](https://www.youtube.com/watch?si=DglDYuvf-zvFY9bS&v=R4uy6Oqiy5I&feature=youtu.be)
-- Basic Git knowledge [Git mastery](https://github.com/HashimThePassionate/learn-git-mastery)
-
-## Contributing 🤝
-
-We welcome contributions! If you’d like to add new sections or improve existing content, please submit a pull request.
-
-## License 📄
-
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+This repository is licensed under the **MIT License**.
+See [`LICENSE`](./LICENSE) for more details.
 
