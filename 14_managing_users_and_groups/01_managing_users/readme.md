@@ -519,5 +519,94 @@ sudo chage -d 0 julian
 
 ---
 
+#  **Deleting Users** 🗑️
+
+This section explains **how to safely delete user accounts** from a Linux system using the `userdel` command and manual methods. All steps and options are explained in detail for beginners.
+
+## 🚀 Deleting Users with `userdel`
+
+The **`userdel`** command is the standard way to remove users from your Linux system.
+
+**Syntax:**
+```bash
+userdel [OPTIONS] USER
+````
+
+### Example: Deleting User `julian`
+
+To delete the user `julian` **and** remove all their files and home directory, run:
+
+```bash
+sudo userdel -f -r julian
+```
+
+#### **Options Explained**
+
+| Option | Long Option | What It Does                                                                 |
+| ------ | ----------- | ---------------------------------------------------------------------------- |
+| `-f`   | `--force`   | Forces removal of all files in the user's home directory (even if not owned) |
+| `-r`   | `--remove`  | Removes the user's home directory and mail spool                             |
+
+### 💡 **What Does `userdel` Do?**
+
+* Removes the user entry from `/etc/passwd` and `/etc/shadow`
+* Deletes the home directory (when using `-r`)
+* Deletes mail spool (inbox)
+* **With `-f`**, it will force deletion even if files are not owned by the user
+
+## ⚠️ Deleting Users Manually (Advanced)
+
+Sometimes, you may need to **manually remove a user** (e.g., during troubleshooting or system cleanup).
+
+### **Step-by-step Manual Deletion**
+
+1. **Edit `/etc/passwd` using `vipw`:**
+
+   ```bash
+   sudo vipw
+   ```
+
+   * Find and delete the line for the user, for example:
+
+     ```
+     julian:x:1001:1001:Julian,,,:/home/julian:/bin/bash
+     ```
+
+2. **Edit `/etc/shadow` using `vipw -s`:**
+
+   ```bash
+   sudo vipw -s
+   ```
+
+   * Find and delete the line for the user, for example:
+
+     ```
+     julian:$6$xDdd7Eay/RKYjeTm$Sf.../:18519:0:99999:7:::
+     ```
+
+3. **Remove the user's home directory (if needed):**
+
+   ```bash
+   sudo rm -rf /home/julian
+   ```
+
+   > ⚠️ Be very careful with `rm -rf`, as it permanently deletes files!
+
+
+## 📚 Helpful Tips & References
+
+* For more details on `userdel`, check the manual:
+
+  ```bash
+  man userdel
+  ```
+* For quick help:
+
+  ```bash
+  userdel --help
+  ```
+
+---
+
 
 
