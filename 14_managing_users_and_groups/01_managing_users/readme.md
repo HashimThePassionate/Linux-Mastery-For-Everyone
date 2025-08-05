@@ -369,6 +369,155 @@ ubuntu  alex  alex    zeeshan mustamin ju hashim
 
 ---
 
+#  **Modifying Users** 👤
+In this section, we will explore how to modify existing user accounts in Linux using the `usermod` command. This command allows you to change various attributes of a user account, such as the full name, home directory, login shell, and more.
+
+## 🛠️ Modifying Users with `usermod`
+
+The `usermod` command allows superusers to change user account settings.
+
+**Syntax:**
+```bash
+usermod [OPTIONS] USER
+````
+
+### **Scenario Example**
+
+Suppose we have a user named `julian`, created with basic settings (no full name, no password).
+
+We want to change:
+
+* **Full Name**: To `Julian`
+* **Home Folder**: Move to `/local/julian` (from default `/home/julian`)
+* **Login Shell**: Change to `/bin/bash` (from default `/bin/sh`)
+
+**Command:**
+
+```bash
+sudo usermod -c "Julian" -d /local/julian -m -s /bin/bash julian
+```
+
+---
+
+### 🔍 **Explaining Each Option**
+
+| Option | Long Option | Description                                                    |
+| ------ | ----------- | -------------------------------------------------------------- |
+| `-c`   | `--comment` | Sets the user's full name (or comment field)                   |
+| `-d`   | `--home`    | Sets the user's new home directory                             |
+| `-m`   | `--move`    | Moves the contents from the old home to the new home directory |
+| `-s`   | `--shell`   | Changes the user's login shell                                 |
+
+---
+
+## 📑 **/etc/passwd File Example**
+
+Before change:
+
+```text
+julian:x:1007:1007::/home/julian:/bin/sh
+```
+
+After change (name & shell updated):
+
+```text
+julian:x:1007:1007:David Julian:/home/julian:/bin/bash
+```
+
+You can check the current info with:
+
+```bash
+getent passwd julian
+```
+
+---
+
+## 👤 Changing Username
+
+Change the login username from `julian` to `balog`:
+
+```bash
+sudo usermod -l "balog" julian
+```
+
+After this, the user will be called `balog` in the system.
+
+---
+
+## 🔒 Locking & Unlocking Users
+
+**Lock a user:**
+
+```bash
+sudo usermod -L balog
+```
+
+> Locks the user account (`-L` stands for "lock").
+
+**Unlock a user:**
+
+```bash
+sudo usermod -U balog
+```
+
+> Unlocks the user account (`-U` stands for "unlock").
+
+---
+
+## 📝 Modifying Users via `/etc/passwd` (Manually)
+
+You can manually edit `/etc/passwd` for advanced changes.
+**Recommended tool:** `vipw` (safer editing, prevents file corruption).
+
+**Command:**
+
+```bash
+sudo vipw
+```
+
+* Opens `/etc/passwd` in a safe editor.
+* Change the relevant user's line, for example:
+
+  ```
+  julian:x:1007:1007:Julian,,,:/home/julian:/bin/bash
+  ```
+
+**Note:**
+Each field in `/etc/passwd` is separated by a colon (`:`), and represents different user info.
+
+---
+
+## 🔑 Changing Passwords & Expiration
+
+### Change user password:
+
+```bash
+sudo passwd julian
+```
+
+* Prompts for a new password for the user `julian`.
+
+### Set password to expire in 30 days:
+
+```bash
+sudo chage -M 30 julian
+```
+
+* Forces `julian` to change their password every month.
+
+### Force user to change password at next login:
+
+```bash
+sudo chage -d 0 julian
+```
+
+* On next login, user must create a new password.
+
+### System-Wide Password Policy
+
+* The global settings are found in `/etc/login.defs` under **Password aging controls**.
+
+---
 
 
 
