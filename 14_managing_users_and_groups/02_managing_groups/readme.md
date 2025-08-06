@@ -163,3 +163,194 @@ developers:!::
 ```
 
 ---
+
+### 🔐 **Understanding Group Passwords**
+
+By default, a newly created group does not have a password:
+
+```bash
+sudo groupadd developers
+```
+
+To securely set a password for a group, use the `gpasswd` utility:
+
+```bash
+sudo gpasswd developers
+```
+
+You will see a prompt to set and confirm the password:
+
+```bash
+Changing the password for group developers
+New Password:
+Re-enter new password:
+```
+
+**Purpose**: Group passwords control access to resources. Group members aren't prompted for a password upon login (`newgrp`), but non-members will need the group password.
+
+To remove a group's password, use:
+
+```bash
+sudo gpasswd -r developers
+```
+
+---
+
+## ⚙️ **Modifying Groups**
+
+Use the `groupmod` command to modify groups:
+
+**Change Group ID (GID)**:
+
+```bash
+sudo groupmod -g 1201 developers
+getent group developers
+```
+
+Output:
+
+```bash
+developers:x:1201:
+```
+
+**Rename a Group**:
+
+```bash
+sudo groupmod -n devops developers
+getent group devops
+```
+
+Output:
+
+```bash
+devops:x:1201:
+```
+
+**Change Group Password**:
+
+```bash
+sudo gpasswd devops
+```
+
+To remove the password:
+
+```bash
+sudo gpasswd -r devops
+```
+
+---
+
+## 🗑️ **Deleting Groups**
+
+Use the `groupdel` command:
+
+```bash
+sudo groupdel devops
+```
+
+If the group is a primary group for a user, it can't be deleted directly. Change the user's primary group first:
+
+```bash
+id alex
+sudo usermod -g alex alex
+id alex
+sudo groupdel devops
+```
+
+---
+
+## ✏️ **Modifying Groups via `/etc/group`**
+
+It's safer to edit groups using `vigr`:
+
+```bash
+sudo vigr
+```
+
+After editing:
+
+```bash
+developers:x:1200:alex
+```
+
+To edit `/etc/gshadow`:
+
+```bash
+sudo vigr -s
+```
+
+---
+
+## 👥 **Managing Users in Groups**
+
+### ✅ **Adding Users to Groups**
+
+Create groups first:
+
+```bash
+sudo groupadd -g 1100 admin
+sudo groupadd -g 1200 developer
+sudo groupadd -g 1300 devops
+```
+
+Add users:
+
+```bash
+sudo useradd -g admin -G developers,devops alex2
+sudo useradd -g admin -G developers,devops julian2
+```
+
+Check group memberships:
+
+```bash
+id alex2
+id julian2
+```
+
+### 🚚 **Moving and Removing Users Across Groups**
+
+Create a new group and add a user:
+
+```bash
+sudo groupadd -g 1400 managers
+sudo usermod -a -G managers alex2
+id alex2
+```
+
+To explicitly set secondary groups:
+
+```bash
+sudo usermod -G developers,devops,managers alex2
+```
+
+To remove secondary groups and retain only one:
+
+```bash
+sudo usermod -G managers alex2
+id alex2
+```
+
+Remove all secondary groups:
+
+```bash
+sudo usermod -G '' alex2
+id alex2
+```
+
+Change primary group:
+
+```bash
+sudo usermod -g managers alex2
+id alex2
+```
+
+Assign an exclusive primary group matching the user's UID:
+
+```bash
+sudo groupadd -g 1004 alex2
+sudo usermod -g alex2 alex2
+id alex2
+```
+
+---
+
