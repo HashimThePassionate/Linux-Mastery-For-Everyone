@@ -354,3 +354,233 @@ id alex2
 
 ---
 
+#  **Viewing Groups** 📘
+
+## 📂 Group Information Files
+
+Group-related data is stored in two main files:
+
+* `/etc/group`: Contains group names, GIDs, and members.
+* `/etc/gshadow`: Stores secure group information (like passwords).
+
+We’ll mostly work with `/etc/group` for our needs.
+
+## 🔍 View All Groups
+
+### ✅ Step 1: Update and Install Utilities
+
+```bash
+apt update
+apt install -y bsdmainutils
+apt install less
+```
+
+These commands:
+
+* `apt update`: Refreshes the package list.
+* `apt install -y bsdmainutils`: Installs utilities including `column`.
+* `apt install less`: Installs a pager for scrolling long output.
+
+### 🧾 Step 2: List All Group Names
+
+```bash
+cat /etc/group | cut -d: -f1 | column | less
+```
+
+**Explanation:**
+
+| Command Part     | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| `cat /etc/group` | Outputs the group file                                      |
+| `cut -d: -f1`    | Extracts first field (group names) using ":" as a delimiter |
+| `column`         | Formats the list into multiple columns                      |
+| `less`           | Opens the output in scrollable viewer                       |
+
+**Sample Output:**
+
+```
+root     daemon   bin     sys    adm     tty     disk     lp     mail     news
+...
+alex     developers  devops  managers
+```
+
+## 📋 Using `getent` to View Groups
+
+```bash
+getent group | cut -d: -f1 | column | less
+```
+
+* `getent group`: Retrieves group entries using system database.
+* Output is identical to using `/etc/group`.
+
+### 🔍 View Specific Group Details
+
+```bash
+getent group developers
+```
+
+**Output:**
+
+```
+developers:x:1201:julian2,alex2,alex
+```
+
+Shows:
+
+* Group name: `developers`
+* GID: `1201`
+* Members: `julian2, alex2, alex`
+
+## 👤 View a User's Group Memberships
+
+### 🔎 Groups of a Specific User
+
+```bash
+groups alex2
+```
+
+**Output:**
+
+```
+alex2 : alex2 developers devops managers
+```
+
+* The first group is the **primary group**.
+* The rest are **secondary (supplementary) groups**.
+
+### 🙋‍♂️ Groups of Current User
+
+```bash
+groups
+```
+
+**Output:**
+
+```
+alex developers devops managers
+```
+
+No username = your own groups.
+
+---
+
+## 🔄 Group Login Sessions
+
+### 🧠 Concept
+
+When a user logs in:
+
+* The **primary group** is automatically active.
+* User-initiated tasks (e.g., creating a file) are associated with this group.
+
+## 🔑 Switching Group Sessions: `newgrp`
+
+### 🔁 Syntax
+
+```bash
+newgrp GROUP
+```
+
+Switches the current session to a different group (if the user is a member).
+
+## 🧪 Example: Simulating alex2
+
+### 🔧 Step 1: Check `alex2`'s Group Info
+
+```bash
+id alex2
+```
+
+**Output:**
+
+```
+uid=1002(alex2) gid=1004(alex2) groups=1004(alex2),1201(developers),1300(devops),1400(managers)
+```
+
+### 👤 Step 2: Switch to User `alex2`
+
+```bash
+su alex2
+```
+
+* Requires alex2’s password.
+
+### ✅ Confirm Identity
+
+```bash
+whoami
+```
+
+**Output:**
+
+```
+alex2
+```
+
+```bash
+groups
+```
+
+**Output:**
+
+```
+alex2 developers devops managers
+```
+
+### 📋 Show All Group IDs and Names
+
+```bash
+id
+```
+
+**Output:**
+
+```
+uid=1001(alex) gid=1001(alex) groups=1001(alex),1201(developers),1300(devops),1400(managers)
+```
+
+### 🔍 Show Current Primary Group ID
+
+```bash
+id -g
+```
+
+**Output:**
+
+```
+1001
+```
+
+Represents the **GID** of the **primary group**.
+
+### 🔄 Change to Group `developers`
+
+```bash
+newgrp developers
+```
+
+```bash
+id -g
+```
+
+**Output:**
+
+```
+1201
+```
+
+This confirms the group session is now **developers**.
+
+## 🚫 Accessing Unauthorized Groups
+
+If a user tries to switch to a group they’re **not a member of**, like:
+
+```bash
+newgrp managers
+```
+
+They’ll be **prompted for a password** for that group.
+
+If the user knows the group’s password or is a **superuser**, access is granted. Otherwise, it's denied.
+
+---
