@@ -101,6 +101,10 @@ Linux is a **multiuser, multitasking operating system**. One of the key pillars 
 
 > Linux provides a robust framework to **allow multiple users** to access and operate independently, all while keeping operations secure through file and directory permissions.
 
+<div align="center">
+  <img src="./images/linux permissions.png" alt="" width="400px"/>
+</div>
+
 ### 🧰 What You’ll Learn:
 
 * The three basic permission types: `read`, `write`, and `execute`
