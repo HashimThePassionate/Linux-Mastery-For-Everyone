@@ -112,8 +112,6 @@ Linux is a **multiuser, multitasking operating system**. One of the key pillars 
 
 ## 📊 Figure 4.31 — The File Permission Attributes
 
-![File Permission Chart](attachment:/mnt/data/a0982790-2223-425e-bab7-2213fa268054.png)
-
 | **Entity**   | **Read (r)** = 4 | **Write (w)** = 2 | **Execute (x)** = 1 |
 | ------------ | ---------------- | ----------------- | ------------------- |
 | Owner/User   | ✅                | ✅                 | ✅                   |
