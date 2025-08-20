@@ -109,3 +109,87 @@ Here:
 * `python` process is the child
 
 ---
+
+# 🟢 **Foreground Processes** in Linux
+
+A **Foreground Process** (also known as an **Interactive Process**) is a process that:
+
+* 🧑‍💻 Starts **through a Terminal session**
+* 📥 Accepts **user input**
+* 📤 Sends **output to the screen** (stdout/stderr)
+* 🔄 **Blocks** the terminal until the task finishes or is interrupted
+
+---
+
+## 🧠 Key Characteristics
+
+| Feature               | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| 🎬 Started by         | User via Terminal                                     |
+| 🧾 Output goes to     | Terminal (stdout or stderr)                           |
+| 🧍 Needs user input   | Often yes                                             |
+| 🔗 Linked to terminal | Tied to the current Terminal session (parent process) |
+| 🔚 If terminal exits  | Process ends immediately (via `SIGHUP` signal)        |
+| ✋ Interrupting        | `Ctrl + C` sends `SIGINT` to stop the process         |
+
+---
+
+## 🔍 Simple Foreground Example
+
+```bash
+man ps
+```
+
+📘 This opens the manual for the `ps` command (used to view current processes).
+
+### ⚠️ Behavior:
+
+* Terminal is captured by the `man` interface.
+* You can’t type any other command until you **exit** the manual by pressing `q`.
+
+---
+
+## 🔁 Foreground Example – Infinite Loop
+
+Here’s a **long-running task** that loops infinitely and prints "Wait..." every 5 seconds:
+
+```bash
+while true; do echo "Wait..."; sleep 5; done
+```
+
+### 📟 Sample Terminal Output:
+
+```bash
+root@abb64eb599dc:/# while true; do echo "Wait..."; sleep 5; done
+Wait...
+Wait...
+Wait...
+Wait...
+^C
+root@abb64eb599dc:/#
+```
+
+### ⚙️ Explanation of the Command:
+
+| Part             | Meaning                                                                 |
+| ---------------- | ----------------------------------------------------------------------- |
+| `while true`     | Start an infinite loop                                                  |
+| `do ... done`    | Commands inside the loop                                                |
+| `echo "Wait..."` | Print the message “Wait...”                                             |
+| `sleep 5`        | Pause execution for 5 seconds before repeating                          |
+| `^C` (Ctrl + C)  | Sends `SIGINT` signal to stop the process and return to Terminal prompt |
+
+---
+
+## 📢 Important Signal: `SIGINT`
+
+When you press **Ctrl + C**:
+
+* 🧠 A **SIGINT (Signal Interrupt)** is sent to the **foreground process**.
+* ✂️ The process is **interrupted** and **stopped immediately**.
+* 🖥️ The Terminal becomes **interactive again**.
+
+For deeper info, refer to the **Signals section** in the *Inter-process Communication* topic.
+
+---
+
