@@ -4,7 +4,7 @@ Linux is a **multitasking operating system** ⚡. It can run many programs at th
 
 👉 Knowing how processes work and talk to each other is very important for Linux admins and developers.
 
-In this chapter, you will learn about:
+In this section, you will learn about:
 
 ---
 
