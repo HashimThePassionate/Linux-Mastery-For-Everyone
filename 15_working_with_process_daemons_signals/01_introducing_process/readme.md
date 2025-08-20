@@ -193,3 +193,118 @@ For deeper info, refer to the **Signals section** in the *Inter-process Communic
 
 ---
 
+# ⚫ **Background Processes** in Linux
+
+A **Background Process** (also known as a **non-interactive** or **automated process**) is a process that:
+
+* 🏃 Runs **independently** of user input
+* 💻 Is usually launched from the **Terminal** but **does not block it**
+* 📂 Often writes output to **log files** instead of the terminal
+* 🕰️ Is typically **long-running** and doesn’t require supervision
+
+---
+
+## 🧠 Key Characteristics
+
+| Feature                | Description                                                            |
+| ---------------------- | ---------------------------------------------------------------------- |
+| 🧑‍💻 Started from     | Terminal, script, or auto-triggered                                    |
+| 👤 Needs user input?   | ❌ No                                                                   |
+| 🕐 Duration            | Often long-lived                                                       |
+| 🖥️ Terminal blocked?  | ❌ No — you can keep using the terminal while it runs                   |
+| 🗂️ Output Location    | Often written to files (e.g. log files) instead of displaying onscreen |
+| 🔗 Linked to terminal? | Yes, but doesn’t stop terminal interaction                             |
+
+---
+
+## ✅ How to Start a Background Process
+
+Append an `&` at the end of any command:
+
+```bash
+while true; do echo "Wait..."; sleep 10; done &
+```
+
+### 🧾 Breakdown of the Command:
+
+| Part             | Meaning                                  |
+| ---------------- | ---------------------------------------- |
+| `while true`     | Infinite loop                            |
+| `do ... done`    | Commands to repeat                       |
+| `echo "Wait..."` | Print message                            |
+| `sleep 10`       | Wait 10 seconds between messages         |
+| `&`              | Run in background (don’t block terminal) |
+
+---
+
+## 👨‍💻 Example: Interactive Use While Background Process is Running
+
+```bash
+root@abb64eb599dc:/# while true; do echo "Wait..."; sleep 10; done &
+[1] 2866   # <- Process ID (PID) shown after launch
+root@abb64eb599dc:/# echo "Interactive prompt..."
+Interactive prompt...
+```
+
+> ⚠️ Even though the process is running, you can **continue typing** and running other commands.
+
+---
+
+## 🔪 Terminating a Background Process
+
+To stop a background process, use the `kill` command along with its PID:
+
+```bash
+kill -9 2866
+```
+
+### 💡 Explanation:
+
+| Command | Description                                      |
+| ------- | ------------------------------------------------ |
+| `kill`  | Sends a termination signal to a process          |
+| `-9`    | Stands for `SIGKILL`, a **forceful** termination |
+| `2866`  | The PID (process ID) of the background process   |
+
+✅ Once the process is killed, you’ll see:
+
+```bash
+[1]+  Killed                  while true; do echo "Wait..."; sleep 10; done
+```
+
+---
+
+## 🧬 Background vs. Foreground Processes
+
+| Feature                  | Foreground           | Background                    |
+| ------------------------ | -------------------- | ----------------------------- |
+| Terminal Blocked?        | ✅ Yes                | ❌ No                          |
+| Needs User Input?        | ✅ Often              | ❌ Usually not                 |
+| Ends if Terminal Exits?  | ✅ Yes (via `SIGHUP`) | ✅ Usually (unless daemonized) |
+| Can Output to Log Files? | ❌ Not usually        | ✅ Common practice             |
+
+---
+
+## 🔁 Automated Background Tasks
+
+There are two special types:
+
+### 📅 **Batch Processes**
+
+* Scheduled via tools like `cron` or `at`
+* Not triggered manually by the user
+
+### 🧙‍♂️ **Daemons**
+
+* Start automatically during **system boot**
+* Stop automatically at **shutdown**
+* Examples: `sshd`, `cron`, `nginx`, etc.
+
+> 💡 These are background processes too, but they **don't need terminal** interaction at all.
+
+There’s also a select category of background processes that are automatically started during system
+boot and terminated at shutdown without user supervision. These background processes are also
+known as daemons.
+
+---
+
