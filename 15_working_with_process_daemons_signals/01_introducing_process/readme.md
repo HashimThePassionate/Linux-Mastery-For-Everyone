@@ -308,3 +308,130 @@ known as daemons.
 
 ---
 
+# 🧿 **Introduction to Daemons** in Linux
+
+## 🌀 What is a Daemon?
+
+A **Daemon** is a special type of **background process** in Linux that:
+
+* Starts automatically **during system boot**
+* **Runs indefinitely** or until it's stopped (usually at shutdown)
+* **Doesn’t interact directly** with the user or a terminal
+* Is typically associated with a **system user account** (like `root`) and runs with **elevated privileges**
+
+> ⚙️ Daemons are essential for handling various system services and tasks silently in the background.
+
+---
+
+## 📡 What Do Daemons Do?
+
+Daemons usually:
+
+* Serve **client requests** (e.g., HTTP, FTP)
+* Communicate with other **foreground or background processes**
+
+---
+
+## 🔥 Common Examples of Daemons in Linux
+
+| Daemon    | Description                                                   |
+| --------- | ------------------------------------------------------------- |
+| `systemd` | 🔁 The **parent of all processes** (replaces older `init`)    |
+| `crond`   | ⏰ A **scheduler** that runs automated tasks in the background |
+| `ftpd`    | 🌐 An **FTP server** that handles file transfer requests      |
+| `httpd`   | 🌍 A **web server** (like Apache) for serving HTTP requests   |
+| `sshd`    | 🔒 A **Secure Shell** server that handles remote SSH logins   |
+
+📝 **Naming Convention:** Most daemons in Linux end with **`d`**, which stands for "daemon".
+
+---
+
+## 📂 Where Are Daemon Scripts Stored?
+
+Depending on your **Linux distribution**, the location of daemon scripts varies:
+
+| Distro | Daemon Script Directory |
+| ------ | ----------------------- |
+| Ubuntu | `/etc/init.d/`          |
+| Fedora | `/lib/systemd/`         |
+
+These scripts are used by the **init system** to start, stop, or manage services.
+
+---
+
+## ⚙️ How Are Daemons Controlled?
+
+System daemons are typically controlled through **shell scripts**. These scripts:
+
+* Are **executed during system boot** (automatically)
+* Can also be **manually invoked** by administrators using service control commands
+
+### 🧑‍💻 Example: Starting/Stopping Daemons
+
+Commands like `systemctl start sshd` or `service sshd stop` allow privileged users to:
+
+* Manage daemon lifecycle
+* Perform actions in the **background** while keeping the **terminal free**
+
+---
+
+# 🧬 Understanding the init Process
+
+## 🪜 What is init?
+
+`init` (short for initialization) is:
+
+* A **system process** and **service manager**
+* The **first process** that starts when Linux boots
+* The **root (parent)** of all other processes
+
+🎯 All Linux processes are **direct or indirect children** of `init`.
+
+---
+
+## 🧠 Evolution of init Systems
+
+Over time, various `init` implementations have evolved:
+
+* **SysVinit**
+* **Upstart**
+* **OpenRC**
+* **systemd** (most widely used today)
+* **runit**
+
+Each has pros and cons, but we treat all of them under the generic term "**init**" here.
+
+---
+
+## 🌳 Viewing the Process Tree with `pstree`
+
+The `pstree` command gives a **tree-like view** of all processes, starting from `init` (often `systemd`):
+
+### 🔍 Example Output:
+
+```bash
+root@5ca0168c9be1:/# pstree
+systemd-+-cron
+        |-dbus-daemon
+        |-rsyslogd---3*[{rsyslogd}]
+        |-2*[sleep]
+        |-sshd
+        |-systemd-journal
+        |-systemd-logind
+        |-systemd-network
+        |-systemd-resolve
+        |-systemd-udevd
+        `-udisksd---5*[{udisksd}]
+```
+
+### 🧾 Explanation:
+
+* `systemd` is at the **top** of the tree (parent process)
+* `cron`, `sshd`, `rsyslogd`, etc., are **child processes**
+* Threads (e.g., `[{rsyslogd}]`) are shown with asterisk (`*`) and count
+
+This tree helps visualize the **hierarchical relationship** between processes and their **parent-child** structure.
+
+> 💡 **Pro Tip:** Use `ps aux | grep daemon-name` or `systemctl status daemon-name` to check the status of any daemon.
+
+---
