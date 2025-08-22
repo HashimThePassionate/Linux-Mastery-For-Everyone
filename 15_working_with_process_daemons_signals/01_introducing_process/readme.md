@@ -435,3 +435,232 @@ This tree helps visualize the **hierarchical relationship** between processes an
 > 💡 **Pro Tip:** Use `ps aux | grep daemon-name` or `systemctl status daemon-name` to check the status of any daemon.
 
 ---
+
+# 👨‍👦 **Parent and Child Processes** in Linux
+
+## 🧬 What is a Parent Process?
+
+In Linux, a **Parent Process** is one that creates other processes using system calls like `fork()` or similar. The newly created processes are known as **Child Processes**.
+
+### 🔁 Relationship:
+
+* A **Parent Process** ➝ spawns ➝ **Child Processes**
+* Each child is **linked** to its parent.
+* If the parent process stops or exits, the child is usually affected—unless special instructions are given.
+
+---
+
+## 👶 What is a Child Process?
+
+A **Child Process** is:
+
+* Spawned by a **parent process**
+* Usually **inherits** environment and permissions from the parent
+* Normally **terminates** when the parent exits
+
+However...
+
+> 🛡️ If the child process is told to **ignore the SIGHUP signal** (using tools like `nohup`), it can continue to run even after the parent dies.
+
+---
+
+## 🧠 Key Concept: `SIGHUP` Signal
+
+* **SIGHUP** (Signal Hang Up) is sent to child processes **when a parent process exits**
+* If **not handled**, the child process will **terminate**
+* You can **suppress** this behavior using the `nohup` command
+
+```bash
+nohup myscript.sh &
+```
+
+> 📌 This keeps the child process running **even after logout or parent termination**
+
+---
+
+## 🌲 Linux Process Tree Hierarchy
+
+* **All Linux processes**, except the very first (`init` or `systemd`), are **child processes of some parent**.
+* This creates a **process hierarchy tree** in the system.
+
+> 🧮 You can view it with:
+
+```bash
+pstree
+```
+
+---
+
+## 🔥 Important Behaviors
+
+| Behavior                  | Description                                                                 |
+| ------------------------- | --------------------------------------------------------------------------- |
+| 🛑 Killing child process  | Will **not stop** the parent                                                |
+| 🛑 Killing parent process | Will **usually stop** child unless `nohup` or similar is used               |
+| ✅ Best Practice           | Let parent process **gracefully exit** after child completes                |
+| 🧩 Signals                | Parent sends signals to child (like `SIGTERM`, `SIGHUP`) to manage behavior |
+
+---
+
+
+🧠 **Pro Tip**: Use `ps -ef` or `pstree -p` to inspect running processes and parent-child relationships.
+
+Look:
+```bash
+root@5ca0168c9be1:/# ps -ef
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 00:12 ?        00:00:06 /sbin/init
+root          25       1  0 00:12 ?        00:00:00 /usr/lib/systemd/systemd-journald
+root          66       1  0 00:12 ?        00:00:00 /usr/sbin/cron -f -P
+root          70       1  0 00:12 ?        00:00:00 /usr/lib/systemd/systemd-logind
+syslog        74       1  0 00:12 ?        00:00:00 /usr/sbin/rsyslogd -n -iNONE
+root          77       1  0 00:12 ?        00:00:00 sshd: /usr/sbin/sshd -D [listener] 0 
+message+      78       1  0 00:12 ?        00:00:01 @dbus-daemon --system --address=syste
+root         105       0  0 00:12 pts/0    00:00:00 bash
+systemd+    2601       1  0 00:24 ?        00:00:00 /usr/lib/systemd/systemd-networkd
+systemd+    2627       1  0 00:24 ?        00:00:00 /usr/lib/systemd/systemd-resolved
+root        3331       1  0 00:29 ?        00:00:00 /usr/libexec/udisks2/udisksd
+root        3396       1  0 00:30 ?        00:00:00 /usr/lib/systemd/systemd-udevd
+root        3447       0  0 00:30 pts/1    00:00:00 bash
+root        3574       0  0 00:44 pts/2    00:00:00 bash
+root        3600    3447  0 00:53 pts/1    00:00:00 bash -c set -o huponexit; sleep 1000 
+root        3601    3600  0 00:53 pts/1    00:00:00 sleep 1000
+root        3602    3600  0 00:53 pts/1    00:00:00 sleep 9999
+root        3609    3574  0 01:00 pts/2    00:00:00 ps -ef
+```
+
+---
+# 🔄 **Parent & Child Process Practical Example**
+
+## 🧪 Case 1 — Parent killed → Child also dies
+
+### ▶️ Step 1: Run a parent with a child in the foreground
+
+```bash
+bash -c "sleep 200" &
+```
+
+Output:
+
+```
+[1] 3615
+```
+
+* `3615` = PID of the parent (`bash -c`)
+* It creates a child `sleep 200`
+
+---
+
+### ▶️ Step 2: Check processes
+
+```bash
+ps -o pid,ppid,cmd | grep '[s]leep'
+```
+
+Output:
+
+```
+3615  3574  sleep 200
+```
+
+Here:
+
+* `PPID=3574` → Parent shell that spawned it
+* `CMD=sleep 200`
+
+---
+
+### ▶️ Step 3: Kill the parent
+
+```bash
+kill -TERM 3615
+```
+
+---
+
+### ▶️ Step 4: Verify
+
+```bash
+ps -o pid,ppid,cmd | grep '[s]leep'
+```
+
+Output:
+
+```
+[1]+  Terminated              bash -c "sleep 200"
+```
+
+✅ Proof: Parent is terminated → Child process (`sleep 200`) is also gone.
+
+---
+
+## 🧪 Case 2 — Child survives even if parent dies
+
+### ▶️ Step 1: Run parent with `nohup` child
+
+```bash
+bash -c "nohup sleep 1000 >/tmp/nohup.out 2>&1 & sleep 9999" &
+```
+
+* Parent → `bash -c`
+* Child1 → `sleep 1000` (background)
+* Child2 → `sleep 9999`
+
+---
+
+### ▶️ Step 2: Check processes
+
+```bash
+ps -o pid,ppid,cmd | grep '[s]leep'
+```
+
+Sample Output:
+
+```
+3601  3600  sleep 1000
+3602  3600  sleep 9999
+```
+
+---
+
+### ▶️ Step 3: Kill the parent
+
+```bash
+kill -TERM 3600
+```
+
+---
+
+### ▶️ Step 4: Verify
+
+```bash
+ps -o pid,ppid,cmd | grep '[s]leep'
+```
+
+Sample Output:
+
+```
+3601     1 sleep 1000
+```
+
+👉 Notice:
+
+* Parent (`bash -c`) is gone
+* Child (`sleep 1000`) survived
+* **PPID = 1** → It was adopted by `systemd`
+
+✅ Proof: Child continues even after parent termination.
+
+
+## 🗂️ What is Batch Processing?
+
+Sometimes, Linux processes are run:
+
+* **Without user interaction**
+* On a **predetermined schedule**
+* For long-running or automated tasks
+
+🎯 This is called **Batch Processing**
+
+> Example: Running a backup script every night via `cron`
+---
