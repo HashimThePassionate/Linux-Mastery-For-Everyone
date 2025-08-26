@@ -931,15 +931,48 @@ Even if you run multiple commands in your terminal session, the **`bash` process
 
 ---
 
-## 💡 Summary
+# 🔍 **Advanced Linux Process Attributes Using `ps -l`**
 
-| Concept        | Key Idea                                                |
-| -------------- | ------------------------------------------------------- |
-| Orphan Process | Child still running, parent is gone. Adopted by `init`. |
-| Zombie Process | Child exited, but parent didn’t clean up.               |
-| `ps` Command   | Shows active processes and useful diagnostics.          |
-| TTY            | Terminal interface connected to the process.            |
-| CPU TIME       | Only accumulates when process actively uses CPU.        |
+In many cases, the default `ps` command doesn’t provide enough detail. That’s where the `ps -l` (long format) option helps by offering **deeper insights** into each process running in the current terminal session.
+
+---
+
+## 🛠️ Command: `ps -l`
+
+```bash
+ps -l
+```
+
+📸 **Sample Output:**
+
+```bash
+F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+4 S     0     240       0  0  80   0 -  1147 do_wai pts/0    00:00:00 bash
+4 R     0     304     240  0  80   0 -  1980 -      pts/0    00:00:00 ps
+```
+
+Let's break it down, column by column. ⬇️
+
+---
+
+## 📊 Detailed Explanation of `ps -l` Output Fields
+
+| Field     | Meaning                                                                                                                                                | Example                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
+| **F**     | **Flags**: Shows process flags<br> - `0`: No flags<br> - `1`: Forked but didn't exec<br> - `4`: Superuser privileges (root)                            | `4` (root user)               |
+| **S**     | **Process State**:<br> - `R`: Running<br> - `S`: Sleeping (interruptible)<br> - `D`: Uninterruptible sleep<br> - `Z`: Zombie<br> - `T`: Traced/Stopped | `S` (sleeping), `R` (running) |
+| **UID**   | **User ID**: The owner of the process (numeric ID of user)                                                                                             | `0` (root user)               |
+| **PID**   | **Process ID**: Unique ID assigned to the process by kernel                                                                                            | `240`, `304`                  |
+| **PPID**  | **Parent Process ID**: The PID of the parent process                                                                                                   | `0` (for init), `240` (bash)  |
+| **C**     | **CPU Usage**: Percentage of CPU used by the process recently                                                                                          | `0` (no heavy CPU use)        |
+| **PRI**   | **Priority**: Process priority (lower = higher priority)                                                                                               | `80`                          |
+| **NI**    | **Nice value**:<br> - Ranges from `-20` (highest priority) to `19` (lowest priority)<br> - `0` is default                                              | `0`                           |
+| **ADDR**  | **Memory address of the process** in kernel space (often `-` in userland ps)                                                                           | `-`                           |
+| **SZ**    | **Size of virtual memory** used (in pages)                                                                                                             | `1147`, `1980`                |
+| **WCHAN** | **Waiting Channel**: Kernel function the process is waiting on (if sleeping)                                                                           | `do_wai`, `-`                 |
+| **TTY**   | **Terminal Type**: Terminal associated with the process                                                                                                | `pts/0`                       |
+| **TIME**  | **Total CPU Time** used by the process                                                                                                                 | `00:00:00`                    |
+| **CMD**   | **Command**: The name of the process or command run                                                                                                    | `bash`, `ps`                  |
 
 ---
 
