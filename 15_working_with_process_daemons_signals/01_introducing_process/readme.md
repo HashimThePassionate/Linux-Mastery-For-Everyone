@@ -664,3 +664,170 @@ Sometimes, Linux processes are run:
 
 > Example: Running a backup script every night via `cron`
 ---
+
+# 🧾 **Batch Processes**
+
+Batch processing allows us to run **background jobs** automatically at a **specific time**, often on a **recurring schedule**. These are commonly used to automate repetitive or resource-heavy tasks during off-peak hours.
+
+---
+
+## 📌 What is a Batch Process?
+
+> A **batch process** is a script or command that runs **automatically** without user interaction. It is typically launched by a **job scheduler** like `cron` or `at`.
+
+These jobs can include:
+
+* 📥 Backing up databases
+* 📦 Compressing or uploading files
+* 📊 Generating reports
+* 🔄 Auto-updating system packages
+
+---
+
+## ⚙️ Tools for Scheduling Batch Jobs
+
+### 🔁 `cron` – Recurring Jobs
+
+* Designed for **recurring tasks** (e.g., every 2 minutes, every Monday).
+* Uses a file called `crontab` to schedule jobs.
+
+### ☑️ `at` – One-Time Jobs
+
+* Used for **single-use**, scheduled tasks (e.g., "run this once at 4 PM").
+* Not suitable for repeat schedules.
+
+---
+
+## 🔧 Step-by-Step: Install and Use `cron`
+
+### ✅ Step 1: Install `cron` (If Not Already Installed)
+
+```bash
+sudo apt update
+sudo apt install cron nano
+```
+
+### 🔁 Step 2: Start and Enable cron Service
+
+```bash
+sudo systemctl start cron
+sudo systemctl enable cron
+```
+
+✅ This ensures `cron` starts at boot and runs in the background.
+
+---
+
+## ✍️ Step 3: Make nano as a default editor and Create the Batch Script
+
+Let’s create a simple script at `/root/log_time.sh` that logs the current date and time every 2 minutes.
+
+```bash
+nano ~/.bashrc
+export EDITOR=nano
+source ~/.bashrc
+nano /root/log_time.sh
+```
+
+Paste the following content into the file:
+
+```bash
+#!/bin/bash
+echo "Job ran at: $(date)" >> /root/cron_job_log.txt
+```
+
+Make the script executable:
+
+```bash
+chmod +x /root/log_time.sh
+```
+
+---
+
+## 🛠️ Step 4: Schedule the Job in Crontab
+
+Edit the root user's crontab:
+
+```bash
+crontab -e
+```
+
+Then add the following line at the bottom:
+
+```cron
+*/2 * * * * /root/log_time.sh
+```
+
+📌 **This tells cron to run `/root/log_time.sh` every 2 minutes.**
+
+---
+Absolutely! Let's break down this line from the crontab:
+
+```cron
+*/2 * * * * /root/log_time.sh
+```
+
+This line tells `cron` **when** and **what** to run.
+
+---
+
+## 🧠 Crontab Format Breakdown
+
+A typical crontab line has **5 time fields** followed by the **command/script**:
+
+```cron
+┌───────────── Minute (0 - 59)
+│ ┌───────────── Hour (0 - 23)
+│ │ ┌───────────── Day of month (1 - 31)
+│ │ │ ┌───────────── Month (1 - 12)
+│ │ │ │ ┌───────────── Day of week (0 - 7) (Sunday is 0 or 7)
+│ │ │ │ │
+│ │ │ │ │
+* * * * *  command to run
+```
+
+---
+
+## 📌 What Does `*/2 * * * *` Mean?
+
+Let's break down **`*/2 * * * *`**:
+
+| Field       | Value | Meaning               |
+| ----------- | ----- | --------------------- |
+| Minute      | `*/2` | Every **2 minutes**   |
+| Hour        | `*`   | Every hour            |
+| Day (Month) | `*`   | Every day             |
+| Month       | `*`   | Every month           |
+| Day (Week)  | `*`   | Every day of the week |
+
+## ✅ Examples of Time Schedules
+
+Here are some other examples of crontab time fields:
+
+| Cron Expression   | Meaning                                   |
+| ----------------- | ----------------------------------------- |
+| `0 * * * *`       | Every hour at minute 0 (e.g., 1:00, 2:00) |
+| `30 9 * * 1-5`    | 9:30 AM on weekdays (Mon–Fri)             |
+| `0 0 * * 1`       | Every Monday at midnight                  |
+| `*/15 8-17 * * *` | Every 15 minutes from 8 AM to 5 PM        |
+
+---
+
+## ✅ Step 5: Verify That cron Is Working
+
+Wait a few minutes and check the log file:
+
+```bash
+cat /root/cron_job_log.txt
+```
+
+You should see something like:
+
+```
+Job ran at: Tue Aug 26 01:02:00 PKT 2025
+Job ran at: Tue Aug 26 01:04:00 PKT 2025
+```
+
+🎉 Your batch job is successfully running every 2 minutes!
+
+---
