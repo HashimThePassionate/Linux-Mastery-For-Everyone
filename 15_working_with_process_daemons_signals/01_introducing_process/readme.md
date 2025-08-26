@@ -831,3 +831,116 @@ Job ran at: Tue Aug 26 01:04:00 PKT 2025
 🎉 Your batch job is successfully running every 2 minutes!
 
 ---
+
+# 🧠 **Orphan, Zombie & Anatomy of a Process**
+
+## ⚰️ Orphan and Zombie Processes
+
+In Linux, understanding how processes behave — especially when they become **orphan** or **zombie** — is crucial for efficient system administration.
+
+### 👶 What is an **Orphan Process**?
+
+An **orphan process** occurs when:
+
+* A child process is **still running**, but its **parent process terminates** before it finishes.
+* In this case, the Linux kernel reassigns the orphan process to the **`init` process (PID 1)**, which becomes its new parent.
+* This is a **normal behavior** and **handled gracefully** by Linux.
+
+> 📌 **Remember:** Orphan processes are still **alive and running**.
+
+---
+
+### 🧟 What is a **Zombie Process**?
+
+A **zombie process** (also known as a **defunct process**) occurs when:
+
+* A child process **has completed execution** (terminated) **but still has an entry** in the **process table**.
+* It stays there **until the parent process reads its exit status** using `wait()` system call.
+* These entries can be seen using the `ps` command but the process **doesn't exist anymore**.
+
+> 📌 **Remember:** Zombie processes are **terminated**, but **still linger** in memory tables.
+
+---
+
+### 🔍 Difference Between Orphan and Zombie
+
+| Attribute       | Orphan Process 🍼  | Zombie Process 🧟                |
+| --------------- | ------------------ | -------------------------------- |
+| Alive?          | ✅ Yes              | ❌ No                             |
+| Parent Exists?  | ❌ No (init adopts) | ✅ Yes (didn’t clean up)          |
+| Cleanup Needed? | ❌ No (handled)     | ✅ Yes (manually if persistent)   |
+| System Impact   | Minimal            | Can be dangerous if many pile up |
+
+---
+
+## 🧬 Anatomy of a Process in Linux
+
+To inspect and analyze processes, Linux offers powerful tools like `ps` and `top`.
+
+---
+
+### 📌 `ps` Command Basics
+
+```bash
+ps [OPTIONS]
+```
+
+* The `ps` command shows a **snapshot of current system processes**.
+* Most commonly used without any arguments to show processes in the current terminal.
+
+```bash
+ps
+```
+
+📸 **Sample Output:**
+
+```bash
+root@5ca0168c9be1:/# ps
+  PID TTY          TIME CMD
+  240 pts/0    00:00:00 bash
+  262 pts/0    00:00:00 ps
+```
+
+---
+
+### 📊 Breaking Down `ps` Output
+
+| Header   | Meaning                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------ |
+| **PID**  | **Process ID** – A unique number assigned by the kernel when the process is created. Example: `240`                |
+| **TTY**  | **Teletype Terminal** – Shows which terminal is controlling the process. Example: `pts/0` means a pseudo-terminal. |
+| **TIME** | **CPU Time** – Total CPU time the process has used. Shows as `00:00:00` if commands run too quickly.               |
+| **CMD**  | **Command Name** – The command that started the process (like `bash`, `ps`).                                       |
+
+---
+
+## 🔍 TTY: Understanding the Terminal Control
+
+* **TTY** = Teletype terminal → represents where a process is interacting with.
+* **pts/0** → Pseudo Terminal Session 0 (usually SSH or console session).
+* More sessions (e.g., new SSH connections) will appear as `pts/1`, `pts/2`, etc.
+
+---
+
+## 🧠 CPU TIME Explanation
+
+Even if you run multiple commands in your terminal session, the **`bash` process** might show **`00:00:00`** under **TIME** because:
+
+* The **parent shell (bash)** doesn’t consume much CPU itself.
+* **Each command** you run is a **separate child process**, and their CPU time is not added to bash’s TIME.
+
+---
+
+## 💡 Summary
+
+| Concept        | Key Idea                                                |
+| -------------- | ------------------------------------------------------- |
+| Orphan Process | Child still running, parent is gone. Adopted by `init`. |
+| Zombie Process | Child exited, but parent didn’t clean up.               |
+| `ps` Command   | Shows active processes and useful diagnostics.          |
+| TTY            | Terminal interface connected to the process.            |
+| CPU TIME       | Only accumulates when process actively uses CPU.        |
+
+---
+
+
