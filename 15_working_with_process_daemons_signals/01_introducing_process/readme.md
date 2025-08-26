@@ -976,4 +976,153 @@ Let's break it down, column by column. ⬇️
 
 ---
 
+# 📈 **Real-Time Process Monitoring in Linux using `top`**
 
+The `ps` command provides a snapshot of current processes — but what if you want a **live, real-time view** of what’s happening in your system?
+
+That’s where the **`top` command** comes in. It’s one of the most powerful tools for Linux administrators to monitor and manage running processes.
+
+---
+
+## 🧠 What is `top`?
+
+* The `top` command gives a **live view** of system performance.
+* It updates in **real time** and shows process activity, CPU/memory usage, and system load.
+* It's **interactive**: you can sort, filter, and kill processes from the `top` screen.
+
+---
+
+## 🔧 Syntax
+
+```bash
+top [OPTIONS]
+```
+
+💡 Example (default usage):
+
+```bash
+top
+```
+
+<div align="center">
+  <img src="./images/01.png"/>
+</div>
+
+---
+
+## 🖥️ Sample Output (Real-Time)
+
+```bash
+top - 13:23:31 up 34 min,  0 users,  load average: 0.30, 0.14, 0.04
+Tasks:  15 total,   1 running,  14 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.2 us,  0.3 sy,  0.0 ni, 99.3 id,  0.0 wa,  0.0 hi,  0.2 si,  0.0 st
+MiB Mem :   7903.2 total,   6380.1 free,    637.2 used,   1040.0 buff/cache
+MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.   7266.0 avail Mem
+```
+
+Let’s break this into sections 👇
+
+---
+
+## 🧾 1. **System Overview (Top Header)**
+
+| Field                            | Meaning                                                                                               |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `13:23:31`                       | Current system time                                                                                   |
+| `up 34 min`                      | How long the system has been running                                                                  |
+| `0 users`                        | Number of active (logged-in) users                                                                    |
+| `load average: 0.30, 0.14, 0.04` | System load averages over **1, 5, and 15 minutes**. Lower is better (usually < 1 for single-core CPU) |
+
+---
+
+## 🧾 2. **Tasks Summary**
+
+```bash
+Tasks:  15 total,   1 running,  14 sleeping,   0 stopped,   0 zombie
+```
+
+| Field         | Description                                             |
+| ------------- | ------------------------------------------------------- |
+| `15 total`    | Total number of processes                               |
+| `1 running`   | Processes currently using CPU                           |
+| `14 sleeping` | Processes in idle or waiting state                      |
+| `0 stopped`   | Suspended/stopped processes                             |
+| `0 zombie`    | Defunct (zombie) processes not yet cleaned up by parent |
+
+---
+
+## 🧾 3. **CPU Usage Statistics**
+
+```bash
+%Cpu(s):  0.2 us,  0.3 sy,  0.0 ni, 99.3 id,  0.0 wa,  0.0 hi,  0.2 si,  0.0 st
+```
+
+| Code | Meaning                                            |
+| ---- | -------------------------------------------------- |
+| `us` | User space CPU usage (programs/apps)               |
+| `sy` | System/kernel space usage                          |
+| `ni` | Nice-value adjusted process usage                  |
+| `id` | Idle time (higher is better!)                      |
+| `wa` | Waiting for I/O                                    |
+| `hi` | Hardware interrupts                                |
+| `si` | Software interrupts                                |
+| `st` | Stolen time (used by virtual machines/hypervisors) |
+
+---
+
+## 🧾 4. **Memory and Swap Summary**
+
+```bash
+MiB Mem :   7903.2 total,   6380.1 free,    637.2 used,   1040.0 buff/cache
+MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.   7266.0 avail Mem
+```
+
+| Field          | Explanation                         |
+| -------------- | ----------------------------------- |
+| **Total**      | Total physical RAM and swap         |
+| **Free**       | Unused memory/swap                  |
+| **Used**       | Currently active usage              |
+| **buff/cache** | Memory used for buffers, file cache |
+| **avail Mem**  | Memory available for new processes  |
+
+---
+
+## 🔍 5. **Per-Process Information Table**
+
+```bash
+PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+```
+
+Let’s break down each column 🔍
+
+| Column              | Description                                                                         |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| **PID**             | Process ID — uniquely identifies each process                                       |
+| **USER**            | User who owns the process                                                           |
+| **PR (Priority)**   | Scheduling priority. Lower number = higher priority                                 |
+| **NI (Nice Value)** | Adjusts priority from -20 (high) to 19 (low). 0 is default                          |
+| **VIRT**            | Virtual memory used (includes code, data, and shared libs)                          |
+| **RES**             | Resident memory (non-swapped physical RAM used)                                     |
+| **SHR**             | Shared memory with other processes                                                  |
+| **S (State)**       | Process state:<br>• `R`: Running<br>• `S`: Sleeping<br>• `I`: Idle<br>• `Z`: Zombie |
+| **%CPU**            | CPU usage by this process                                                           |
+| **%MEM**            | RAM usage by this process                                                           |
+| **TIME+**           | Total CPU time used by the process                                                  |
+| **COMMAND**         | Command used to launch the process                                                  |
+
+---
+
+## 🔁 Example Rows
+
+```bash
+    1 root      20   0   21136  12032   9344 S   0.0   0.1   0:01.08 systemd
+   145 root      20   0  469020  13056  11008 S   0.0   0.2   0:00.29 udisksd
+```
+
+🧠 **Explanation**:
+
+* **systemd** is sleeping (`S`) with minimal CPU/memory usage.
+* **udisksd** is managing disk services and using slightly more memory.
+
+
+---
