@@ -1124,5 +1124,97 @@ Let’s break down each column 🔍
 * **systemd** is sleeping (`S`) with minimal CPU/memory usage.
 * **udisksd** is managing disk services and using slightly more memory.
 
+---
+
+Great, Hashim! 👨‍💻 Here's a **beautiful, full `README.md`** that explains the **lifecycle and states of a Linux process**, using the content and diagram you provided (Figure 5.7) — perfectly suitable for GitHub documentation, Linux study notes, or interviews.
+
+---
+
+# 🔁 **Lifecycle and States of a Linux Process**
+
+Processes in Linux go through **various states** during their lifetime, depending on system conditions, resources, and signals. Understanding these states is vital for effective **system monitoring, debugging**, and **process management**.
+
+---
+
+## 🧠 Process State Codes (As Seen in `ps` and `top`)
+
+| Code | State                         | Description                                                |
+| ---- | ----------------------------- | ---------------------------------------------------------- |
+| `R`  | **Running**                   | Actively executing on the CPU                              |
+| `I`  | **Idle**                      | Special kernel task; runs when CPU is free                 |
+| `S`  | **Sleeping (Interruptible)**  | Waiting for a signal/event that can wake it                |
+| `D`  | **Uninterruptible Sleep**     | Waiting for hardware (e.g., I/O), cannot be interrupted    |
+| `T`  | **Stopped (Job Control)**     | Stopped via `SIGSTOP` or similar signal                    |
+| `t`  | **Stopped (Tracer/Debugger)** | Stopped under a debugger                                   |
+| `Z`  | **Zombie**                    | Process has exited, but parent hasn’t read its exit status |
+
+---
+
+## 🧬 **High-Level Categories of Process States**
+
+### 1️⃣ **Running**
+
+* Includes:
+
+  * `R` (Running)
+  * `I` (Idle)
+* `Idle`: A kernel task that keeps the CPU occupied when there's nothing to do.
+* These show up in tools like `top` as part of **CPU idle time**.
+
+---
+
+### 2️⃣ **Waiting**
+
+* Includes:
+
+  * `S` (Interruptible Sleep)
+  * `D` (Uninterruptible Sleep)
+* **Interruptible Sleep**:
+
+  * Can be awakened by signals (e.g., a keyboard interrupt or I/O completion).
+* **Uninterruptible Sleep**:
+
+  * Waiting for non-interruptible system calls, often related to disk or hardware access.
+
+---
+
+### 3️⃣ **Stopped**
+
+* Includes:
+
+  * `T` (Stopped by job control, e.g., via `Ctrl+Z`)
+  * `t` (Stopped by debugger)
+* The process is paused but can be resumed (`SIGCONT`).
+
+---
+
+### 4️⃣ **Zombie**
+
+* Process has **completed** but the **parent hasn’t collected its exit status**.
+* Remains in the process table to allow the parent to read the result (via `wait()`).
+* Can be cleaned up once the parent does its job — or automatically if orphaned.
+
+---
+
+## 📉 **Process State Transitions (Lifecycle)**
+
+Below is a simplified view of how a Linux process moves through different states:
+
+<div align="center">
+  <img src="./images/02.png" alt="" width="500px"/>
+</div>
+
+### 🔁 **Transitions**
+
+| From         | To                                             | Trigger |
+| ------------ | ---------------------------------------------- | ------- |
+| `R` → `S`    | Process is waiting for a signal or event       |         |
+| `S` → `R`    | A **wake-up signal** is received               |         |
+| `R` → `D`    | Waiting on **uninterruptible I/O**, e.g., disk |         |
+| `D` → `R`    | Woken up after device responds                 |         |
+| `R` → `T`    | **SIGSTOP** signal received                    |         |
+| `T` → `R`    | **SIGCONT** signal received                    |         |
+| `R` → `Z`    | Process has exited                             |         |
+| `Z` → (gone) | Parent collects status via `wait()`            |         |
 
 ---
