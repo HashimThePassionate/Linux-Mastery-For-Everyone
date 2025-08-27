@@ -1676,3 +1676,119 @@ Sample:
 ```
 
 ---
+
+# 🛑 **Managing Processes with `kill` and `killall`** in Linux
+
+When a process needs to be terminated, Linux provides powerful tools like **`kill`** and **`killall`**.
+These commands send **signals** to processes, telling them to stop or take specific actions.
+
+---
+
+## 📌 The `kill` Command
+
+### 🔹 Syntax
+
+```bash
+kill [OPTIONS] [ -s SIGNAL | -SIGNAL ] PID [...]
+```
+
+* **`PID`** → Process ID of the target process.
+* **`SIGNAL`** → Type of signal to send (default: `SIGTERM` = 15).
+
+---
+
+### 🔹 Listing Available Signals
+
+```bash
+kill -l
+```
+
+Sample Output:
+
+```bash
+ 1) SIGHUP       2) SIGINT       3) SIGQUIT      4) SIGILL       5) SIGTRAP
+ 6) SIGABRT      7) SIGBUS       8) SIGFPE       9) SIGKILL     10) SIGUSR1
+11) SIGSEGV     12) SIGUSR2     13) SIGPIPE     14) SIGALRM     15) SIGTERM
+16) SIGSTKFLT   17) SIGCHLD     18) SIGCONT     19) SIGSTOP     20) SIGTSTP
+21) SIGTTIN     22) SIGTTOU     23) SIGURG      24) SIGXCPU     25) SIGXFSZ
+26) SIGVTALRM   27) SIGPROF     28) SIGWINCH    29) SIGIO       30) SIGPWR
+31) SIGSYS      34) SIGRTMIN    35) SIGRTMIN+1  36) SIGRTMIN+2  37) SIGRTMIN+3
+38) SIGRTMIN+4  39) SIGRTMIN+5  40) SIGRTMIN+6  41) SIGRTMIN+7  42) SIGRTMIN+8
+43) SIGRTMIN+9  44) SIGRTMIN+10 45) SIGRTMIN+11 46) SIGRTMIN+12 47) SIGRTMIN+13
+48) SIGRTMIN+14 49) SIGRTMIN+15 50) SIGRTMAX-14 51) SIGRTMAX-13 52) SIGRTMAX-12
+53) SIGRTMAX-11 54) SIGRTMAX-10 55) SIGRTMAX-9  56) SIGRTMAX-8  57) SIGRTMAX-7
+58) SIGRTMAX-6  59) SIGRTMAX-5  60) SIGRTMAX-4  61) SIGRTMAX-3  62) SIGRTMAX-2
+63) SIGRTMAX-1  64) SIGRTMAX
+```
+
+* **`SIGTERM (15)`** → Default, requests process termination (gracefully).
+* **`SIGKILL (9)`** → Forces immediate termination (cannot be ignored).
+* **`SIGSTOP` / `SIGCONT`** → Pause or continue a process.
+
+---
+
+### 🔹 Example: Killing a Process by PID
+
+Suppose our test process has PID **1094**:
+
+```bash
+kill -9 1094
+```
+
+Equivalent command:
+
+```bash
+kill -KILL 1094
+```
+
+✔️ Both send the `SIGKILL` signal to **forcefully stop** the process.
+
+---
+
+## 📌 The `killall` Command
+
+While `kill` works with **PIDs**, the **`killall`** command works with **process names**.
+
+### 🔹 Syntax
+
+```bash
+killall [OPTIONS] [ -s SIGNAL | -SIGNAL ] NAME...
+```
+
+* **`NAME`** → Process name (e.g., `test.sh`).
+* **Signal** can be given as a **name** (`TERM`) or **value** (`15`).
+
+---
+
+### 🔹 Example: Killing Processes by Name
+
+Terminate all processes running `test.sh`:
+
+```bash
+killall -e -TERM test.sh
+```
+
+* **`-e`** → Matches the process name exactly.
+* **`-TERM`** → Sends the `SIGTERM` signal (default = 15).
+
+---
+
+## 📊 Comparison: `kill` vs `killall`
+
+| Command   | Works On         | Example                    |
+| --------- | ---------------- | -------------------------- |
+| `kill`    | Process **ID**   | `kill -9 1094`             |
+| `killall` | Process **Name** | `killall -e -TERM test.sh` |
+
+---
+
+## 📌 After Killing a Process
+
+* The process is removed from the **system process table**.
+* It will no longer appear in commands like:
+
+  * `ps`
+  * `top`
+  * `pstree`
+
+---
