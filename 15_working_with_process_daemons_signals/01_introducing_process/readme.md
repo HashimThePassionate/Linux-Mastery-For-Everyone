@@ -1549,3 +1549,130 @@ systemd-+-bash
 * ✅ Complements `ps` by offering a **tree structure view**.
 
 ---
+
+# 📊 **Monitoring Processes with `top`** in Linux
+
+The **`top` command** is one of the most commonly used tools by Linux administrators to **monitor processes in real time**.
+It provides dynamic updates on **CPU usage, memory consumption, tasks, and load averages**.
+
+---
+
+## 📌 Syntax
+
+```bash
+top [OPTIONS]
+```
+
+---
+
+## 🌀 Example 1: Launching `top`
+
+```bash
+top
+```
+
+* Displays **all processes** in real time.
+* By default, processes are **sorted by CPU usage** (`%CPU` column).
+* Press **`Q`** → Exit `top`.
+
+---
+
+## 🌀 Example 2: Sorting Processes in Interactive Mode
+
+1. Run `top`.
+2. Press **Shift + F** → Opens interactive sort mode.
+3. Use **arrow keys** → Select the field (e.g., `%MEM`).
+4. Press **S** → Apply sorting by the chosen field.
+5. Press **Q** → Exit interactive mode.
+
+---
+
+## 🌀 Example 3: Sorting with the `-o` Option
+
+Instead of using interactive mode, we can sort using **command-line options**:
+
+### 🔹 Sort by CPU (top 10 processes)
+
+```bash
+top -b -o %CPU | head -n 17
+```
+
+* **`-b`** → Batch mode (non-interactive, suitable for scripting).
+* **`-o %CPU`** → Sort by CPU usage.
+* **`head -n 17`** → Show only first 17 lines (accounting for `top`’s 7-line header + 10 processes).
+
+---
+
+### 🔹 Sort by Memory (top 10 processes)
+
+```bash
+top -b -o +%MEM | head -n 17
+```
+
+* **`+%MEM`** → Adds **memory usage** (`%MEM`) as an additional sorting field.
+
+Sample Output:
+
+```
+top - 04:42:45 up 50 min,  0 user,  load average: 3.00, 3.00, 2.61
+Tasks:  19 total,   4 running,  15 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 73.8 us,  0.0 sy,  0.0 ni, 23.8 id,  0.0 wa,  0.0 hi,  2.4 si,  0.0 st
+MiB Mem :   7903.2 total,   6390.4 free,    635.7 used,   1031.3 buff/cache
+MiB Swap:   2048.0 total,   2048.0 free,      0.0 used.   7267.5 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+    167 root      20   0  107008  22016  12928 S   0.0   0.3   0:00.33 unatten+
+    145 root      20   0  469120  13184  11136 S   0.0   0.2   0:00.28 udisksd
+    ...
+```
+
+---
+
+## 🌀 Example 4: Filtering by User
+
+```bash
+top -u $(whoami) -b -o %CPU | head -n 12
+```
+
+* **`-u $(whoami)`** → Limits output to the **current user’s processes**.
+* Useful for monitoring **your own processes** only.
+
+---
+
+## 🌀 Example 5: Monitoring a Specific Process by PID
+
+```bash
+top -p 377
+```
+
+* **`-p <PID>`** → Monitors a specific process.
+* Example output (for `test.sh` running with PID 377):
+
+```
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 74.9 us,  0.1 sy,  0.0 ni, 24.7 id,  0.0 wa,  0.0 hi,  0.3 si,  0.0 st
+MiB Mem :   7903.2 total,   6388.9 free,    637.2 used,   1031.3 buff/cache
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND           
+    377 root      20   0    4324   3072   2944 R  99.7   0.0  22:58.27 test.sh
+```
+
+✔️ This view is perfect for **tracking CPU/memory usage** of a single process.
+
+---
+
+## 🛑 Killing a Process in `top`
+
+While inside the `top` interface:
+
+1. Press **K**
+2. Enter the **PID** of the process you want to kill.
+3. Confirm → Process will be terminated.
+
+Sample:
+
+```
+[1]+  Terminated              ./test.sh
+```
+
+---
