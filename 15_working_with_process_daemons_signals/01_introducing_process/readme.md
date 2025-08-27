@@ -1442,3 +1442,110 @@ root  377   343  99 04:21 pts/2  00:02:32 /bin/bash ./test.sh
 * **CMD** → `/bin/bash ./test.sh`, meaning bash is executing our script.
 
 ---
+
+# 🌳 **Visualizing Processes with `pstree`**
+
+The **`pstree` command** displays running processes in a **hierarchical, tree-like structure**.
+It acts as a **visualizer for the `ps` command**, helping administrators see **parent-child relationships** among processes.
+
+---
+
+## 📌 Syntax
+
+```bash
+pstree [OPTIONS] [PID] [USER]
+```
+
+* **OPTIONS** → Modify the display (e.g., show PIDs).
+* **PID** → Show the tree starting from a specific process ID.
+* **USER** → Show processes belonging to a specific user.
+
+---
+
+## 🌀 Example 1: Viewing Current Terminal’s Process Tree
+
+```bash
+pstree $(echo $$)
+```
+
+### 📖 Explanation:
+
+* **`echo $$`** → Prints the **PID of the current shell**.
+* **`pstree $(echo $$)`** → Builds a tree rooted at the current shell process.
+
+### 🖼️ Sample Output:
+
+```
+bash-+-pstree
+     `-test.sh
+```
+
+Here:
+
+* **bash** is the parent process.
+* **pstree** and **test.sh** are child processes of this bash session.
+
+---
+
+## 🌀 Example 2: Showing Process IDs with `-p`
+
+```bash
+pstree -p $(echo $$)
+```
+
+### 📖 Explanation:
+
+* **`-p` / `--show-pids`** → Displays **process IDs** next to process names.
+
+### 🖼️ Sample Output:
+
+```
+bash(343)-+-pstree(422)
+          `-test.sh(377)
+```
+
+✔️ Now we can see both **process names** and their corresponding **PIDs**.
+
+---
+
+## 🌀 Example 3: Displaying Processes by User
+
+```bash
+pstree $(whoami)
+```
+
+### 📖 Explanation:
+
+* **`whoami`** → Prints the **current logged-in user**.
+* **`pstree $(whoami)`** → Displays a tree of all processes owned by this user.
+
+### 🖼️ Sample Output:
+
+```
+systemd-+-bash
+        |-cron
+        |-dbus-daemon
+        |-polkitd---3*[{polkitd}]
+        |-rsyslogd---3*[{rsyslogd}]
+        |-sshd
+        |-systemd-journal
+        |-systemd-logind
+        |-systemd-network
+        |-systemd-resolve
+        |-systemd-udevd
+        |-udisksd---5*[{udisksd}]
+        `-unattended-upgr---{unattended-upgr}
+```
+
+✔️ This gives a **full view** of all processes started by the system and user.
+
+---
+
+## 📊 Why Use `pstree`?
+
+* ✅ Provides a **visual representation** of process hierarchy.
+* ✅ Makes it easier to identify **parent-child relationships**.
+* ✅ Helps debug long-running background jobs or daemons.
+* ✅ Complements `ps` by offering a **tree structure view**.
+
+---
