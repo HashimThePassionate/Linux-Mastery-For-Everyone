@@ -1792,3 +1792,118 @@ killall -e -TERM test.sh
   * `pstree`
 
 ---
+
+# 🔎 **Searching & Terminating Processes with `pgrep` and `pkill`**
+
+Linux provides **pattern-based utilities** — `pgrep` and `pkill` — to **search for and manage processes** without needing to manually look up their PIDs.
+
+* **`pgrep`** → Finds processes matching a given pattern.
+* **`pkill`** → Kills processes matching a given pattern.
+
+---
+
+## 📌 Syntax
+
+```bash
+pgrep [OPTIONS] PATTERN
+pkill [OPTIONS] PATTERN
+```
+
+---
+
+## 🌀 Example 1: Finding a Process by Name
+
+Start the script again (since it was killed earlier):
+
+```bash
+./test.sh &
+```
+
+Sample Output:
+
+```
+[1] 521
+```
+
+Now use `pgrep` to locate it:
+
+```bash
+pgrep -f test.sh
+```
+
+Output:
+
+```
+521
+```
+
+✔️ Here, `521` is the PID of `test.sh`.
+
+* **`-f` / `--full`** → Ensures **full command line matching** instead of just the process name.
+
+---
+
+## 🌀 Example 2: Getting Detailed Info with `ps`
+
+Combine `pgrep` with `ps` for more information:
+
+```bash
+pgrep -f test.sh | xargs ps -fp
+```
+
+Sample Output:
+
+```
+UID          PID    PPID  C STIME TTY          TIME CMD
+root         521     343 99 05:05 pts/2    00:00:32 /bin/bash ./test.sh
+```
+
+### 📖 How it Works:
+
+* `pgrep -f test.sh` → Finds the PID (`521`).
+* `xargs` → Converts this PID into an argument.
+* `ps -fp <PID>` → Displays detailed info about that PID.
+
+---
+
+## 🌀 Example 3: Killing a Process with `pkill`
+
+Terminate `test.sh` using its name:
+
+```bash
+pkill -f test.sh
+```
+
+✔️ Process is silently terminated.
+
+---
+
+## 🌀 Example 4: Killing with Feedback
+
+To see confirmation of what got killed:
+
+```bash
+pkill -ef test.sh
+```
+
+Sample Output:
+
+```
+test.sh killed (pid 521)
+[1]+  Terminated              ./test.sh
+```
+
+* **`-e`** → Echoes the killed process.
+* **`-f`** → Ensures full command line match.
+
+---
+
+## 📊 Comparison: `pgrep` vs `pkill`
+
+| Command  | Purpose                              | Example                            |
+| -------- | ------------------------------------ | ---------------------------------- |
+| `pgrep`  | Find process IDs by pattern          | `pgrep -f test.sh`                 |
+| `pkill`  | Kill processes by pattern            | `pkill -ef test.sh`                |
+| Combined | Lookup and then act with another cmd | `pgrep -f test.sh \| xargs ps -fp` |
+
+---
