@@ -1218,3 +1218,77 @@ Below is a simplified view of how a Linux process moves through different states
 | `Z` → (gone) | Parent collects status via `wait()`            |         |
 
 ---
+
+# 🖥️ **Working with Processes** in Linux
+
+Some of these tools (such as `ps` and `top`) were mentioned earlier when discussing process internals. Here, we’ll put that knowledge into practice with **real-world hands-on examples**.
+
+## 📌 Process Exploration with `ps`
+
+The `ps` command (short for **Process Status**) is a powerful utility for listing running processes on a Linux system.
+
+---
+
+### 🔍 Example 1: Listing all processes
+
+```bash
+ps -e | head
+```
+
+#### 📖 Explanation:
+
+* **`ps -e`** → Displays **all running processes** in the system.
+
+  * The `-e` flag is equivalent to `-A`.
+* **`| head`** → Pipes the output into the `head` command, which shows only the **first 10 lines by default**.
+
+#### 🖼️ Sample Output:
+
+```
+    PID TTY          TIME CMD
+      1 ?        00:00:01 systemd
+     27 ?        00:00:00 systemd-journal
+     60 ?        00:00:00 systemd-udevd
+     66 ?        00:00:00 systemd-resolve
+     72 ?        00:00:00 systemd-network
+    135 ?        00:00:00 cron
+    136 ?        00:00:00 dbus-daemon
+    138 ?        00:00:00 polkitd
+    143 ?        00:00:00 systemd-logind
+```
+
+✅ This gives a **quick snapshot** of the processes, but it only shows minimal fields like **PID** and **CMD**.
+
+---
+
+### 🔍 Example 2: Detailed process listing for the current user
+
+```bash
+ps -fU $(whoami)
+```
+
+#### 📖 Explanation:
+
+* **`-f`** → Enables **full-format listing**, displaying detailed process information.
+* **`-U $(whoami)`** → Lists processes **owned by the current user**.
+
+  * `$(whoami)` dynamically retrieves the **current logged-in username**.
+
+#### 🖼️ Sample Output:
+
+```
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 03:57 ?        00:00:01 /sbin/init
+root          27       1  0 03:57 ?        00:00:00 /usr/lib/systemd/systemd-journald
+root          60       1  0 03:57 ?        00:00:00 /usr/lib/systemd/systemd-udevd
+root         135       1  0 03:57 ?        00:00:00 /usr/sbin/cron -f -P
+root         143       1  0 03:57 ?        00:00:00 /usr/lib/systemd/systemd-logind
+root         145       1  0 03:57 ?        00:00:00 /usr/libexec/udisks2/udisksd
+root         151       1  0 03:57 ?        00:00:00 sshd: /usr/sbin/sshd -D [listener] 0 
+root         167       1  0 03:57 ?        00:00:00 /usr/bin/python3 /usr/share/unattende
+root         242       0  0 03:57 pts/0    00:00:00 bash
+root         274     242  0 03:59 pts/0    00:00:00 ps -fU root
+```
+
+---
+
