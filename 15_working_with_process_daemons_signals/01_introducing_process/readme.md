@@ -1292,3 +1292,153 @@ root         274     242  0 03:59 pts/0    00:00:00 ps -fU root
 
 ---
 
+# 🔎 **Searching and Monitoring Specific Processes** in Linux
+
+In Linux system administration, we often need to **search for specific processes** — either for **monitoring** purposes or to take some **action** (like stopping them). This section demonstrates how to locate and analyze processes effectively.
+
+---
+
+## 🌀 Step 1: Creating a Long-Running Process
+
+We can simulate a long-lived process using a simple **infinite loop**:
+
+```bash
+while true; do x=1; done
+```
+
+👉 This loop keeps assigning the value `1` to the variable `x` **forever**. It consumes CPU cycles and will continue running until stopped manually.
+
+---
+
+### 📝 Writing the Loop into a Script
+
+Using an editor such as `nano`, we create a script file named **`test.sh`**:
+
+```bash
+nano test.sh
+```
+
+Then, add the following content:
+
+```bash
+#!/bin/bash
+while true; do x=1; done
+```
+
+✔️ The first line `#!/bin/bash` is the **shebang line**, which tells Linux to run the script using the **bash shell**.
+✔️ This line **must always be the first line** in a bash script.
+
+Check the file contents:
+
+```bash
+cat test.sh
+```
+
+---
+
+## 🔑 Step 2: Making the Script Executable
+
+```bash
+chmod +x test.sh
+```
+
+* **`chmod +x`** → Grants **execute permission** to the file.
+
+Check permissions with:
+
+```bash
+ls -l test.sh
+```
+
+Sample Output:
+
+```
+-rwxr-xr-x 1 root root 38 Aug 27 04:20 test.sh
+```
+
+* `rwx` → Owner can read, write, and execute.
+* `r-x` → Group and others can read and execute.
+
+---
+
+## 🚀 Step 3: Running the Script in the Background
+
+```bash
+./test.sh &
+```
+
+* **`&`** → Runs the script as a **background process**, freeing up the terminal.
+* Linux assigns a **Process ID (PID)** to this background process.
+
+Sample Output:
+
+```
+[1] 377
+```
+
+Here, `377` is the **PID** of our script.
+
+---
+
+## 🔍 Step 4: Finding the Process by Name
+
+We can use `ps` and `grep` to locate our script:
+
+```bash
+ps -ef | grep test.sh
+```
+
+Sample Output:
+
+```
+root   377   343  99 04:21 pts/2  00:00:08 /bin/bash ./test.sh
+root   379   343   0 04:21 pts/2  00:00:00 grep --color=auto test.sh
+```
+
+### 📖 Explanation:
+
+* **First line** → Our actual process: `/bin/bash ./test.sh`.
+* **Second line** → The `grep test.sh` command itself (not useful).
+
+---
+
+## 🧹 Step 5: Filtering Out Unwanted `grep` Results
+
+We can refine the search to exclude the `grep` process itself:
+
+```bash
+ps -ef | grep test.sh | grep -v grep
+```
+
+Sample Output:
+
+```
+root   377   343  99 04:21 pts/2  00:01:34 /bin/bash ./test.sh
+```
+
+* **`grep -v grep`** → Removes the line that contains `grep` from the output.
+
+---
+
+## 🔢 Step 6: Finding a Process by PID
+
+Sometimes, we already know the **PID** and want detailed info:
+
+```bash
+ps -fp 377
+```
+
+Sample Output:
+
+```
+UID   PID   PPID  C STIME TTY      TIME CMD
+root  377   343  99 04:21 pts/2  00:02:32 /bin/bash ./test.sh
+```
+
+### 📖 Explanation:
+
+* **PID** → 377 (our script).
+* **PPID** → 343 (parent process ID).
+* **CMD** → `/bin/bash ./test.sh`, meaning bash is executing our script.
+
+---
