@@ -2081,3 +2081,196 @@ root@5ca0168c9be1:/# sudo systemctl start apache2
 🔄 Restart control of Apache service.
 
 ---
+# 🔄 **Inter-Process Communication** (IPC) in Linux
+
+**Inter-Process Communication (IPC)** is a mechanism that allows processes to interact and exchange information. It provides shared interfaces so that processes can collaborate, synchronize, or exchange data effectively.
+
+---
+
+## 📚 IPC Interfaces in Linux
+
+Linux offers multiple IPC interfaces, each with its own purpose and behavior.
+
+---
+
+### 1. 📂 Shared Storage (Files)
+
+* **How it works:**
+
+  * One process (**producer**) writes to a file.
+  * Another process (**consumer**) reads from the same file.
+
+* **Problem:**
+
+  * Risk of **race conditions** (simultaneous read/write operations corrupting data).
+
+* **Solution:**
+
+  * Use **file locking** mechanisms during writes.
+
+✅ Example (naive producer-consumer):
+
+```bash
+# Producer writes
+echo "Hello from Producer" > shared_file.txt
+
+# Consumer reads
+cat shared_file.txt
+```
+
+---
+
+### 2. 🧠 Shared Memory
+
+* **How it works:**
+
+  * Processes normally have separate memory spaces.
+  * Shared memory allows multiple processes to access the **same memory segment**.
+
+* **APIs Available:**
+
+  * **System V API** (legacy)
+  * **POSIX API** (modern)
+
+* **Linux Implementation:**
+
+  * `/dev/shm` → RAM-backed temporary filesystem (acts like a RAM disk).
+
+✅ Example:
+
+```bash
+# Producer writes into shared memory-backed file
+echo "Hello from RAM storage" > /dev/shm/storage
+
+# Consumer reads
+cat /dev/shm/storage
+```
+
+⚠️ **Note:** Shared memory is fast but may not perform well with **massive data streams**.
+
+---
+
+### 3. 🚰 Pipes
+
+#### a) **Unnamed (Anonymous) Pipes**
+
+* Exist **only while processes are running**.
+* Used to redirect output of one process to another.
+
+✅ Example:
+
+```bash
+producer.sh | consumer.sh
+```
+
+* `producer.sh` writes data → goes directly to `consumer.sh`.
+
+---
+
+#### b) **Named Pipes (FIFOs)**
+
+* Persist **as long as the system is running** (unlike unnamed pipes).
+* Represented as **files** in the filesystem.
+* Can be deleted manually when no longer needed.
+
+✅ Example:
+
+```bash
+# Create a named pipe
+mkfifo mypipe
+
+# Producer writes
+echo "Hello via FIFO" > mypipe
+
+# Consumer reads
+cat mypipe
+```
+
+---
+
+### 4. 📬 Message Queues
+
+* **Asynchronous communication**:
+
+  * Producer writes a message.
+  * Message stays in queue until consumer processes it.
+
+* **Message structure:**
+
+  * Sequence
+  * Payload (data)
+  * Type (priority, category, etc.)
+
+* **Examples of Message Queue Implementations:**
+
+  * RabbitMQ 🐇
+  * ActiveMQ
+  * ZeroMQ
+  * MQTT
+
+⚠️ Message queues are **unidirectional** (producer → consumer).
+
+
+<div align="center">
+  <img src="./images/03.png" width="400"/>
+</div>
+
+---
+
+### 5. 🌐 Sockets
+
+#### a) **IPC (Unix Domain) Sockets**
+
+* Work locally.
+* Identified via **filesystem paths**.
+* Support **bidirectional** communication.
+
+#### b) **Network Sockets**
+
+* Extend IPC across systems.
+* Use **TCP/UDP protocols** for data transfer.
+
+Both types:
+
+* Use **client/server model**.
+* Maintain communication until one side closes the connection.
+
+✅ Example (TCP socket):
+
+```bash
+# Start server on port 8080
+nc -l 8080
+
+# Connect as client
+nc localhost 8080
+```
+
+---
+
+### 6. 📢 Signals
+
+* **Lightweight IPC mechanism** → **notify processes about events**.
+
+* **One-way, asynchronous**.
+
+* **No data payload** (only notification).
+
+* **Types of signals:**
+
+  * Kernel → Process
+  * Process → Process
+  * Process → Itself
+
+✅ Example:
+
+```bash
+# Send termination signal to process with PID 1234
+kill -SIGTERM 1234
+
+# Or using signal number (SIGTERM = 15)
+kill -15 1234
+```
+
+---
+
+
