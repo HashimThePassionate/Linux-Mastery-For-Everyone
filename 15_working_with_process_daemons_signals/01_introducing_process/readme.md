@@ -1,5 +1,140 @@
 # 👨‍💻 **Introducing Processes** in Linux
 
+<details>
+<summary><strong>📑 Table of Contents</strong></summary>
+
+| # | 📑 Section | 🔗 Link |
+|---|------------|---------|
+| 1 | 🛠️ How Are Processes Created? | [How Are Processes Created?](#️-how-are-processes-created) |
+| 2 | 🔎 Understanding Process Types | [Understanding Process Types in Linux](#-understanding-process-types-in-linux) |
+| 3 | 🧑‍💼 Foreground Processes | [Foreground (Interactive) Processes](#-foreground-interactive-processes) |
+| 4 | 🤖 Background Processes | [Background (Non-Interactive) Processes](#-background-non-interactive-processes) |
+| 5 | 🧩 Extended Classifications | [Extended Classifications](#-extended-classifications) |
+| 6 | 🧾 Batch Processes | [Batch Processes](#-batch-processes) |
+| 7 | 🧙‍♂️ Daemons | [Daemons](#️-daemons) |
+| 8 | 👨‍👦 Parent and Child Processes | [Parent and Child Processes](#-parent-and-child-processes) |
+| 9 | 🟢 Foreground Processes Deep Dive | [**Foreground Processes** in Linux](#-foreground-processes-in-linux) |
+| 10 | 🧠 Key Characteristics | [Key Characteristics](#-key-characteristics) |
+| 11 | 🔍 Simple Foreground Example | [Simple Foreground Example](#-simple-foreground-example) |
+| 12 | 🔁 Infinite Loop Example | [Foreground Example – Infinite Loop](#-foreground-example--infinite-loop) |
+| 13 | 📢 SIGINT Signal | [Important Signal: `SIGINT`](#-important-signal-sigint) |
+| 14 | ⚫ Background Processes Deep Dive | [**Background Processes** in Linux](#-background-processes-in-linux) |
+| 15 | ✅ Starting Background Process | [How to Start a Background Process](#-how-to-start-a-background-process) |
+| 16 | 👨‍💻 Interactive Background Example | [Example: Interactive Use While Background Process is Running](#-example-interactive-use-while-background-process-is-running) |
+| 17 | 🔪 Terminating Background Process | [Terminating a Background Process](#-terminating-a-background-process) |
+| 18 | 🧬 Process Comparison | [Background vs. Foreground Processes](#-background-vs-foreground-processes) |
+| 19 | 🔁 Automated Tasks | [Automated Background Tasks](#-automated-background-tasks) |
+| 20 | 🧿 Introduction to Daemons | [**Introduction to Daemons** in Linux](#-introduction-to-daemons-in-linux) |
+| 21 | 🌀 What is a Daemon? | [What is a Daemon?](#-what-is-a-daemon) |
+| 22 | 📡 Daemon Functions | [What Do Daemons Do?](#-what-do-daemons-do) |
+| 23 | 🔥 Common Daemon Examples | [Common Examples of Daemons in Linux](#-common-examples-of-daemons-in-linux) |
+| 24 | 📂 Daemon Storage Location | [Where Are Daemon Scripts Stored?](#-where-are-daemon-scripts-stored) |
+| 25 | ⚙️ Daemon Control | [How Are Daemons Controlled?](#️-how-are-daemons-controlled) |
+| 26 | 🧬 Understanding init Process | [Understanding the init Process](#-understanding-the-init-process) |
+| 27 | 🪜 What is init? | [What is init?](#-what-is-init) |
+| 28 | 🧠 Evolution of init Systems | [Evolution of init Systems](#-evolution-of-init-systems) |
+| 29 | 🌳 Process Tree with pstree | [Viewing the Process Tree with `pstree`](#-viewing-the-process-tree-with-pstree) |
+| 30 | 👨‍👦 Parent Child Processes | [**Parent and Child Processes** in Linux](#-parent-and-child-processes-in-linux) |
+| 31 | 🧬 Parent Process | [What is a Parent Process?](#-what-is-a-parent-process) |
+| 32 | 👶 Child Process | [What is a Child Process?](#-what-is-a-child-process) |
+| 33 | 🧠 SIGHUP Signal | [Key Concept: `SIGHUP` Signal](#-key-concept-sighup-signal) |
+| 34 | 🌲 Process Tree Hierarchy | [Linux Process Tree Hierarchy](#-linux-process-tree-hierarchy) |
+| 35 | 🔥 Important Behaviors | [Important Behaviors](#-important-behaviors) |
+| 36 | 🔄 Practical Examples | [**Parent & Child Process Practical Example**](#-parent--child-process-practical-example) |
+| 37 | 🧪 Case 1: Parent Dies | [Case 1 — Parent killed → Child also dies](#-case-1--parent-killed--child-also-dies) |
+| 38 | 🧪 Case 2: Child Survives | [Case 2 — Child survives even if parent dies](#-case-2--child-survives-even-if-parent-dies) |
+| 39 | 🗂️ What is Batch Processing? | [What is Batch Processing?](#️-what-is-batch-processing) |
+| 40 | 🧾 Batch Processes | [**Batch Processes**](#-batch-processes-2) |
+| 41 | 📌 Batch Process Definition | [What is a Batch Process?](#-what-is-a-batch-process) |
+| 42 | ⚙️ Scheduling Tools | [Tools for Scheduling Batch Jobs](#️-tools-for-scheduling-batch-jobs) |
+| 43 | 🔁 cron Jobs | [`cron` – Recurring Jobs](#-cron--recurring-jobs) |
+| 44 | ☑️ at Jobs | [`at` – One-Time Jobs](#️-at--one-time-jobs) |
+| 45 | 🔧 Install and Use cron | [Step-by-Step: Install and Use `cron`](#-step-by-step-install-and-use-cron) |
+| 46 | ✍️ Create Batch Script | [Make nano as a default editor and Create the Batch Script](#️-step-3-make-nano-as-a-default-editor-and-create-the-batch-script) |
+| 47 | 🛠️ Schedule in Crontab | [Schedule the Job in Crontab](#️-step-4-schedule-the-job-in-crontab) |
+| 48 | 🧠 Crontab Format | [Crontab Format Breakdown](#-crontab-format-breakdown) |
+| 49 | 📌 Crontab Examples | [Examples of Time Schedules](#-examples-of-time-schedules) |
+| 50 | ✅ Verify cron Working | [Verify That cron Is Working](#-step-5-verify-that-cron-is-working) |
+| 51 | 🧠 Orphan & Zombie Processes | [**Orphan, Zombie & Anatomy of a Process**](#-orphan-zombie--anatomy-of-a-process) |
+| 52 | ⚰️ Orphan and Zombie | [Orphan and Zombie Processes](#️-orphan-and-zombie-processes) |
+| 53 | 👶 Orphan Process | [What is an **Orphan Process**?](#-what-is-an-orphan-process) |
+| 54 | 🧟 Zombie Process | [What is a **Zombie Process**?](#-what-is-a-zombie-process) |
+| 55 | 🔍 Orphan vs Zombie | [Difference Between Orphan and Zombie](#-difference-between-orphan-and-zombie) |
+| 56 | 🧬 Process Anatomy | [Anatomy of a Process in Linux](#-anatomy-of-a-process-in-linux) |
+| 57 | 📌 ps Command Basics | [`ps` Command Basics](#-ps-command-basics) |
+| 58 | 📊 ps Output Breakdown | [Breaking Down `ps` Output](#-breaking-down-ps-output) |
+| 59 | 🔍 TTY Understanding | [TTY: Understanding the Terminal Control](#-tty-understanding-the-terminal-control) |
+| 60 | 🧠 CPU TIME Explanation | [CPU TIME Explanation](#-cpu-time-explanation) |
+| 61 | 🔍 Advanced ps Attributes | [**Advanced Linux Process Attributes Using `ps -l`**](#-advanced-linux-process-attributes-using-ps--l) |
+| 62 | 🛠️ ps -l Command | [Command: `ps -l`](#️-command-ps--l) |
+| 63 | 📊 ps -l Output Fields | [Detailed Explanation of `ps -l` Output Fields](#-detailed-explanation-of-ps--l-output-fields) |
+| 64 | 📈 Real-Time Monitoring | [**Real-Time Process Monitoring in Linux using `top`**](#-real-time-process-monitoring-in-linux-using-top) |
+| 65 | 🧠 What is top? | [What is `top`?](#-what-is-top) |
+| 66 | 🔧 top Syntax | [Syntax](#-syntax) |
+| 67 | 🖥️ top Sample Output | [Sample Output (Real-Time)](#️-sample-output-real-time) |
+| 68 | 🧾 System Overview | [1. **System Overview (Top Header)**](#-1-system-overview-top-header) |
+| 69 | 🧾 Tasks Summary | [2. **Tasks Summary**](#-2-tasks-summary) |
+| 70 | 🧾 CPU Usage Statistics | [3. **CPU Usage Statistics**](#-3-cpu-usage-statistics) |
+| 71 | 🧾 Memory and Swap | [4. **Memory and Swap Summary**](#-4-memory-and-swap-summary) |
+| 72 | 🔍 Per-Process Table | [5. **Per-Process Information Table**](#-5-per-process-information-table) |
+| 73 | 🔁 Example Rows | [Example Rows](#-example-rows) |
+| 74 | 🔁 Process Lifecycle | [**Lifecycle and States of a Linux Process**](#-lifecycle-and-states-of-a-linux-process) |
+| 75 | 🧠 Process State Codes | [Process State Codes (As Seen in `ps` and `top`)](#-process-state-codes-as-seen-in-ps-and-top) |
+| 76 | 🧬 Process State Categories | [**High-Level Categories of Process States**](#-high-level-categories-of-process-states) |
+| 77 | 1️⃣ Running State | [**Running**](#1️⃣-running) |
+| 78 | 2️⃣ Waiting State | [**Waiting**](#2️⃣-waiting) |
+| 79 | 3️⃣ Stopped State | [**Stopped**](#3️⃣-stopped) |
+| 80 | 4️⃣ Zombie State | [**Zombie**](#4️⃣-zombie) |
+| 81 | 📉 State Transitions | [**Process State Transitions (Lifecycle)**](#-process-state-transitions-lifecycle) |
+| 82 | 🖥️ Working with Processes | [**Working with Processes** in Linux](#️-working-with-processes-in-linux) |
+| 83 | 📌 Process Exploration | [Process Exploration with `ps`](#-process-exploration-with-ps) |
+| 84 | 🔍 List All Processes | [Example 1: Listing all processes](#-example-1-listing-all-processes) |
+| 85 | 🔍 User Process Listing | [Example 2: Detailed process listing for the current user](#-example-2-detailed-process-listing-for-the-current-user) |
+| 86 | 🔎 Search & Monitor Processes | [**Searching and Monitoring Specific Processes** in Linux](#-searching-and-monitoring-specific-processes-in-linux) |
+| 87 | 🌀 Create Long-Running Process | [Step 1: Creating a Long-Running Process](#-step-1-creating-a-long-running-process) |
+| 88 | 📝 Write Script | [Writing the Loop into a Script](#-writing-the-loop-into-a-script) |
+| 89 | 🔑 Make Script Executable | [Step 2: Making the Script Executable](#-step-2-making-the-script-executable) |
+| 90 | 🚀 Run in Background | [Step 3: Running the Script in the Background](#-step-3-running-the-script-in-the-background) |
+| 91 | 🔍 Find by Name | [Step 4: Finding the Process by Name](#-step-4-finding-the-process-by-name) |
+| 92 | 🧹 Filter grep Results | [Step 5: Filtering Out Unwanted `grep` Results](#-step-5-filtering-out-unwanted-grep-results) |
+| 93 | 🔢 Find by PID | [Step 6: Finding a Process by PID](#-step-6-finding-a-process-by-pid) |
+| 94 | 🌳 Visualizing with pstree | [**Visualizing Processes with `pstree`**](#-visualizing-processes-with-pstree) |
+| 95 | 📌 pstree Syntax | [Syntax](#-syntax-1) |
+| 96 | 🌀 Current Terminal Tree | [Example 1: Viewing Current Terminal's Process Tree](#-example-1-viewing-current-terminals-process-tree) |
+| 97 | 🌀 Show Process IDs | [Example 2: Showing Process IDs with `-p`](#-example-2-showing-process-ids-with--p) |
+| 98 | 🌀 Processes by User | [Example 3: Displaying Processes by User](#-example-3-displaying-processes-by-user) |
+| 99 | 📊 Why Use pstree? | [Why Use `pstree`?](#-why-use-pstree) |
+| 100 | 📊 Advanced top Monitoring | [**Monitoring Processes with `top`** in Linux](#-monitoring-processes-with-top-in-linux) |
+| 101 | 🌀 Launch top | [Example 1: Launching `top`](#-example-1-launching-top) |
+| 102 | 🌀 Interactive Sorting | [Example 2: Sorting Processes in Interactive Mode](#-example-2-sorting-processes-in-interactive-mode) |
+| 103 | 🌀 Sorting with -o | [Example 3: Sorting with the `-o` Option](#-example-3-sorting-with-the--o-option) |
+| 104 | 🔹 Sort by CPU | [Sort by CPU (top 10 processes)](#-sort-by-cpu-top-10-processes) |
+| 105 | 🔹 Sort by Memory | [Sort by Memory (top 10 processes)](#-sort-by-memory-top-10-processes) |
+| 106 | 🌀 Filter by User | [Example 4: Filtering by User](#-example-4-filtering-by-user) |
+| 107 | 🌀 Monitor Specific PID | [Example 5: Monitoring a Specific Process by PID](#-example-5-monitoring-a-specific-process-by-pid) |
+| 108 | 🛑 Kill in top | [Killing a Process in `top`](#-killing-a-process-in-top) |
+| 109 | 🛑 Process Management | [**Managing Processes with `kill` and `killall`** in Linux](#-managing-processes-with-kill-and-killall-in-linux) |
+| 110 | 📌 kill Command | [The `kill` Command](#-the-kill-command) |
+| 111 | 🔹 kill Syntax | [Syntax](#-syntax-3) |
+| 112 | 🔹 List Signals | [Listing Available Signals](#-listing-available-signals) |
+| 113 | 🔹 Kill by PID | [Example: Killing a Process by PID](#-example-killing-a-process-by-pid) |
+| 114 | 📌 killall Command | [The `killall` Command](#-the-killall-command) |
+| 115 | 🔹 killall Syntax | [Syntax](#-syntax-4) |
+| 116 | 🔹 Kill by Name | [Example: Killing Processes by Name](#-example-killing-processes-by-name) |
+| 117 | 📊 kill vs killall | [Comparison: `kill` vs `killall`](#-comparison-kill-vs-killall) |
+| 118 | 📌 After Killing | [After Killing a Process](#-after-killing-a-process) |
+| 119 | 🔎 Pattern-Based Management | [**Searching & Terminating Processes with `pgrep` and `pkill`**](#-searching--terminating-processes-with-pgrep-and-pkill) |
+| 120 | 📌 pgrep/pkill Syntax | [Syntax](#-syntax-5) |
+| 121 | 🌀 Find by Name | [Example 1: Finding a Process by Name](#-example-1-finding-a-process-by-name) |
+| 122 | 🌀 Detailed Info with ps | [Example 2: Getting Detailed Info with `ps`](#-example-2-getting-detailed-info-with-ps) |
+| 123 | 🌀 Kill with pkill | [Example 3: Killing a Process with `pkill`](#-example-3-killing-a-process-with-pkill) |
+| 124 | 🌀 Kill with Feedback | [Example 4: Killing with Feedback](#-example-4-killing-with-feedback) |
+| 125 | 📊 pgrep vs pkill | [Comparison: `pgrep` vs `pkill`](#-comparison-pgrep-vs-pkill) |
+
+</details>
+
+---
+
 A **process** represents a **running instance of a program**.
 
 🔍 **Definition:**
