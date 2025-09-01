@@ -410,3 +410,135 @@ Linux uses a **special abstraction layer** called the **Virtual File System (VFS
 
 ---
 
+# 💽 **Understanding Disks and Partitions** in Linux
+
+Understanding **disks and partitions** is a key skill for every **system administrator**. Formatting and partitioning are critical from the very beginning (system installation) and remain essential for storage management.
+
+---
+
+## 📀 Common Disk Types
+
+A **disk** is a hardware component that stores data. It comes in different types and uses different interfaces:
+
+* **HDD (Hard Disk Drive)** → Traditional spinning disks.
+* **SSD (Solid-State Drive)** → Faster, uses flash memory.
+* **NVMe (Non-Volatile Memory Express)** → Extremely fast, RAM-like storage with low latency.
+
+### 🔌 Interfaces
+
+* **IDE (Integrated Drive Electronics)** → Old, low transfer rate, now deprecated.
+* **SATA (Serial ATA)** → Replaced IDE, supports up to **16 GB/s transfer rate**.
+* **SCSI (Small Computer Systems Interface)** → Used in enterprise servers, often with RAID.
+* **SAS (Serial Attached SCSI)** → High-reliability enterprise interface, similar speed to SATA.
+* **USB (Universal Serial Bus)** → Used for external drives & flash drives.
+
+---
+
+## 📏 Disk Geometry
+
+Each disk has:
+
+* **Heads**
+* **Cylinders**
+* **Tracks**
+* **Sectors**
+
+In Linux, you can view this geometry using:
+
+```bash
+sudo fdisk -l
+```
+
+---
+
+## 🔎 Command Example
+
+We ran `fdisk -l` on a Debian 12 system with a **50 GB SSD** and a **USB device** inserted.
+
+### 📜 Command Used
+
+```bash
+sudo fdisk -l
+```
+
+* `sudo` → Run with root privileges.
+* `fdisk` → Tool to manage disk partitions.
+* `-l` → List all disks and partitions.
+
+---
+
+## 📊 Output Explained
+
+Here’s the actual output (abridged):
+
+```text
+Disk /dev/loop0: 4 KiB, 4096 bytes, 8 sectors
+...
+Disk /dev/sda: 50 GiB, 53687091200 bytes, 104857600 sectors
+Disk model: VBOX HARDDISK
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
+
+Device     Start       End   Sectors Size Type
+/dev/sda1   2048      4095      2048   1M BIOS boot
+/dev/sda2   4096 104855551 104851456  50G Linux filesystem
+```
+
+---
+
+### 🔹 Loop Devices (`/dev/loopX`)
+
+Example:
+
+```text
+Disk /dev/loop0: 4 KiB, 4096 bytes, 8 sectors
+```
+
+* **Loop devices** are virtual devices.
+* They are **files mounted as block devices**.
+* Commonly used by **snap packages**, squashfs images, or mounting ISO files.
+* Each `/dev/loopX` is a separate virtual device.
+
+---
+
+### 🔹 Main Disk (`/dev/sda`)
+
+```text
+Disk /dev/sda: 50 GiB, 53687091200 bytes, 104857600 sectors
+Disk model: VBOX HARDDISK
+Disklabel type: gpt
+Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
+```
+
+* **Device name:** `/dev/sda` → first detected hard drive.
+* **Size:** 50 GiB (VirtualBox hard disk).
+* **Sectors:** 512 bytes each.
+* **Partition Table (Disklabel type):** GPT (GUID Partition Table).
+* **Disk Identifier:** Unique UUID for this disk.
+
+---
+
+### 🔹 Partitions on `/dev/sda`
+
+| Device      | Start | End       | Sectors   | Size | Type             |
+| ----------- | ----- | --------- | --------- | ---- | ---------------- |
+| `/dev/sda1` | 2048  | 4095      | 2048      | 1M   | BIOS boot        |
+| `/dev/sda2` | 4096  | 104855551 | 104851456 | 50G  | Linux filesystem |
+
+* **`/dev/sda1` (1 MB)** → BIOS boot partition (used when booting in legacy BIOS mode with GPT).
+* **`/dev/sda2` (50 GB)** → Main Linux filesystem partition.
+
+---
+
+### 🔹 Example of Loop Devices Sizes
+
+* `/dev/loop1` → 73.91 MiB
+* `/dev/loop3` → 245.13 MiB
+* `/dev/loop5` → 516.01 MiB
+* `/dev/loop11` → 246.43 MiB
+
+👉 These correspond to **mounted squashfs images** (commonly from Snap packages in Ubuntu/Debian).
+
+---
