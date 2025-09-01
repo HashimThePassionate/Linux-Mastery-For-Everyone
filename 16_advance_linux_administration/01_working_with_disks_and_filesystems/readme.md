@@ -196,3 +196,79 @@ These names can vary depending on whether you’re on:
 
 ---
 
+# 📘 **Understanding Device Naming Conventions** in Linux
+
+On a **Debian-based system**, the naming convention is designed for **predictability**. It is based on **hardware buses’ names**, which is similar across most modern Linux-based operating systems.
+
+---
+
+## 🔍 Checking Active `udev` Rules
+
+You can check which **udev rules** are active on your system.
+
+* On **Debian-based** and **Red Hat-based** distributions, the rules are stored in:
+
+```
+/lib/udev/rules.d/
+```
+
+These rules help the system **identify devices consistently** each time they are connected.
+
+---
+
+## 💽 Hard Drives and External Drives
+
+Linux streamlines naming conventions for different types of drives. Below are the most common cases:
+
+### 1️⃣ Classic **IDE Drivers** (used for ATA drives)
+
+* `hda` → Master device on the first channel
+* `hdb` → Slave device on the first channel
+* `hdc` → Master device on the second channel
+* `hdd` → Slave device on the second channel
+
+---
+
+### 2️⃣ **NVMe Drivers** (used for modern SSDs)
+
+* `nvme0` → First device controller (**character device**)
+* `nvme0n1` → First namespace (**block device**)
+* `nvme0n1p1` → First namespace, first partition (**block device**)
+
+💡 **Tip:** NVMe device names look longer, but the structure makes it easy to distinguish between controllers, namespaces, and partitions.
+
+---
+
+### 3️⃣ **MMC Drivers** (used for SD cards & eMMC chips)
+
+* `mmcblk` → General identifier for SD/eMMC storage
+* `mmcblk0` → First MMC device
+* `mmcblk0p1` → First MMC device, first partition
+
+---
+
+### 4️⃣ **SCSI Drivers** (used for SATA & USB drives)
+
+* `sd` → General identifier for mass storage devices
+* `sda` → First registered SCSI/SATA/USB device
+* `sdb` → Second device
+* `sdc` → Third device
+* `sg` → Refers to generic SCSI layers (**character device**)
+
+💡 Today, most **SATA** and **USB** storage devices fall under this **SCSI-like naming scheme**.
+
+---
+
+## 📂 Why Device Naming Matters?
+
+The devices we are most interested in are **mass storage devices**:
+
+* **HDDs (Hard Disk Drives)**
+* **SSDs (Solid-State Drives)**
+
+These drives usually contain **partitions** with specific **filesystem structures**.
+
+👉 Earlier (in **section 2: The Linux Shell and Filesystem**), we introduced the Linux directory structure.
+👉 Now, it’s time to dive deeper into **filesystem types in Linux** to understand how data is organized inside these partitions.
+
+---
