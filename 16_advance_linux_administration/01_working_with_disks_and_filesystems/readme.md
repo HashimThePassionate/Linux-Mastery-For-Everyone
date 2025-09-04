@@ -1135,6 +1135,13 @@ Hello from my new partition!
 
 ---
 
+## 🔁 Check Mounting
+
+```bash
+hashim@hashim-VirtualBox:~$ mount | grep /dev/sdb
+/dev/sdb1 on /mnt/mydata type ext4 (rw,relatime)
+```
+
 ## 7️⃣ Unmount When Done (Optional)
 
 If you’re finished and want to safely detach the partition:
@@ -1142,36 +1149,6 @@ If you’re finished and want to safely detach the partition:
 ```bash
 sudo umount /mnt/mydata
 ```
-
----
-
-## 🔁 Bonus: Make It Auto-Mount at Boot
-
-1. Find UUID:
-
-   ```bash
-   blkid /dev/sdb1
-   ```
-
-   Example output:
-
-   ```
-   /dev/sdb1: UUID="92c99acd-3855-45c7-827d-855d8a1b99dc" TYPE="ext4"
-   ```
-
-2. Edit `/etc/fstab`:
-
-   ```bash
-   sudo nano /etc/fstab
-   ```
-
-3. Add this line at the bottom:
-
-   ```
-   UUID=92c99acd-3855-45c7-827d-855d8a1b99dc   /mnt/mydata   ext4   defaults   0   2
-   ```
-
-Now `/dev/sdb1` will auto-mount to `/mnt/mydata` every time you boot.
 
 ---
 
