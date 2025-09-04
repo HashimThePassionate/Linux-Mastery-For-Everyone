@@ -717,13 +717,236 @@ sr0     11:0    1  50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
 
 ---
 
-## 🚀 Summary
+# 🧰 **Partition Table Editors in Linux**
 
-* Disks are divided into **partitions** for organization.
-* **MBR** (old) vs **GPT** (modern) define how partitions are stored.
-* Linux names disks like `/dev/sda`, `/dev/sdb`, etc.
-* `lsblk` helps visualize partitions and mount points.
-* Bootloader (**GRUB**) uses the partition table to find the active partition and boot the OS.
+## 🗂️ What Are Partition Table Editors?
+
+Linux provides multiple tools to **view, create, edit, and script** partition layouts:
+
+* **`fdisk`** — Classic **interactive** CLI editor (widely used; great for MBR and basic GPT tasks).
+* **`sfdisk`** — **Non-interactive**/script-friendly editor; perfect for **dumping and restoring** layouts.
+* **`parted`** — GNU partition manipulator; good for larger disks and GPT; **CLI**.
+* **`gparted`** — Graphical front-end to `parted` (GUI).
+
+> In this guide we’ll **focus on `fdisk`** because it’s the most common CLI editor across Ubuntu/Debian, RHEL/Fedora, openSUSE, etc.
 
 ---
 
+## 👀 First, See What Linux Already Knows: `/proc/partitions`
+
+If you’re unsure what your last steps did, quickly **visualize kernel-known partitions**:
+
+### 🔧 Command
+
+```bash
+cat /proc/partitions
+```
+
+### 🧠 What it shows
+
+* A kernel view of block devices and partitions.
+* Columns:
+
+  * **major** / **minor**: Kernel device numbers.
+  * **#blocks**: Size in **1 KiB blocks** (multiply by 1024 to get bytes).
+  * **name**: Device node name (e.g., `sda`, `sda1`, `sdb`, `loop0`).
+
+### 📄 Your sample output (explained)
+
+```
+major minor  #blocks  name
+
+   7        0          4 loop0
+   7        1      75688 loop1
+   7        2      75692 loop2
+   7        3     251012 loop3
+   7        4     252340 loop4
+   7        5      11400 loop5
+   7        6     528392 loop6
+   7        7      93888 loop7
+   8        0   52428800 sda
+   8        1       1024 sda1
+   8        2   52425728 sda2
+  11        0      51898 sr0
+   8       16   10563424 sdb
+   7        8      11088 loop8
+   7        9      50476 loop9
+   7       10        576 loop10
+   7       11      51988 loop11
+```
+
+* `loop*`: Read-only **loop devices** (often created by **Snap** packages).
+* `sda` (≈ 50 GiB): Your main disk; `sda1` (1 MiB) and `sda2` (\~50 GiB).
+* `sr0`: Optical (CD-ROM) device (VirtualBox Guest Additions ISO mounted).
+* `sdb` (\~10.1 GiB): Another disk (in your case, a **VBOX HARDDISK**). We’ll edit this with `fdisk`.
+
+---
+
+## 🧨 Safety First with `fdisk`
+
+> **Root required**: `sudo` is necessary.
+> **Changes are NOT written** until you type **`w`** (write).
+> You can **quit safely** with **`q`** at any time (no changes written).
+
+### Start `fdisk` on a disk
+
+```bash
+sudo fdisk /dev/sdb
+```
+
+* Replace `/dev/sdb` with your target disk (⚠️ double-check with `lsblk` to avoid data loss).
+
+### What you saw (and what it means)
+
+```
+Welcome to fdisk (util-linux 2.39.3).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+Device does not contain a recognized partition table.
+Created a new DOS (MBR) disklabel with disk identifier 0x26eeecf9.
+```
+
+* `fdisk` warns that **nothing is saved** until `w`.
+* It detected no valid table and created an **MBR (DOS) disklabel** in memory.
+
+### Getting help inside `fdisk`
+
+* Type **`m`** to show **all commands**.
+* Useful ones:
+
+  * `p` — print partition table
+  * `n` — new partition
+  * `d` — delete partition
+  * `t` — change partition type
+  * `a` — toggle bootable flag (MBR)
+  * `o` — create new **empty MBR** table
+  * `g` — create new **empty GPT** table
+  * `i` — info about a partition (in modern `fdisk`, it’s **lowercase `i`**)
+  * `v` — verify the partition table
+  * `w` — **write** changes
+  * `q` — **quit** (discard)
+
+> 📝 Your text mentions **`I`** (capital i) for info; in current util-linux `fdisk`, the correct key is **lowercase `i`**.
+
+---
+
+## 🧱 Create a New **MBR** Partition Table (on a USB or Test Disk)
+
+> In your narrative you use `sudo fdisk /dev/sda` for the “MBR creation” example; in the later session you worked on `/dev/sdb`. The steps are identical—just make sure you target the **correct disk**.
+
+### Steps inside `fdisk`
+
+```text
+Command (m for help): o       ← create empty MBR (DOS) disklabel
+Created a new DOS (MBR) disklabel with disk identifier 0x128d4ca3.
+
+Command (m for help): w       ← write table to disk
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+```
+
+* `o` wipes the in-memory layout and prepares a fresh **MBR** table.
+* `w` persists it to disk and asks the kernel to re-read the table.
+
+> 💡 After creating a fresh table you can use:
+>
+> * `v` (verify) — should report no partitions yet.
+> * `p` (print) — shows the empty table.
+
+---
+
+## ➕ Create a New Partition (Step-by-Step)
+
+Your session on `/dev/sdb`:
+
+```text
+Command (m for help): n
+Partition type
+   p   primary (0 primary, 0 extended, 4 free)
+   e   extended (container for logical partitions)
+Select (default p): p
+Partition number (1-4, default 1): 1
+First sector (2048-21126847, default 2048): 2048
+Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-21126847, default 21126847): +1G
+
+Created a new partition 1 of type 'Linux' and of size 1 GiB.
+
+Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Syncing disks.
+```
+
+### What each prompt means
+
+* **`n`**: Start new partition creation.
+* **`p`**: Choose **primary** (MBR supports up to 4 primary; or 3 primary + 1 extended).
+* **Partition number**: `1` (first partition).
+* **First sector**: `2048` is a good default (1 MiB alignment).
+* **Last sector**: You used **`+1G`** to size the partition to **1 GiB**.
+* **Signature removal**: If prompted, typing **`Y`** clears old filesystem signatures (safer).
+
+> ✅ Result: **`/dev/sdb1`** created as a **1 GiB** primary partition (type **0x83 “Linux”** in MBR terms).
+
+---
+
+## 🔍 Verify with `fdisk -l` and `parted print`
+
+### `fdisk -l /dev/sdb`
+
+```bash
+sudo fdisk -l /dev/sdb
+```
+
+```
+Disk /dev/sdb: 10.07 GiB, 10816946176 bytes, 21126848 sectors
+Disk model: VBOX HARDDISK
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x128d4ca3
+
+Device     Boot Start     End Sectors Size Id Type
+/dev/sdb1        2048 2099199 2097152   1G 83 Linux
+```
+
+* **Disk /dev/sdb**: Size in **GiB** + exact bytes + total sector count.
+* **Units**: Sector size is 512 bytes.
+* **Disklabel type**: `dos` = **MBR**.
+* **Partition row**:
+
+  * **Start/End**: Sector range.
+  * **Sectors**: Count (here 2,097,152 sectors × 512 B = 1,073,741,824 B ≈ **1 GiB**).
+  * **Id**: `83` = Linux (MBR type code).
+  * **Type**: Human-friendly name.
+
+### `parted /dev/sdb print`
+
+```bash
+sudo parted /dev/sdb print
+```
+
+```
+Model: ATA VBOX HARDDISK (scsi)
+Disk /dev/sdb: 10.8GB
+Sector size (logical/physical): 512B/512B
+Partition Table: msdos
+Disk Flags:
+
+Number  Start   End     Size    Type     File system  Flags
+ 1      1049kB  1075MB  1074MB  primary
+```
+
+* **Partition Table: msdos** = **MBR**.
+* Column meanings:
+
+  * **Number** — partition index (`1`).
+  * **Start/End** — human-readable offsets.
+  * **Size** — \~1.074 GB (decimal GB vs binary GiB explains small differences).
+  * **Type** — `primary`.
+  * **File system** — empty because it’s **not formatted yet** (that’s expected).
+
+---
