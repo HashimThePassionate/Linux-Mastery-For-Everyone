@@ -185,7 +185,7 @@ crw-r--r--  1 root root      1,  11 Aug 29 03:47 kmsg
 Disk devices also appear under `/dev` with specific names.
 For example:
 
-* `/dev/sda` → First SCSI/SATA disk
+* `/dev/sdb` → First SCSI/SATA disk
 * `/dev/sdb` → Second disk, and so on
 * `/dev/loop0`, `/dev/loop1` → Loop devices
 
@@ -250,7 +250,7 @@ Linux streamlines naming conventions for different types of drives. Below are th
 ### 4️⃣ **SCSI Drivers** (used for SATA & USB drives)
 
 * `sd` → General identifier for mass storage devices
-* `sda` → First registered SCSI/SATA/USB device
+* `sdb` → First registered SCSI/SATA/USB device
 * `sdb` → Second device
 * `sdc` → Third device
 * `sg` → Refers to generic SCSI layers (**character device**)
@@ -474,7 +474,7 @@ Here’s the actual output (abridged):
 ```text
 Disk /dev/loop0: 4 KiB, 4096 bytes, 8 sectors
 ...
-Disk /dev/sda: 50 GiB, 53687091200 bytes, 104857600 sectors
+Disk /dev/sdb: 50 GiB, 53687091200 bytes, 104857600 sectors
 Disk model: VBOX HARDDISK
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -482,8 +482,8 @@ Disklabel type: gpt
 Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 
 Device     Start       End   Sectors Size Type
-/dev/sda1   2048      4095      2048   1M BIOS boot
-/dev/sda2   4096 104855551 104851456  50G Linux filesystem
+/dev/sdb1   2048      4095      2048   1M BIOS boot
+/dev/sdb2   4096 104855551 104851456  50G Linux filesystem
 ```
 
 ---
@@ -503,16 +503,16 @@ Disk /dev/loop0: 4 KiB, 4096 bytes, 8 sectors
 
 ---
 
-### 🔹 Main Disk (`/dev/sda`)
+### 🔹 Main Disk (`/dev/sdb`)
 
 ```text
-Disk /dev/sda: 50 GiB, 53687091200 bytes, 104857600 sectors
+Disk /dev/sdb: 50 GiB, 53687091200 bytes, 104857600 sectors
 Disk model: VBOX HARDDISK
 Disklabel type: gpt
 Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 ```
 
-* **Device name:** `/dev/sda` → first detected hard drive.
+* **Device name:** `/dev/sdb` → first detected hard drive.
 * **Size:** 50 GiB (VirtualBox hard disk).
 * **Sectors:** 512 bytes each.
 * **Partition Table (Disklabel type):** GPT (GUID Partition Table).
@@ -520,15 +520,15 @@ Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 
 ---
 
-### 🔹 Partitions on `/dev/sda`
+### 🔹 Partitions on `/dev/sdb`
 
 | Device      | Start | End       | Sectors   | Size | Type             |
 | ----------- | ----- | --------- | --------- | ---- | ---------------- |
-| `/dev/sda1` | 2048  | 4095      | 2048      | 1M   | BIOS boot        |
-| `/dev/sda2` | 4096  | 104855551 | 104851456 | 50G  | Linux filesystem |
+| `/dev/sdb1` | 2048  | 4095      | 2048      | 1M   | BIOS boot        |
+| `/dev/sdb2` | 4096  | 104855551 | 104851456 | 50G  | Linux filesystem |
 
-* **`/dev/sda1` (1 MB)** → BIOS boot partition (used when booting in legacy BIOS mode with GPT).
-* **`/dev/sda2` (50 GB)** → Main Linux filesystem partition.
+* **`/dev/sdb1` (1 MB)** → BIOS boot partition (used when booting in legacy BIOS mode with GPT).
+* **`/dev/sdb2` (50 GB)** → Main Linux filesystem partition.
 
 ---
 
@@ -629,24 +629,24 @@ Linux uses **device nodes** in `/dev` to represent disks and partitions.
 
 ### Convention:
 
-* First hard drive → `/dev/sda`
+* First hard drive → `/dev/sdb`
 * Second hard drive → `/dev/sdb`
 * Third hard drive → `/dev/sdc`, and so on.
 * Partitions are numbered:
 
-  * First partition on first disk → `/dev/sda1`
-  * Second partition on first disk → `/dev/sda2`
+  * First partition on first disk → `/dev/sdb1`
+  * Second partition on first disk → `/dev/sdb2`
   * First partition on second disk → `/dev/sdb1`
 
 ```bash
-Disk: /dev/sda (500GB)
- ├── /dev/sda1  → Linux OS (Primary)
- ├── /dev/sda2  → Windows OS (Primary)
- ├── /dev/sda3  → Data Storage (Primary)
- ├── /dev/sda4  → Extended Partition
-        ├── /dev/sda5 → Movies (Logical)
-        ├── /dev/sda6 → Backup (Logical)
-        └── /dev/sda7 → Extra Files (Logical)
+Disk: /dev/sdb (500GB)
+ ├── /dev/sdb1  → Linux OS (Primary)
+ ├── /dev/sdb2  → Windows OS (Primary)
+ ├── /dev/sdb3  → Data Storage (Primary)
+ ├── /dev/sdb4  → Extended Partition
+        ├── /dev/sdb5 → Movies (Logical)
+        ├── /dev/sdb6 → Backup (Logical)
+        └── /dev/sdb7 → Extra Files (Logical)
 ```
 
 👉 Note: This applies to **SCSI and SATA devices**. Letters (`a`, `b`, `c`) are assigned based on device **ID**, not physical order.
@@ -668,7 +668,7 @@ lsblk
 * `lsblk` → Lists information about all block devices (disks, partitions, loop devices, etc.).
 * Columns:
 
-  * **NAME** → Device name (`sda`, `sda1`, etc.).
+  * **NAME** → Device name (`sdb`, `sdb1`, etc.).
   * **MAJ\:MIN** → Major and minor device numbers (kernel identifiers).
   * **RM** → Removable device? (`1` for removable, `0` for fixed).
   * **SIZE** → Size of the disk or partition.
@@ -695,9 +695,9 @@ loop8    7:8    0  10.8M  1 loop /snap/snap-store/1270
 loop9    7:9    0  49.3M  1 loop /snap/snapd/24792
 loop10   7:10   0  50.8M  1 loop /snap/snapd/25202
 loop11   7:11   0   576K  1 loop /snap/snapd-desktop-integration/315
-sda      8:0    0    50G  0 disk 
-├─sda1   8:1    0     1M  0 part 
-└─sda2   8:2    0    50G  0 part /
+sdb      8:0    0    50G  0 disk 
+├─sdb1   8:1    0     1M  0 part 
+└─sdb2   8:2    0    50G  0 part /
 sr0     11:0    1  50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
 ```
 
@@ -706,11 +706,11 @@ sr0     11:0    1  50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
 * **loop devices (`loop0` → `loop11`)**:
   Virtual devices created by the **snap package system** (read-only).
 
-* **sda (50G, disk)**:
+* **sdb (50G, disk)**:
   Main virtual hard disk of the system.
 
-  * **sda1 (1M)**: Tiny partition, often used for boot/grub or alignment.
-  * **sda2 (50G, mounted at `/`)**: Root filesystem (Linux OS).
+  * **sdb1 (1M)**: Tiny partition, often used for boot/grub or alignment.
+  * **sdb2 (50G, mounted at `/`)**: Root filesystem (Linux OS).
 
 * **sr0 (ROM, 50.7M)**:
   Represents the **virtual CD-ROM drive**, currently mounted at `/media/hashim/VBox_GAs_7.2.0`.
@@ -749,7 +749,7 @@ cat /proc/partitions
 
   * **major** / **minor**: Kernel device numbers.
   * **#blocks**: Size in **1 KiB blocks** (multiply by 1024 to get bytes).
-  * **name**: Device node name (e.g., `sda`, `sda1`, `sdb`, `loop0`).
+  * **name**: Device node name (e.g., `sdb`, `sdb1`, `sdb`, `loop0`).
 
 ### 📄 Your sample output (explained)
 
@@ -764,9 +764,9 @@ major minor  #blocks  name
    7        5      11400 loop5
    7        6     528392 loop6
    7        7      93888 loop7
-   8        0   52428800 sda
-   8        1       1024 sda1
-   8        2   52425728 sda2
+   8        0   52428800 sdb
+   8        1       1024 sdb1
+   8        2   52425728 sdb2
   11        0      51898 sr0
    8       16   10563424 sdb
    7        8      11088 loop8
@@ -776,7 +776,7 @@ major minor  #blocks  name
 ```
 
 * `loop*`: Read-only **loop devices** (often created by **Snap** packages).
-* `sda` (≈ 50 GiB): Your main disk; `sda1` (1 MiB) and `sda2` (\~50 GiB).
+* `sdb` (≈ 50 GiB): Your main disk; `sdb1` (1 MiB) and `sdb2` (\~50 GiB).
 * `sr0`: Optical (CD-ROM) device (VirtualBox Guest Additions ISO mounted).
 * `sdb` (\~10.1 GiB): Another disk (in your case, a **VBOX HARDDISK**). We’ll edit this with `fdisk`.
 
@@ -1138,7 +1138,7 @@ Hello from my new partition!
 ## 🔁 Check Mounting
 
 ```bash
-hashim@hashim-VirtualBox:~$ mount | grep /dev/sdb
+mount | grep /dev/sdb
 /dev/sdb1 on /mnt/mydata type ext4 (rw,relatime)
 ```
 
@@ -1152,3 +1152,184 @@ sudo umount /mnt/mydata
 
 ---
 
+## 📌 **Mounting Persistence**
+
+By default, mounting is **temporary**—it only lasts until the system is **shut down or rebooted**.
+To make a mount **persistent**, you need to configure the `/etc/fstab` file.
+
+---
+
+## 📝 Editing `/etc/fstab`
+
+Open the file in a text editor:
+
+```bash
+sudo nano /etc/fstab
+```
+
+Add a new line like this:
+
+```bash
+/dev/sdb  /mnt/sdb  ext4  defaults  0  0
+```
+
+---
+
+## 📊 Structure of `/etc/fstab`
+
+The file has **six columns**, each with a specific meaning:
+
+1. **Device name** → e.g., `/dev/sdb` or a UUID.
+2. **Mount point** → The directory where the filesystem will be mounted (e.g., `/mnt/sdb`).
+3. **Filesystem type** → e.g., `ext4`, `xfs`, `ntfs`.
+4. **Options** → Mount options, multiple options separated by commas (e.g., `defaults`, `ro`, `rw`).
+5. **Backup operation** →
+
+   * `0` → No backup
+   * `1` → Backup enabled using `dump` utility
+6. **Filesystem check order (fsck)** →
+
+   * `0` → No check
+   * `1` → Check root filesystem first
+   * `2` → Check other partitions after root
+
+---
+
+## 💡 Key Notes
+
+* Editing `/etc/fstab` makes mounting **permanent**, surviving **shutdowns and reboots**.
+* Usually, `/etc/fstab` contains entries only for **internal hard drives**.
+* **External drives** (USB, HDDs, etc.) are often mounted automatically under `/media` using the kernel’s **HAL (Hardware Abstraction Layer)**.
+
+---
+
+## ⚡ Example Workflow
+
+1. Identify processes preventing unmount:
+
+   ```bash
+   sudo lsof | grep /dev/sdb
+   ```
+2. Kill blocking processes if necessary.
+3. Add the partition to `/etc/fstab` for persistence:
+
+   ```bash
+   /dev/sdb  /mnt/sdb  ext4  defaults  0  0
+   ```
+4. Mount all filesystems defined in `/etc/fstab`:
+
+   ```bash
+   sudo mount -a
+   ```
+
+# 🖥️ **Example: Permanent Mounting of `/dev/sdb1`**
+
+Suppose you have a partition `/dev/sdb1` and you want it to be **always mounted at boot** under `/mnt/data`.
+
+---
+
+## 1️⃣ Create a Mount Point
+
+```bash
+sudo mkdir -p /mnt/data
+```
+
+📖 **Explanation**
+
+* `mkdir -p` → Creates the directory `/mnt/data`.
+* If the directory already exists, `-p` prevents errors.
+* This will be the folder where `/dev/sdb1`’s contents appear.
+
+---
+
+## 2️⃣ Test Manual Mount
+
+```bash
+sudo mount /dev/sdb1 /mnt/data
+```
+
+📖 **Explanation**
+
+* `mount` → Mounts the filesystem.
+* `/dev/sdb1` → The device/partition you want to mount.
+* `/mnt/data` → Target mount directory.
+
+👉 At this point, the partition is mounted, but only **temporarily** (will disappear after reboot).
+
+---
+
+## 3️⃣ Get UUID of Partition (Recommended)
+
+Instead of using `/dev/sdb1` (which may change across reboots), use the **UUID**.
+
+```bash
+sudo blkid -s UUID -o value /dev/sdb
+```
+
+Example output:
+
+```
+cc87e91a-f460-4768-a0a9-fb295fb0a942
+```
+
+Copy the `UUID` value.
+
+---
+
+## 4️⃣ Edit `/etc/fstab`
+
+Open the file:
+
+```bash
+sudo nano /etc/fstab
+```
+
+Add this line at the end (replace UUID with your actual one):
+
+```fstab
+UUID=cc87e91a-f460-4768-a0a9-fb295fb0a942  /mnt/data   ext4   defaults   0   2
+```
+
+📖 **Column Meaning**
+
+1. **UUID=…** → Unique ID of the partition
+2. **/mnt/data** → Mount point
+3. **ext4** → Filesystem type
+4. **defaults** → Standard mount options
+5. **0** → No backup with `dump`
+6. **2** → Run `fsck` after root check (use `1` only for `/`)
+
+---
+
+## 5️⃣ Apply the Changes
+
+```bash
+sudo mount -a
+```
+
+📖 **Explanation**
+
+* Reads `/etc/fstab` and mounts all listed filesystems.
+* If there’s an error in `/etc/fstab`, this command will complain (good for testing before reboot).
+
+---
+
+## 6️⃣ Verify Mount
+
+```bash
+df -h | grep /mnt/data
+```
+
+Expected output (example):
+
+```
+/dev/sdb1       100G   20G   80G   20%   /mnt/data
+```
+
+---
+
+✅ Now, `/dev/sdb1` will **auto-mount** at `/mnt/data` every time you boot your system.
+
+---
+
+⚡ Question: Do you want me to also show you an **example with multiple partitions** in `/etc/fstab` (like `/home`, `/data`, `/backup`), so you can see a real-world setup?
