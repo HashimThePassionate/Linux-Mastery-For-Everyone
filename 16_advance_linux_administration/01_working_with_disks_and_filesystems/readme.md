@@ -833,7 +833,7 @@ Created a new DOS (MBR) disklabel with disk identifier 0x26eeecf9.
 
 ## 🧱 Create a New **MBR** Partition Table (on a USB or Test Disk)
 
-> In your narrative you use `sudo fdisk /dev/sda` for the “MBR creation” example; in the later session you worked on `/dev/sdb`. The steps are identical—just make sure you target the **correct disk**.
+> Creating new  partition `sudo fdisk /dev/sdb` 
 
 ### Steps inside `fdisk`
 
@@ -1051,3 +1051,127 @@ sudo dd if=mbr-backup-sdb of=/dev/sdb bs=512 count=1
 * Always **double-check the target disk (`/dev/sdX`)** before running `dd`.
 
 ---
+
+# 📂 **Mounting newly created partition in Linux**
+
+---
+
+## 1️⃣ Format the Partition
+
+Since it’s brand new, first format it with **Ext4**:
+
+```bash
+sudo mkfs.ext4 /dev/sdb1
+```
+
+👉 This writes a filesystem so Linux can store files inside.
+
+---
+
+## 2️⃣ Create a Mount Point (Folder)
+
+Choose a directory where you want this partition accessible.
+Example: `/mnt/mydata`
+
+```bash
+sudo mkdir /mnt/mydata
+```
+
+👉 This will be the “link” between your filesystem and the partition.
+
+---
+
+## 3️⃣ Mount the Partition
+
+Now mount `/dev/sdb1` to that folder:
+
+```bash
+sudo mount /dev/sdb1 /mnt/mydata
+```
+
+👉 Now anything you save inside `/mnt/mydata` will be written to the partition itself.
+
+---
+
+## 4️⃣ Create a Folder Inside the Partition
+
+For example, create a folder `project` inside it:
+
+```bash
+sudo mkdir /mnt/mydata/project
+```
+
+---
+
+## 5️⃣ Create a Text File Inside That Folder
+
+Let’s make a text file named `hello.txt`:
+
+```bash
+echo "Hello from my new partition!" | sudo tee /mnt/mydata/project/hello.txt
+```
+
+Or open it with `nano`:
+
+```bash
+sudo nano /mnt/mydata/project/hello.txt
+```
+
+👉 Now your file is stored **inside the new partition**.
+
+---
+
+## 6️⃣ Verify the File
+
+```bash
+cat /mnt/mydata/project/hello.txt
+```
+
+Expected output:
+
+```
+Hello from my new partition!
+```
+
+---
+
+## 7️⃣ Unmount When Done (Optional)
+
+If you’re finished and want to safely detach the partition:
+
+```bash
+sudo umount /mnt/mydata
+```
+
+---
+
+## 🔁 Bonus: Make It Auto-Mount at Boot
+
+1. Find UUID:
+
+   ```bash
+   blkid /dev/sdb1
+   ```
+
+   Example output:
+
+   ```
+   /dev/sdb1: UUID="92c99acd-3855-45c7-827d-855d8a1b99dc" TYPE="ext4"
+   ```
+
+2. Edit `/etc/fstab`:
+
+   ```bash
+   sudo nano /etc/fstab
+   ```
+
+3. Add this line at the bottom:
+
+   ```
+   UUID=92c99acd-3855-45c7-827d-855d8a1b99dc   /mnt/mydata   ext4   defaults   0   2
+   ```
+
+Now `/dev/sdb1` will auto-mount to `/mnt/mydata` every time you boot.
+
+---
+
