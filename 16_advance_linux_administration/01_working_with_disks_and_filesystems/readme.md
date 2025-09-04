@@ -185,7 +185,7 @@ crw-r--r--  1 root root      1,  11 Aug 29 03:47 kmsg
 Disk devices also appear under `/dev` with specific names.
 For example:
 
-* `/dev/sdb` → First SCSI/SATA disk
+* `/dev/sdb ` → First SCSI/SATA disk
 * `/dev/sdb` → Second disk, and so on
 * `/dev/loop0`, `/dev/loop1` → Loop devices
 
@@ -250,7 +250,7 @@ Linux streamlines naming conventions for different types of drives. Below are th
 ### 4️⃣ **SCSI Drivers** (used for SATA & USB drives)
 
 * `sd` → General identifier for mass storage devices
-* `sdb` → First registered SCSI/SATA/USB device
+* `sdb ` → First registered SCSI/SATA/USB device
 * `sdb` → Second device
 * `sdc` → Third device
 * `sg` → Refers to generic SCSI layers (**character device**)
@@ -474,7 +474,7 @@ Here’s the actual output (abridged):
 ```text
 Disk /dev/loop0: 4 KiB, 4096 bytes, 8 sectors
 ...
-Disk /dev/sdb: 50 GiB, 53687091200 bytes, 104857600 sectors
+Disk /dev/sdb : 50 GiB, 53687091200 bytes, 104857600 sectors
 Disk model: VBOX HARDDISK
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -482,8 +482,8 @@ Disklabel type: gpt
 Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 
 Device     Start       End   Sectors Size Type
-/dev/sdb1   2048      4095      2048   1M BIOS boot
-/dev/sdb2   4096 104855551 104851456  50G Linux filesystem
+/dev/sdb 1   2048      4095      2048   1M BIOS boot
+/dev/sdb 2   4096 104855551 104851456  50G Linux filesystem
 ```
 
 ---
@@ -503,16 +503,16 @@ Disk /dev/loop0: 4 KiB, 4096 bytes, 8 sectors
 
 ---
 
-### 🔹 Main Disk (`/dev/sdb`)
+### 🔹 Main Disk (`/dev/sdb `)
 
 ```text
-Disk /dev/sdb: 50 GiB, 53687091200 bytes, 104857600 sectors
+Disk /dev/sdb : 50 GiB, 53687091200 bytes, 104857600 sectors
 Disk model: VBOX HARDDISK
 Disklabel type: gpt
 Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 ```
 
-* **Device name:** `/dev/sdb` → first detected hard drive.
+* **Device name:** `/dev/sdb ` → first detected hard drive.
 * **Size:** 50 GiB (VirtualBox hard disk).
 * **Sectors:** 512 bytes each.
 * **Partition Table (Disklabel type):** GPT (GUID Partition Table).
@@ -520,15 +520,15 @@ Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 
 ---
 
-### 🔹 Partitions on `/dev/sdb`
+### 🔹 Partitions on `/dev/sdb `
 
 | Device      | Start | End       | Sectors   | Size | Type             |
 | ----------- | ----- | --------- | --------- | ---- | ---------------- |
-| `/dev/sdb1` | 2048  | 4095      | 2048      | 1M   | BIOS boot        |
-| `/dev/sdb2` | 4096  | 104855551 | 104851456 | 50G  | Linux filesystem |
+| `/dev/sdb 1` | 2048  | 4095      | 2048      | 1M   | BIOS boot        |
+| `/dev/sdb 2` | 4096  | 104855551 | 104851456 | 50G  | Linux filesystem |
 
-* **`/dev/sdb1` (1 MB)** → BIOS boot partition (used when booting in legacy BIOS mode with GPT).
-* **`/dev/sdb2` (50 GB)** → Main Linux filesystem partition.
+* **`/dev/sdb 1` (1 MB)** → BIOS boot partition (used when booting in legacy BIOS mode with GPT).
+* **`/dev/sdb 2` (50 GB)** → Main Linux filesystem partition.
 
 ---
 
@@ -629,24 +629,24 @@ Linux uses **device nodes** in `/dev` to represent disks and partitions.
 
 ### Convention:
 
-* First hard drive → `/dev/sdb`
+* First hard drive → `/dev/sdb `
 * Second hard drive → `/dev/sdb`
 * Third hard drive → `/dev/sdc`, and so on.
 * Partitions are numbered:
 
-  * First partition on first disk → `/dev/sdb1`
-  * Second partition on first disk → `/dev/sdb2`
+  * First partition on first disk → `/dev/sdb 1`
+  * Second partition on first disk → `/dev/sdb 2`
   * First partition on second disk → `/dev/sdb1`
 
 ```bash
-Disk: /dev/sdb (500GB)
- ├── /dev/sdb1  → Linux OS (Primary)
- ├── /dev/sdb2  → Windows OS (Primary)
- ├── /dev/sdb3  → Data Storage (Primary)
- ├── /dev/sdb4  → Extended Partition
-        ├── /dev/sdb5 → Movies (Logical)
-        ├── /dev/sdb6 → Backup (Logical)
-        └── /dev/sdb7 → Extra Files (Logical)
+Disk: /dev/sdb  (500GB)
+ ├── /dev/sdb 1  → Linux OS (Primary)
+ ├── /dev/sdb 2  → Windows OS (Primary)
+ ├── /dev/sdb 3  → Data Storage (Primary)
+ ├── /dev/sdb 4  → Extended Partition
+        ├── /dev/sdb 5 → Movies (Logical)
+        ├── /dev/sdb 6 → Backup (Logical)
+        └── /dev/sdb 7 → Extra Files (Logical)
 ```
 
 👉 Note: This applies to **SCSI and SATA devices**. Letters (`a`, `b`, `c`) are assigned based on device **ID**, not physical order.
@@ -668,7 +668,7 @@ lsblk
 * `lsblk` → Lists information about all block devices (disks, partitions, loop devices, etc.).
 * Columns:
 
-  * **NAME** → Device name (`sdb`, `sdb1`, etc.).
+  * **NAME** → Device name (`sdb `, `sdb 1`, etc.).
   * **MAJ\:MIN** → Major and minor device numbers (kernel identifiers).
   * **RM** → Removable device? (`1` for removable, `0` for fixed).
   * **SIZE** → Size of the disk or partition.
@@ -695,9 +695,9 @@ loop8    7:8    0  10.8M  1 loop /snap/snap-store/1270
 loop9    7:9    0  49.3M  1 loop /snap/snapd/24792
 loop10   7:10   0  50.8M  1 loop /snap/snapd/25202
 loop11   7:11   0   576K  1 loop /snap/snapd-desktop-integration/315
-sdb      8:0    0    50G  0 disk 
-├─sdb1   8:1    0     1M  0 part 
-└─sdb2   8:2    0    50G  0 part /
+sdb       8:0    0    50G  0 disk 
+├─sdb 1   8:1    0     1M  0 part 
+└─sdb 2   8:2    0    50G  0 part /
 sr0     11:0    1  50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
 ```
 
@@ -706,11 +706,11 @@ sr0     11:0    1  50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
 * **loop devices (`loop0` → `loop11`)**:
   Virtual devices created by the **snap package system** (read-only).
 
-* **sdb (50G, disk)**:
+* **sdb  (50G, disk)**:
   Main virtual hard disk of the system.
 
-  * **sdb1 (1M)**: Tiny partition, often used for boot/grub or alignment.
-  * **sdb2 (50G, mounted at `/`)**: Root filesystem (Linux OS).
+  * **sdb 1 (1M)**: Tiny partition, often used for boot/grub or alignment.
+  * **sdb 2 (50G, mounted at `/`)**: Root filesystem (Linux OS).
 
 * **sr0 (ROM, 50.7M)**:
   Represents the **virtual CD-ROM drive**, currently mounted at `/media/hashim/VBox_GAs_7.2.0`.
@@ -749,7 +749,7 @@ cat /proc/partitions
 
   * **major** / **minor**: Kernel device numbers.
   * **#blocks**: Size in **1 KiB blocks** (multiply by 1024 to get bytes).
-  * **name**: Device node name (e.g., `sdb`, `sdb1`, `sdb`, `loop0`).
+  * **name**: Device node name (e.g., `sdb `, `sdb 1`, `sdb`, `loop0`).
 
 ### 📄 Your sample output (explained)
 
@@ -764,9 +764,9 @@ major minor  #blocks  name
    7        5      11400 loop5
    7        6     528392 loop6
    7        7      93888 loop7
-   8        0   52428800 sdb
-   8        1       1024 sdb1
-   8        2   52425728 sdb2
+   8        0   52428800 sdb 
+   8        1       1024 sdb 1
+   8        2   52425728 sdb 2
   11        0      51898 sr0
    8       16   10563424 sdb
    7        8      11088 loop8
@@ -776,7 +776,7 @@ major minor  #blocks  name
 ```
 
 * `loop*`: Read-only **loop devices** (often created by **Snap** packages).
-* `sdb` (≈ 50 GiB): Your main disk; `sdb1` (1 MiB) and `sdb2` (\~50 GiB).
+* `sdb ` (≈ 50 GiB): Your main disk; `sdb 1` (1 MiB) and `sdb 2` (\~50 GiB).
 * `sr0`: Optical (CD-ROM) device (VirtualBox Guest Additions ISO mounted).
 * `sdb` (\~10.1 GiB): Another disk (in your case, a **VBOX HARDDISK**). We’ll edit this with `fdisk`.
 
@@ -1208,7 +1208,7 @@ The file has **six columns**, each with a specific meaning:
 1. Identify processes preventing unmount:
 
    ```bash
-   sudo lsof | grep /dev/sdb
+   sudo lsof | grep /dev/sdb 
    ```
 2. Kill blocking processes if necessary.
 3. Add the partition to `/etc/fstab` for persistence:
