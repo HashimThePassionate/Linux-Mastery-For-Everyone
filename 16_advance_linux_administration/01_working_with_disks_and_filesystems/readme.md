@@ -542,3 +542,188 @@ Disk identifier: 4B260F40-3DAC-4B10-8131-933A12162613
 👉 These correspond to **mounted squashfs images** (commonly from Snap packages in Ubuntu/Debian).
 
 ---
+
+# 📀 **Partitioning Disks in Linux**
+
+Disks are rarely used as a single block of storage — instead, they are divided into **partitions**. Partitioning allows better organization, multiple operating systems, and efficient disk usage.
+
+---
+
+## 🧩 Understanding Partitions
+
+* **Partitions** are **contiguous sets of sectors and/or cylinders** on a disk.
+* They help divide a single physical disk into multiple logical sections.
+* Even with SSDs, this legacy concept remains relevant.
+
+### 🔑 Partition Types
+
+1. **Primary Partitions**
+
+   * Maximum of **4 primary partitions**.
+   * Can directly hold data or an OS.
+
+2. **Extended Partitions**
+
+   * Only **1 extended partition** is allowed per disk.
+   * It acts like a container to hold **logical partitions**.
+
+3. **Logical Partitions**
+
+   * Created inside the extended partition.
+   * Allow up to a **total of 15 partitions** per disk.
+
+---
+
+## 🗂️ MBR vs GPT Partitioning
+
+### 🔹 Master Boot Record (MBR)
+
+* Used until around **2010**.
+* Limitations:
+
+  * Only **4 primary partitions**.
+  * Max partition size: **2 TB**.
+* Stores partition table in the first **512 bytes** of disk.
+* Uses **hexadecimal codes** for partition types:
+
+  * `0x0c` → FAT
+  * `0x07` → NTFS
+  * `0x83` → Linux filesystem
+  * `0x82` → Swap
+
+### 🔹 GUID Partition Table (GPT)
+
+* Part of **UEFI standard**.
+* Solves MBR’s limitations:
+
+  * Supports **128 partitions**.
+  * Supports disks up to **75.6 Zettabytes (ZB)**.
+  * Better redundancy (multiple copies of partition table).
+* Modern systems use GPT.
+
+---
+
+## 📑 Partition Table Layout
+
+The **MBR** (first 512 bytes of a disk) is structured as:
+
+| Section              | Size      | Purpose                                       |
+| -------------------- | --------- | --------------------------------------------- |
+| Bootloader code      | 446 bytes | Loads the OS (e.g., **GRUB** in Linux).       |
+| Partition table      | 64 bytes  | Stores details of up to 4 primary partitions. |
+| End of sector marker | 2 bytes   | Identifies end of MBR.                        |
+
+Each **partition entry** (16 bytes) includes:
+
+* Start Cylinder/Head/Sector (CHS)
+* Partition type code
+* End CHS
+* Starting sector (LBA)
+* Number of sectors
+
+---
+
+## 🏷️ Naming Partitions in Linux
+
+Linux uses **device nodes** in `/dev` to represent disks and partitions.
+
+### Convention:
+
+* First hard drive → `/dev/sda`
+* Second hard drive → `/dev/sdb`
+* Third hard drive → `/dev/sdc`, and so on.
+* Partitions are numbered:
+
+  * First partition on first disk → `/dev/sda1`
+  * Second partition on first disk → `/dev/sda2`
+  * First partition on second disk → `/dev/sdb1`
+
+```bash
+Disk: /dev/sda (500GB)
+ ├── /dev/sda1  → Linux OS (Primary)
+ ├── /dev/sda2  → Windows OS (Primary)
+ ├── /dev/sda3  → Data Storage (Primary)
+ ├── /dev/sda4  → Extended Partition
+        ├── /dev/sda5 → Movies (Logical)
+        ├── /dev/sda6 → Backup (Logical)
+        └── /dev/sda7 → Extra Files (Logical)
+```
+
+👉 Note: This applies to **SCSI and SATA devices**. Letters (`a`, `b`, `c`) are assigned based on device **ID**, not physical order.
+
+---
+
+## ⚙️ Checking Partition Attributes
+
+To inspect partitions, use the **`lsblk` command**.
+
+### 🔹 Command:
+
+```bash
+lsblk
+```
+
+### 📖 Explanation:
+
+* `lsblk` → Lists information about all block devices (disks, partitions, loop devices, etc.).
+* Columns:
+
+  * **NAME** → Device name (`sda`, `sda1`, etc.).
+  * **MAJ\:MIN** → Major and minor device numbers (kernel identifiers).
+  * **RM** → Removable device? (`1` for removable, `0` for fixed).
+  * **SIZE** → Size of the disk or partition.
+  * **RO** → Read-only status (`1` = read-only).
+  * **TYPE** → Device type (`disk`, `part`, `loop`, `rom`).
+  * **MOUNTPOINTS** → Where it is mounted in the filesystem.
+
+---
+
+## 📊 Sample Output Breakdown
+
+```bash
+hashim@hashim-VirtualBox:~$ lsblk
+NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
+loop0    7:0    0  73.9M  1 loop /snap/core22/2111
+loop1    7:1    0     4K  1 loop /snap/bare/5
+loop2    7:2    0  73.9M  1 loop /snap/core22/2045
+loop3    7:3    0 245.1M  1 loop /snap/firefox/6565
+loop4    7:4    0 246.4M  1 loop /snap/firefox/6738
+loop5    7:5    0   516M  1 loop /snap/gnome-42-2204/202
+loop6    7:6    0  11.1M  1 loop /snap/firmware-updater/167
+loop7    7:7    0  91.7M  1 loop /snap/gtk-common-themes/1535
+loop8    7:8    0  10.8M  1 loop /snap/snap-store/1270
+loop9    7:9    0  49.3M  1 loop /snap/snapd/24792
+loop10   7:10   0  50.8M  1 loop /snap/snapd/25202
+loop11   7:11   0   576K  1 loop /snap/snapd-desktop-integration/315
+sda      8:0    0    50G  0 disk 
+├─sda1   8:1    0     1M  0 part 
+└─sda2   8:2    0    50G  0 part /
+sr0     11:0    1  50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
+```
+
+### 🔎 Analysis:
+
+* **loop devices (`loop0` → `loop11`)**:
+  Virtual devices created by the **snap package system** (read-only).
+
+* **sda (50G, disk)**:
+  Main virtual hard disk of the system.
+
+  * **sda1 (1M)**: Tiny partition, often used for boot/grub or alignment.
+  * **sda2 (50G, mounted at `/`)**: Root filesystem (Linux OS).
+
+* **sr0 (ROM, 50.7M)**:
+  Represents the **virtual CD-ROM drive**, currently mounted at `/media/hashim/VBox_GAs_7.2.0`.
+
+---
+
+## 🚀 Summary
+
+* Disks are divided into **partitions** for organization.
+* **MBR** (old) vs **GPT** (modern) define how partitions are stored.
+* Linux names disks like `/dev/sda`, `/dev/sdb`, etc.
+* `lsblk` helps visualize partitions and mount points.
+* Bootloader (**GRUB**) uses the partition table to find the active partition and boot the OS.
+
+---
+
