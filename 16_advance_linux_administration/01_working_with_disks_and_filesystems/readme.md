@@ -950,3 +950,104 @@ Number  Start   End     Size    Type     File system  Flags
   * **File system** — empty because it’s **not formatted yet** (that’s expected).
 
 ---
+
+# 🛡️ **Backing Up and Restoring Partition Tables in Linux**
+
+Partitioning can be risky ⚠️ — a small mistake may wipe important data.
+That’s why it’s crucial to **back up your partition table (MBR or GPT headers)** before making changes.
+
+In this section, we’ll see how to use the **`dd` utility** for this purpose.
+
+---
+
+## 📥 Backing Up the Partition Table
+
+### 🔹 Command:
+
+```bash
+sudo dd if=/dev/sdb of=mbr-backup-sdb bs=512 count=1
+```
+
+### 📖 Explanation of Options:
+
+* **`dd`** → A low-level copy tool that copies data from input to output in blocks.
+* **`if=/dev/sdb`** → *Input file*: here it’s the raw disk (`/dev/sdb`).
+* **`of=mbr-backup-sdb`** → *Output file*: the backup file stored in your home directory.
+* **`bs=512`** → *Block size*: 512 bytes (size of one sector).
+* **`count=1`** → Copy only **1 block** (first sector).
+
+👉 The **first 512 bytes** of an MBR disk contain:
+
+1. **Bootloader code** (446 bytes).
+2. **Partition table** (64 bytes).
+3. **Boot signature** (2 bytes).
+
+So this backup captures the **MBR bootloader + partition table**.
+
+### 🧾 Output:
+
+```
+1+0 records in
+1+0 records out
+512 bytes copied, 0.00112285 s, 456 kB/s
+```
+
+* Confirms that exactly **512 bytes** were copied.
+* File **`mbr-backup-sdb`** is created in your current directory.
+
+---
+
+## 📂 Verifying the Backup File
+
+After running the command, check with `ls`:
+
+```bash
+ls
+```
+
+Output:
+
+```
+Desktop  Documents  Downloads  mbr-backup-sdb  Music  Pictures  Public  snap  Templates  Videos
+```
+
+Here, `mbr-backup-sdb` is your backup file.
+
+---
+
+## 📤 Restoring the Partition Table
+
+If something goes wrong, you can restore the MBR with:
+
+```bash
+sudo dd if=mbr-backup-sdb of=/dev/sdb bs=512 count=1
+```
+
+### 📖 Explanation:
+
+* **`if=mbr-backup-sdb`** → Reads backup file.
+* **`of=/dev/sdb`** → Writes back to the disk.
+* **`bs=512 count=1`** → Writes only the first sector (MBR).
+
+### 🧾 Output:
+
+```
+1+0 records in
+1+0 records out
+512 bytes copied, 0.000675828 s, 758 kB/s
+```
+
+✅ Successfully restored the MBR.
+
+---
+
+## ⚠️ Important Notes
+
+* This backup only works for **MBR partition tables**.
+
+  * GPT uses multiple headers and requires different tools (`sgdisk --backup`).
+* Only the **first sector** is saved. If your disk had **extended partitions** (logical partitions), their tables live in Extended Boot Records (EBRs), which are **not included** in this 512-byte backup.
+* Restoring overwrites the existing MBR — be careful.
+* Always **double-check the target disk (`/dev/sdX`)** before running `dd`.
+
+---
