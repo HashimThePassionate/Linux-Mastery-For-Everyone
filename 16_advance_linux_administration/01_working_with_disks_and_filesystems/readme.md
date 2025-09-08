@@ -1332,4 +1332,192 @@ Expected output (example):
 
 ---
 
-⚡ Question: Do you want me to also show you an **example with multiple partitions** in `/etc/fstab` (like `/home`, `/data`, `/backup`), so you can see a real-world setup?
+# 🌀 Linux Swap Partition
+
+Linux has a **robust swap implementation** that extends virtual memory by using hard disk space when the **physical RAM** is full. This mechanism ensures that even under heavy memory usage, the system remains stable and responsive.
+
+---
+
+## 📘 What is Swap?
+
+* **Swap** is a dedicated space (either a partition or a file) on the disk that is used as an **extension of RAM**.
+* When programs do not use all of their allocated memory, or when the system experiences **memory pressure**, Linux moves less-used pages to the swap space.
+* Linux allows **multiple swap areas**, and swapping is usually done on **dedicated partitions**.
+
+⚖️ **Recommended Size**:
+
+> Swap space should be at least equal to the **total RAM** on the system.
+
+---
+
+## 🔍 Checking Swap Usage
+
+You can check swap utilization in two ways:
+
+1. By viewing `/proc/swaps`:
+
+   ```bash
+   cat /proc/swaps
+   ```
+
+   This shows all active swap devices/files with size, usage, and priority.
+
+2. Using the `free` command:
+
+   ```bash
+   free -h
+   ```
+
+   This displays **total, used, and free memory** (RAM + Swap) in a human-readable format (`-h`).
+
+---
+
+## 🖥️ Practical Example
+
+### Step 1: List Block Devices
+
+```bash
+lsblk
+```
+
+* **Purpose**: Lists information about block devices (disks, partitions, loops).
+* **Options**:
+
+  * None here → shows all disks and partitions with their mount points.
+* **Output Fields**:
+
+  * `NAME`: Device name (sda, sdb, loop devices).
+  * `SIZE`: Total size of device/partition.
+  * `TYPE`: Disk, partition, or loop.
+  * `MOUNTPOINTS`: Where it is mounted in the filesystem.
+
+---
+
+### Step 2: Check Active Swap
+
+```bash
+cat /proc/swaps
+```
+
+* Shows which swap files/partitions are currently active.
+* Example output:
+
+  ```
+  Filename   Type   Size     Used   Priority
+  /swap.img  file   3959804  0      -2
+  ```
+
+---
+
+### Step 3: Partition a New Disk (`/dev/sdb`)
+
+```bash
+sudo fdisk /dev/sdb
+```
+
+* **Purpose**: Start partitioning tool for `/dev/sdb`.
+* **Inside `fdisk` session**:
+
+  * `n` → Create a new partition.
+  * Choose `p` → Primary partition.
+  * Partition number → `1`.
+  * First sector → Default (press Enter).
+  * Last sector → `+2G` (creates a 2 GB partition).
+  * `w` → Write changes to disk.
+
+✅ After this, `lsblk` confirms `/dev/sdb1` exists as a **2 GB partition**.
+
+---
+
+### Step 4: Format the Partition as Swap
+
+```bash
+sudo mkswap /dev/sdb1
+```
+
+* **Purpose**: Mark `/dev/sdb1` as swap space.
+* Creates swap metadata and generates a **UUID** for the partition.
+
+---
+
+### Step 5: Enable the Swap Partition
+
+```bash
+sudo swapon /dev/sdb1
+```
+
+* **Purpose**: Activates the swap partition so the kernel can use it immediately.
+
+Check active swaps:
+
+```bash
+swapon --show
+```
+
+* Shows both the default `swap.img` and the new `/dev/sdb1`.
+
+---
+
+### Step 6: Check Memory + Swap Together
+
+```bash
+free -h
+```
+
+* Displays total memory + swap space.
+* Example:
+
+  ```
+  Mem:   3.3Gi  used 1.1Gi  free 1.5Gi
+  Swap:  5.8Gi  used 0B    free 5.8Gi
+  ```
+
+---
+
+### Step 7: Disable Swap (Optional)
+
+```bash
+sudo swapoff /dev/sdb1
+```
+
+* **Purpose**: Turns off swap usage on `/dev/sdb1`.
+* After disabling, check again with:
+
+  ```bash
+  swapon --show
+  ```
+
+  Only `/swap.img` remains active.
+
+---
+
+## 🧾 Summary of Commands
+
+| Command             | Purpose                                               |
+| ------------------- | ----------------------------------------------------- |
+| `lsblk`             | List block devices (disks & partitions).              |
+| `cat /proc/swaps`   | Show active swap areas.                               |
+| `free -h`           | Display memory & swap usage in human-readable format. |
+| `fdisk /dev/sdb`    | Partition the `/dev/sdb` disk interactively.          |
+| `mkswap /dev/sdb1`  | Format partition as swap space.                       |
+| `swapon /dev/sdb1`  | Activate swap partition.                              |
+| `swapon --show`     | List all active swap spaces.                          |
+| `swapoff /dev/sdb1` | Deactivate swap partition.                            |
+
+---
+
+## 📌 Pro Tip
+
+* To make the swap partition **persistent after reboot**, add an entry in `/etc/fstab`:
+
+  ```bash
+  UUID=<swap-partition-uuid> none swap sw 0 0
+  ```
+* You can find the UUID using:
+
+  ```bash
+  blkid /dev/sdb1
+  ```
+
+---
+
