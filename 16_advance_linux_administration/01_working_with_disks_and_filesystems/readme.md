@@ -1332,7 +1332,7 @@ Expected output (example):
 
 ---
 
-# 🌀 Linux Swap Partition
+# 🌀 **Linux Swap Partition**
 
 Linux has a **robust swap implementation** that extends virtual memory by using hard disk space when the **physical RAM** is full. This mechanism ensures that even under heavy memory usage, the system remains stable and responsive.
 
@@ -1488,21 +1488,7 @@ sudo swapoff /dev/sdb1
   ```
 
   Only `/swap.img` remains active.
-
----
-
-## 🧾 Summary of Commands
-
-| Command             | Purpose                                               |
-| ------------------- | ----------------------------------------------------- |
-| `lsblk`             | List block devices (disks & partitions).              |
-| `cat /proc/swaps`   | Show active swap areas.                               |
-| `free -h`           | Display memory & swap usage in human-readable format. |
-| `fdisk /dev/sdb`    | Partition the `/dev/sdb` disk interactively.          |
-| `mkswap /dev/sdb1`  | Format partition as swap space.                       |
-| `swapon /dev/sdb1`  | Activate swap partition.                              |
-| `swapon --show`     | List all active swap spaces.                          |
-| `swapoff /dev/sdb1` | Deactivate swap partition.                            |
+                          |
 
 ---
 
@@ -1521,3 +1507,420 @@ sudo swapoff /dev/sdb1
 
 ---
 
+# 🧱 **Introducing LVM in Linux**
+
+## 🧠 What is LVM (Logical Volume Manager)?
+
+**LVM** is a storage management layer in Linux that sits between physical disks and filesystems. It gives you **flexibility** to allocate, resize, and move storage **while filesystems are online**, minimizing downtime.
+
+### 🔧 Why use LVM?
+
+* **Grow storage live:** Add more disks to a **Volume Group (VG)** and expand your **Logical Volumes (LV)** without rebooting.
+* **Migrate data with no downtime:** Move data from an old disk to a new one while mounted.
+* **Snapshots, thin provisioning:** Advanced storage features (beyond scope of this run, but supported by LVM).
+
+### 📦 Core Building Blocks
+
+* **PV (Physical Volume):** A whole disk or a partition initialized for LVM (e.g., `/dev/sdb`).
+* **VG (Volume Group):** A pool of storage created by combining one or more PVs (e.g., `newvolume`).
+* **LV (Logical Volume):** Allocated chunks from a VG that you **format + mount** like normal partitions (e.g., `/dev/newvolume/lv_data`).
+* **PE (Physical Extent):** Fixed-size chunks inside a VG (commonly **4 MiB**); LVs are built from these.
+
+### 🛠️ LVM Utilities (you mentioned)
+
+* `pvcreate`, `vgcreate`, `lvcreate` — create PV/VG/LV
+* `vgdisplay`, `lvdisplay` — show details
+* `lvextend` — grow an LV
+* Plus common Linux tools used around LVM: `lsblk`, `fdisk`, `mkfs`, `mount`, `df`, `wipefs`
+
+---
+
+## ✅ Prerequisites
+
+* We’re demonstrating on **Debian/Ubuntu** (you used Ubuntu) with two free internal disks: **`/dev/sdb`** and **`/dev/sdc`**.
+* LVM tools come from the **`lvm2`** package.
+
+---
+
+## 🚀 Install LVM Tools (lvm2)
+
+## Command:
+```bash
+hashim@hashim-V:~$ sudo apt install lvm2
+Installing:                     
+  lvm2
+
+Installing dependencies:
+  dmeventd    libdevmapper-event1.02.1  thin-provisioning-tools
+  libaio1t64  liblvm2cmd2.03
+
+Summary:
+  Upgrading: 0, Installing: 6, Removing: 0, Not Upgrading: 254
+  Download size: 3,891 kB
+  Space needed: 10.9 MB / 39.2 GB available
+
+Continue? [Y/n] y
+```
+
+### 📝 Explanation
+
+* Installs **LVM management tools** and dependencies.
+* Enables background services like **lvm2-monitor** for device-mapper events.
+
+---
+
+## 🔎 Inspect Disks
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda      8:0    0   50G  0 disk 
+├─sda1   8:1    0    1M  0 part 
+└─sda2   8:2    0   50G  0 part 
+sdb      8:16   0   10G  0 disk 
+sdc      8:32   0   10G  0 disk 
+sr0     11:0    1 50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
+```
+
+### 📝 Explanation
+
+* Shows **two empty disks**: `/dev/sdb` and `/dev/sdc` of 10G each, ready for LVM.
+
+---
+
+## 🧼 Clean Disk Signatures (Safe Reset)
+
+> Use when disks may have old partition tables or signatures.
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo wipefs -a /dev/sdb
+/dev/sdb: 2 bytes were erased at offset 0x000001fe (dos): 55 aa
+/dev/sdb: calling ioctl to re-read partition table: Success
+hashim@hashim-V:~$ sudo wipefs -a /dev/sdc
+```
+
+### 📝 Explanation
+
+* `wipefs -a` removes filesystem/partition signatures to avoid LVM confusion.
+* You wiped both **/dev/sdb** and **/dev/sdc** clean.
+
+---
+
+## 🧱 Create Physical Volumes (PVs)
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo pvcreate /dev/sdb /dev/sdc
+  Physical volume "/dev/sdb" successfully created.
+  Physical volume "/dev/sdc" successfully created.
+```
+
+### 📝 Explanation
+
+* Marks **whole disks** as LVM-managed (PVs).
+* You can also use partitions (e.g., `/dev/sdb1`) if needed.
+
+---
+
+## 🧰 Create a Volume Group (VG)
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo vgcreate newvolume /dev/sdb /dev/sdc
+  Volume group "newvolume" successfully created
+```
+
+### 📝 Explanation
+
+* Creates VG named **`newvolume`** with both PVs.
+* Total size ≈ 20G (10G + 10G minus metadata).
+
+---
+
+## 📦 Create a Logical Volume (LV)
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo lvcreate -L 15GB -n lv_data newvolume
+WARNING: swap signature detected on /dev/newvolume/lv_data at offset 4086. Wipe it? [y/n]: y
+  Wiping swap signature on /dev/newvolume/lv_data.
+  Logical volume "lv_data" created.
+```
+
+### 📝 Explanation
+
+* `-L 15GB` allocates a **15 GB** LV from VG `newvolume`.
+* `-n lv_data` names the LV.
+* **Warning** about “swap signature” means some bytes suggested an old swap header—answering **`y`** wipes it before proceeding.
+
+---
+
+## 🗂️ Verify the LV Device Path
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo ls /dev/newvolume/lv_data 
+/dev/newvolume/lv_data
+```
+
+### 📝 Explanation
+
+* Confirms LV’s block device at **`/dev/newvolume/lv_data`** (also often available as `/dev/mapper/newvolume-lv_data`).
+
+---
+
+## 🧾 Create a Filesystem on the LV
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo mkfs -t ext4 /dev/newvolume/lv_data
+mke2fs 1.47.2 (1-Jan-2025)
+Creating filesystem with 3932160 4k blocks and 983040 inodes
+Filesystem UUID: 6ca2496f-7621-4ff4-9115-1e8df2e0a796
+Superblock backups stored on blocks: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (16384 blocks): done
+Writing superblocks and filesystem accounting information: done   
+```
+
+### 📝 Explanation
+
+* Formats the LV with **ext4** so it can be mounted and used like a normal partition.
+
+---
+
+## 📂 Create Mount Point & Mount the LV
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ pwd
+/home/hashim
+hashim@hashim-V:~$ mkdir lvm
+hashim@hashim-V:~$ ls
+Desktop  Documents  Downloads  lvm  Music  Pictures  Public  snap  Templates  Videos
+hashim@hashim-V:~$ sudo mount /dev/newvolume/lv_data /home/hashim/lvm/
+```
+
+### 📝 Explanation
+
+* Makes directory **`/home/hashim/lvm`** and mounts the LV there.
+
+---
+
+## 📊 Inspect the Volume Group
+
+### 🔹 Command + Output
+
+```bash
+hashim@hashim-V:~$ sudo vgdisplay newvolume
+  --- Volume group ---
+  VG Name               newvolume
+  System ID             
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  2
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               19.99 GiB
+  PE Size               4.00 MiB
+  Total PE              5118
+  Alloc PE / Size       3840 / 15.00 GiB
+  Free  PE / Size       1278 / 4.99 GiB
+  VG UUID               h7M38m-dC1D-06xa-7pIa-lq23-iOlc-n86cfX
+```
+
+### 📝 Explanation
+
+* **VG Size ≈ 19.99 GiB** from two PVs.
+* **PE Size = 4 MiB** (default extent size).
+* **Allocated = 3840 PEs (15 GiB)** → your LV size.
+* **Free = 1278 PEs (\~4.99 GiB)** → still available to grow LVs.
+
+---
+
+## ⬆️ Extend the Logical Volume
+
+```bash
+hashim@hashim-V:~$ sudo lvextend -L +1G /dev/newvolume/lv_data
+  Size of logical volume newvolume/lv_data changed from 15.00 GiB (3840 extents) to 16.00 GiB (4096 extents).
+  Logical volume newvolume/lv_data successfully resized.
+```
+
+### 📝 Explanation
+
+* Adds **+1 GiB**, taking LV from **15 GiB → 16 GiB**.
+* Extents updated from **3840 → 4096** (because **1 GiB / 4 MiB per PE = 256 PEs**).
+
+### 🔹 Verify VG again
+
+```bash
+hashim@hashim-V:~$ sudo vgdisplay newvolume
+  --- Volume group ---
+  VG Name               newvolume
+  System ID             
+  Format                lvm2
+  Metadata Areas        2
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                1
+  Open LV               1
+  Max PV                0
+  Cur PV                2
+  Act PV                2
+  VG Size               19.99 GiB
+  PE Size               4.00 MiB
+  Total PE              5118
+  Alloc PE / Size       4096 / 16.00 GiB
+  Free  PE / Size       1022 / 3.99 GiB
+  VG UUID               h7M38m-dC1D-06xa-7pIa-lq23-iOlc-n86cfX
+```
+
+### 📝 Explanation
+
+* **Allocated** now 16 GiB.
+* **Free** dropped to \~4 GiB.
+
+> ⚠️ **Important:** After extending the **LV**, you must also **resize the filesystem** to see the extra space. For **ext4** online resize, you can use:
+>
+> * If mounted: `sudo resize2fs /dev/newvolume/lv_data` (many modern kernels allow online).
+> * If offline: `sudo umount /home/hashim/lvm && sudo resize2fs /dev/newvolume/lv_data && sudo mount ...`
+
+---
+
+## 📏 Check Filesystem Size (Your Attempt)
+
+```bash
+hashim@hashim-V:~$ sudo umount /home/hashim/lvm
+hashim@hashim-V:~$ df -h | grep lv_data
+```
+
+### 📝 Explanation
+
+* You unmounted the LV first.
+* `df -h | grep lv_data` returned **nothing** because it lists **mounted** filesystems only—and you had just unmounted it.
+* To see block device size without mounting, use:
+
+  * `lsblk -f`
+  * `sudo dumpe2fs -h /dev/newvolume/lv_data | grep -i 'block count\|block size'`
+  * Or simply **remount** then `df -h`.
+
+---
+
+## 📌 Persist the Mount (Make it Survive Reboots)
+
+> You wrote:
+> **“All changes implemented hitherto are not permanent. To make them permanent, you will have to edit the `/etc/fstab` file by adding the following within the file”**
+
+### ✅ Steps to persist:
+1. Add an entry to `/etc/fstab`:
+
+```bash
+/dev/newvolume/lv_data /home/hashim/lvm  ext4  defaults  1  2
+```
+3. Test without reboot:
+
+```bash
+   sudo mount -a
+```
+
+> 🔒 Using UUID is safer than device paths because names can change across boots.
+
+---
+
+## 🗂 Structure of fstab Line
+
+```
+<device>   <mountpoint>   <filesystem>   <options>   <dump>   <fsck order>
+```
+
+---
+
+## 📖 Meaning of `1 2`
+
+### 🗄 **1 → Dump (Backup)**
+
+* 📦 **Purpose:** Tells whether the `dump` command should back up this filesystem.
+* `1` → Backup **enabled** ✅
+* `0` → Backup **disabled** ❌
+  *(Most modern systems don’t use dump, so this is usually 0.)*
+
+---
+
+### 🛠 **2 → fsck Order (Filesystem Check)**
+
+* 🔍 **Purpose:** Tells the boot process in what order `fsck` should check filesystems.
+* `0` → Skip check 🚫
+* `1` → Check **root filesystem (`/`) first** 🏠
+* `2` → Check **all other filesystems after root** 📂
+
+---
+
+## 🧹 Clean Up: Remove LV, VG, PV
+
+### 🔹 Commands + Outputs
+
+```bash
+hashim@hashim-V:~$ sudo lvremove /dev/newvolume/lv_data
+Do you really want to remove and DISCARD active logical volume newvolume/lv_data? [y/n]: y
+  Logical volume "lv_data" successfully removed.
+
+hashim@hashim-V:~$ sudo vgremove newvolume
+  Volume group "newvolume" successfully removed
+
+hashim@hashim-V:~$ sudo pvremove /dev/sdb /dev/sdc
+  Labels on physical volume "/dev/sdb" successfully wiped.
+  Labels on physical volume "/dev/sdc" successfully wiped.
+
+hashim@hashim-V:~$ lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+loop0    7:0    0    4K  1 loop /snap/bare/5
+loop1    7:1    0  242M  1 loop /snap/firefox/6042
+loop2    7:2    0 11.8M  1 loop /snap/desktop-security-center/59
+loop3    7:3    0 73.9M  1 loop /snap/core22/1908
+loop4    7:4    0 11.1M  1 loop /snap/firmware-updater/167
+loop5    7:5    0  516M  1 loop /snap/gnome-42-2204/202
+loop6    7:6    0 14.4M  1 loop /snap/prompting-client/104
+loop7    7:7    0 91.7M  1 loop /snap/gtk-common-themes/1535
+loop8    7:8    0 10.8M  1 loop /snap/snap-store/1270
+loop9    7:9    0 44.4M  1 loop /snap/snapd/23771
+loop10   7:10   0  568K  1 loop /snap/snapd-desktop-integration/253
+loop11   7:11   0 50.8M  1 loop /snap/snapd/25202
+loop12   7:12   0 73.9M  1 loop /snap/core22/2111
+loop13   7:13   0  576K  1 loop /snap/snapd-desktop-integration/315
+sda      8:0    0   50G  0 disk 
+├─sda1   8:1    0    1M  0 part 
+└─sda2   8:2    0   50G  0 part /
+sdb      8:16   0   10G  0 disk 
+sdc      8:32   0   10G  0 disk 
+sr0     11:0    1 50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
+```
+
+### 📝 Explanation
+
+* **`lvremove`** deletes the logical volume.
+* **`vgremove`** removes the volume group (must have no LVs left).
+* **`pvremove`** wipes LVM labels off the disks—fully de-LVMs them.
+* `lsblk` shows **plain disks** again.
+
+---
