@@ -1924,3 +1924,223 @@ sr0     11:0    1 50.7M  0 rom  /media/hashim/VBox_GAs_7.2.0
 * `lsblk` shows **plain disks** again.
 
 ---
+
+# 🧰 **LVM Snapshots**
+
+## 📌 What Is an LVM Snapshot?
+
+An **LVM snapshot** is a **frozen instance** of a logical volume (LV) taken at a specific moment in time. Under the hood, it uses **copy-on-write (CoW)**:
+
+* The snapshot starts small and references the same data blocks as the source (origin) LV.
+* **When a block on the origin changes**, the **original** version of that block is **copied into the snapshot LV** first.
+* This preserves the **point-in-time** state so you can **back up** or **roll back** safely.
+
+> ⚠️ **Plan snapshot size:** Since CoW stores **original versions of changed blocks**, estimate **how much data will change** during the snapshot’s lifetime.
+> If the snapshot space fills up (**100% used**), **LVM disables/invalidates** the snapshot automatically and it **can’t be used to restore**.
+
+---
+
+## 🧠 How Copy-on-Write Works (Quick Mental Model)
+
+1. **T=0 (Create Snapshot):** Snapshot points to the same data as the origin. Very little space used.
+2. **Write to Origin:** Before the write is committed, LVM **copies the original block** into the snapshot LV.
+3. **Snapshot Data% Grows:** Each changed block consumes space **inside the snapshot LV**.
+4. **If Snapshot LV fills:** Snapshot becomes **invalid/disabled** → you **cannot** restore from it.
+
+---
+
+## 🧪 Creating a New Snapshot
+
+### ✅ Command
+
+```bash
+sudo lvcreate -s -L 2G -n linux-snapshot-01 /dev/newvolume/lv_data
+```
+
+### 🏷️ Flags Explained
+
+* `lvcreate` — Create a logical volume.
+* `-s` — **Create a snapshot** (instead of a regular LV).
+* `-L 2G` — **Allocate 2 GiB** to hold changed blocks (snapshot data store).
+* `-n linux-snapshot-01` — **Name** of the snapshot LV.
+* `/dev/newvolume/lv_data` — **Origin LV** you are snapshotting (VG=`newvolume`, LV=`lv_data`).
+
+### 🖥️ Sample Output
+
+```
+Logical volume "linux-snapshot-01" created.
+```
+
+This means the snapshot LV exists, usually as:
+
+* **Mapped device:** `/dev/mapper/newvolume-linux--snapshot--01`
+* **Symlink:** `/dev/newvolume/linux-snapshot-01`
+
+> ℹ️ **Why the double dashes?** In `/dev/mapper/…`, **hyphens in names are escaped** as double dashes.
+> Example: `linux-snapshot-01` → `linux--snapshot--01`.
+
+---
+
+## 🔍 Verifying the Snapshot
+
+### ✅ Command
+
+```bash
+sudo lvs
+```
+
+### 🖥️ Sample Output (from your notes)
+
+```
+LV                 VG        Attr       LSize  Pool Origin  Data%  Meta%  Move Log Cpy%Sync Convert
+linux-snapshot-01  newvolume swi-a-s--- 2.00g       lv_data 0.01
+lv_data            newvolume owi-aos--- 15.00g
+```
+
+### 📊 Columns Decoded (line-by-line)
+
+* **LV** — Logical volume name.
+* **VG** — Volume group name.
+* **Attr** — A compact flag string:
+
+  * Starts with **`s`** for **snapshot** LV, **`o`** for **origin** LV.
+  * Contains **`a`** when **active** (in use).
+  * Contains **`w`** when **writable**.
+  * (It’s a dense bitmask; `man lvs` shows all positions.)
+* **LSize** — LV size:
+
+  * `linux-snapshot-01` → **2.00g** snapshot store.
+  * `lv_data` → **15.00g** origin LV.
+* **Origin** — For snapshots, shows the **source LV** (`lv_data`).
+* **Data%** — **How full the snapshot store is**.
+
+  * `0.01` means **0.01%** of the 2 GiB snapshot space is used by CoW blocks so far.
+
+> ✅ Interpretation of your output:
+>
+> * `linux-snapshot-01` is an **active snapshot** of `lv_data`, currently **almost empty** (great!).
+> * `lv_data` is the **origin** LV of **15 GiB**.
+
+---
+
+## 📏 Extending the Snapshot Size
+
+> Your text says: “Extend from **2 GB** to **3 GB** (source was 3 GB).”
+> In the table, the origin is **15 GB**—that’s OK; treat it as a **demo** where we **add +1 GB** to the snapshot store.
+
+### ✅ Command
+
+```bash
+sudo lvextend -L +1G -n /dev/newvolume/linux-snapshot-01
+```
+
+### 🏷️ Flags Explained
+
+* `lvextend` — Grow an LV.
+* `-L +1G` — **Increase size by 1 GiB** (use `-L 3G` to set an **absolute** size).
+* `-n /dev/newvolume/linux-snapshot-01` — Target LV (snapshot LV).
+
+### 🖥️ Sample Output
+
+```
+Size of logical volume newvolume/linux-snapshot-01 changed from 2.00 GiB (512 extents) to 3.00 GiB (768 extents).
+Logical volume newvolume/linux-snapshot-01 successfully resized.
+```
+
+**What it means:**
+
+* Snapshot LV grew **from 2 GiB → 3 GiB**.
+* “Extents” are LVM’s allocation units (here: **512 → 768**).
+* You now have **more headroom** before the snapshot fills up.
+
+---
+## ♻️ Restoring (Rolling Back) from a Snapshot
+
+> **Idea:** Merge the snapshot **back into its origin** to revert the origin LV to the snapshot point.
+
+### 1) Unmount the Filesystem (Required)
+
+You **must** unmount the filesystem on the origin LV so it’s **inactive/consistent** during merge.
+
+```bash
+sudo umount /home/hashim/lvm/
+```
+
+* Replace `/home/hashim/lvm/` with the **actual mountpoint** of your origin LV.
+* If it’s busy, stop services or use `fuser -vm /mountpoint` to find blockers.
+
+### 2) Merge the Snapshot into the Origin
+
+```bash
+sudo lvconvert --merge /dev/newvolume/linux-snapshot-01
+```
+
+### 🏷️ Flags Explained
+
+* `lvconvert --merge <snapshotLV>` — **Merge** the snapshot **into its origin**, reverting the origin to the snapshot’s state.
+  After merge completes, the **snapshot LV disappears**.
+
+### 🖥️ Sample Output
+
+```
+Merging of volume newvolume/linux-snapshot-01 started.
+newvolume/lv_data: Merged: 100.00%
+```
+
+**Meaning:**
+
+* LVM began the merge and then **applied 100%** of snapshot data back onto the origin LV.
+* After merge, only the **origin** remains.
+
+### 3) Verify the Result
+
+```bash
+sudo lvs
+```
+
+Sample:
+
+```
+LV      VG        Attr       LSize  Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+lv_data newvolume -wi-a----- 15.00g
+```
+
+**Meaning:**
+
+* Only `lv_data` is present (snapshot LV is gone).
+* `-wi-a-----` indicates a **normal, active** LV.
+
+> 🔄 **Re-mount** your filesystem afterward:
+>
+> ```bash
+> sudo mount /dev/newvolume/lv_data /home/hashim/lvm/
+> ```
+
+---
+
+## 🧯 Optional: Deleting a Snapshot (When You Don’t Need It)
+
+If you **don’t** intend to roll back and want to **free space**:
+
+```bash
+sudo lvremove /dev/newvolume/linux-snapshot-01
+```
+
+* This **does not** change your origin LV; it just **removes** the snapshot LV.
+
+---
+
+## ✅ Good Practices & Tips
+
+* **Size planning:**
+  Start with a reasonable guess (e.g., **10–30%** of origin size) if you expect moderate changes. **Monitor `Data%`** via `lvs`.
+* **Keep snapshots short-lived:**
+  Use them for **backups**, **patching**, **schema/data migrations**, or **risky changes**—then merge or remove.
+* **One snapshot per operation:**
+  Avoid piling multiple long-lived snapshots; they can hurt performance and risk filling.
+* **Backups from snapshots:**
+  Mount the snapshot **read-only** (or create a read-only snapshot) for **consistent backups** without pausing apps too long.
+* **If snapshot hits 100%:**
+  It becomes **invalid/disabled**; you **can’t restore**. Extend **before** it fills if needed (`lvextend`).
+
+---
