@@ -662,3 +662,147 @@ Each protocol is standardized in an **RFC (Request for Comments)**, published by
 
 ---
 
+
+# 🌐 **IP Addressing, Subnets & Broadcast Addresses**
+
+An **IP address** is a **unique identifier (UID)** for devices in a network. Devices locate and communicate with each other using IP addresses—similar to how postal mail is delivered using house addresses.
+
+---
+
+## 📮 IPv4 vs IPv6
+
+* **IPv4 (Internet Protocol version 4):**
+
+  * 32-bit address → 4,294,967,296 (\~4.3 billion) possible addresses.
+  * Written as **4 groups of 8 bits (1 byte each)** separated by dots.
+  * Example: `192.168.1.53`
+
+* **IPv6 (Internet Protocol version 6):**
+
+  * 128-bit address → virtually unlimited addresses.
+  * Introduced due to IPv4 exhaustion.
+  * Example: `2001:0db8:85a3:0000:0000:8a2e:0370:7334`
+
+---
+
+## 🧮 IPv4 Structure
+
+Example: **192.168.1.53**
+
+<div align="center">
+  <img src="./images/04.png" width="500px"/>
+</div>
+
+* Each number = **8 bits (1 byte)**
+* Total = **32 bits (4 bytes)**
+* Binary form:
+
+  ```
+  11000000.10101000.00000001.00110101
+  ```
+
+---
+
+## 🏷️ Network Classes (Classful Addressing)
+
+Originally, IP addresses were divided into **classes** (introduced in 1981) to separate large, medium, and small networks.
+
+<div align="center">
+  <img src="./images/05.png" width="500px"/>
+</div>
+
+| Class       | Leading Bits | Start Address | End Address     | Default Subnet Mask | Usage               |
+| ----------- | ------------ | ------------- | --------------- | ------------------- | ------------------- |
+| **Class A** | 0            | 0.0.0.0       | 127.255.255.255 | 255.0.0.0           | Very large networks |
+| **Class B** | 10           | 128.0.0.0     | 191.255.255.255 | 255.255.0.0         | Medium networks     |
+| **Class C** | 110          | 192.0.0.0     | 223.255.255.255 | 255.255.255.0       | Small networks      |
+| **Class D** | 1110         | 224.0.0.0     | 239.255.255.255 | Not defined         | Multicasting        |
+| **Class E** | 1111         | 240.0.0.0     | 255.255.255.255 | Not defined         | Experimental        |
+
+⚠️ Today, class-based addressing is mostly replaced by **CIDR (Classless Inter-Domain Routing)**.
+
+---
+
+## 🖧 Subnets
+
+A **subnet (subnetwork)** is a logical division of a network.
+
+Example:
+
+* IP Address: `192.168.1.53`
+* **Network ID:** `192.168.1`
+* **Host ID:** `53`
+
+<div align="center">
+  <img src="./images/06.png" width="500px"/>
+</div>
+
+### 🔑 Subnet Mask
+
+* Defines which part of the IP is **network** and which is **host**.
+* Example: `192.168.1.0` with mask `255.255.255.0`
+
+### 🔢 CIDR Notation
+
+* Example: `192.168.1.0/24`
+* `/24` = first 24 bits represent the **network ID**.
+
+---
+
+## 🧩 Subnetting Example
+
+Suppose we want host addresses between **100 → 125** in network `192.168.1.x`.
+
+1. Starting point: `192.168.1.100`
+
+   ```
+   11000000.10101000.00000001.01100100
+   ```
+
+   → Host identifier = `100`.
+
+2. Closest reserved boundary = `96`.
+   → Equivalent binary: `11100000`
+
+3. Subnet mask:
+
+   ```
+   11111111.11111111.11111111.11100000
+   = 255.255.255.224
+   ```
+
+4. CIDR notation:
+
+   ```
+   192.168.1.96/27
+   ```
+
+5. Host range:
+
+   * Start: `192.168.1.97`
+   * End: `192.168.1.126`
+   * Broadcast: `192.168.1.127`
+
+---
+
+## 📢 Broadcast Addresses
+
+A **broadcast address** is reserved for sending data to **all devices** in a subnet.
+
+* Always the **last IP** in the subnet range.
+
+### Examples:
+
+* `192.168.1.0/24` → Broadcast = `192.168.1.255`
+* `192.168.1.96/27` → Broadcast = `192.168.1.127`
+
+---
+
+## 📚 References
+
+* [RFC 791 – Internet Protocol](https://tools.ietf.org/html/rfc791)
+* [RFC 870 – Classful Networks](https://tools.ietf.org/html/rfc870)
+* [RFC 1918 – Subnets & Private Addressing](https://tools.ietf.org/html/rfc1918)
+* [RFC 6308 – Multicast Addressing](https://tools.ietf.org/html/rfc6308)
+
+---
