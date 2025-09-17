@@ -141,3 +141,72 @@ Data moves **upward (Layer 1 → Layer 7)**:
 
 ---
 
+## 📡 Physical Layer (Layer 1)
+
+The **physical layer** is the foundation of the OSI model. It deals with the **hardware infrastructure** that connects devices and enables communication.
+
+### 🔑 Responsibilities
+
+* Handles **conversion between raw bit streams** and the communication medium.
+* Regulates **bit-rate control** (the speed of communication).
+* Transfers data through **electrical, radio, or optical signals**.
+
+### ⚙️ Components
+
+* **Cables** (coaxial, fiber optics, twisted pair, etc.)
+* **Wireless environments** (Wi-Fi, Bluetooth, etc.)
+* **Optical mediums** (laser, infrared, fiber optics)
+* **Connectors & switches**
+
+### 📜 Protocols Operating at Layer 1
+
+* **Ethernet**
+* **Universal Serial Bus (USB)**
+* **Digital Subscriber Line (DSL)**
+
+---
+
+## 🔗 Data Link Layer (Layer 2)
+
+The **data link layer** ensures a **reliable data flow** between two directly connected devices (e.g., nodes in a **WAN** or devices in a **LAN**).
+
+### 🔑 Responsibilities
+
+* Ensures **flow control** (adapting to the physical layer’s speed).
+* Detects and **corrects communication errors** from the physical layer.
+* Handles **framing** (breaking data into manageable units).
+* Prevents and recovers from **frame collisions** when multiple devices access the same channel.
+
+### ⚙️ Subsystems
+
+1. **Media Access Control (MAC)**
+
+   * Uses **MAC addresses** to identify and connect devices.
+   * Controls **permissions** for devices to transmit/receive data.
+
+2. **Logical Link Control (LLC)**
+
+   * Identifies and encapsulates **network layer protocols**.
+   * Performs **error checking** and **frame synchronization**.
+
+### 🗂️ Frames
+
+* A **frame** = data transmission unit at the data link layer.
+* It acts as a **container for a single network packet**.
+* Packets inside frames move to the next OSI level (**network layer**).
+
+### 📦 Types of Frames
+
+* **Ethernet Frames**
+
+  * IEEE 802.3 (original format)
+  * **802.3 SNAP** (SubNetwork Access Protocol)
+  * **Ethernet II (extended)**
+
+### 📜 Example Protocol
+
+* **Point-to-Point Protocol (PPP)**
+
+  * Binary networking protocol.
+  * Widely used in **high-speed broadband communication networks**.
+
