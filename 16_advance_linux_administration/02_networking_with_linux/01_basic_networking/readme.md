@@ -439,3 +439,226 @@ Both **OSI** and **TCP/IP** provide a layered approach to networking, but TCP/IP
 
 ---
 
+
+# 🌐 **TCP/IP Protocols**
+
+The **TCP/IP protocol suite** is the backbone of the internet. These protocols define **how data is addressed, transmitted, routed, secured, and interpreted** across networks.
+
+Each protocol is standardized in an **RFC (Request for Comments)**, published by the [IETF](https://www.ietf.org/standards/rfcs/).
+
+---
+
+## 🧩 Layer 3 – Network Layer Protocols
+
+### 🌍 Internet Protocol (**IP**) – RFC 791
+
+* **OSI Layer:** Network (L3)
+* **Role:** The core protocol of TCP/IP, responsible for delivering data packets across networks.
+* **Key Features:**
+
+  * Provides **logical addressing** through IPv4 or IPv6.
+  * Splits data into **datagrams** for transport.
+  * Supports **fragmentation and reassembly** of large packets.
+  * Handles **routing** between networks using routers.
+* **Use Case:** Every device on the internet has an IP address (e.g., `192.168.1.1`, `2001:db8::1`).
+
+---
+
+### 🔗 Address Resolution Protocol (**ARP**) – RFC 826
+
+* **OSI Layer:** Data Link (L2)
+* **Role:** Maps **IPv4 addresses → MAC addresses** so data can be delivered over Ethernet.
+* **Key Features:**
+
+  * Operates within local networks.
+  * Maintains an **ARP cache** to store IP-to-MAC mappings.
+* **Use Case:** When you visit a website, your computer first asks, *“Who has this IP?”* ARP replies with the MAC address of the device.
+
+---
+
+### 🧭 Neighbor Discovery Protocol (**NDP**) – RFC 4861
+
+* **OSI Layer:** Data Link (L2)
+* **Role:** IPv6 replacement for ARP.
+* **Key Features:**
+
+  * Handles **address resolution, neighbor reachability, and router discovery**.
+  * Uses **ICMPv6 messages**.
+* **Use Case:** In IPv6-only networks, NDP enables devices to automatically discover neighbors and configure themselves.
+
+---
+
+### 🛠️ Internet Control Message Protocol (**ICMP**) – RFC 792
+
+* **OSI Layer:** Network (L3)
+* **Role:** Provides **diagnostic and error-reporting functions**.
+* **Key Features:**
+
+  * Reports unreachable destinations.
+  * Alerts when packet TTL (Time To Live) expires.
+  * Used in **ping** and **traceroute** commands.
+* **Use Case:**
+
+  * `ping google.com` uses ICMP Echo Request/Reply to test connectivity.
+  * `traceroute` uses ICMP messages to trace the path packets take.
+
+---
+
+## 🚚 Layer 4 – Transport Layer Protocols
+
+### 📦 Transmission Control Protocol (**TCP**) – RFC 793
+
+* **OSI Layer:** Transport (L4)
+* **Role:** Reliable, connection-oriented protocol.
+* **Key Features:**
+
+  * Uses **3-way handshake** (SYN, SYN-ACK, ACK) to establish connections.
+  * Guarantees **delivery, order, and error correction**.
+  * Implements **flow control** (sender doesn’t overwhelm receiver).
+* **Use Case:**
+
+  * Web browsing (HTTP/HTTPS)
+  * Emails (SMTP, IMAP, POP)
+  * File transfers (FTP)
+
+---
+
+### 🚀 User Datagram Protocol (**UDP**) – RFC 768
+
+* **OSI Layer:** Transport (L4)
+* **Role:** Lightweight, connectionless protocol.
+* **Key Features:**
+
+  * No handshake → faster but less reliable.
+  * No retransmission or ordering guarantees.
+* **Use Case:**
+
+  * Online gaming 🎮
+  * Video/voice streaming 🎥🎙️
+  * DNS lookups
+
+---
+
+## 🖥️ Layer 7 – Application Layer Protocols
+
+### 🖧 Dynamic Host Configuration Protocol (**DHCP**) – RFC 2131
+
+* **Role:** Automatically assigns **IP addresses, subnet masks, gateways, and DNS servers**.
+* **Process:**
+
+  * DHCP Discover → DHCP Offer → DHCP Request → DHCP Acknowledge (DORA process).
+* **Use Case:** When you connect your phone to Wi-Fi, DHCP gives it an IP automatically.
+
+---
+
+### 🌐 Domain Name System (**DNS**) – RFC 2929
+
+* **Role:** Translates **domain names → IP addresses**.
+* **Key Features:**
+
+  * Hierarchical system (root → TLD → authoritative servers).
+  * Caches results to improve speed.
+* **Use Case:**
+
+  * `www.google.com` → `142.250.190.14`.
+
+---
+
+### 🌍 HyperText Transfer Protocol (**HTTP**) – RFC 2616
+
+* **Role:** Core protocol of the **World Wide Web**.
+* **Key Features:**
+
+  * Client/server model.
+  * Stateless (each request is independent).
+* **Use Case:** Loading web pages, APIs.
+
+---
+
+### 📂 File Transfer Protocol (**FTP**) – RFC 959
+
+* **Role:** Transfers files between client ↔ server.
+* **Modes:**
+
+  * Active & Passive (different ways of handling connections).
+* **Use Case:** Uploading/downloading files to a web server.
+
+---
+
+### 💻 Terminal Network Protocol (**TELNET**) – RFC 854
+
+* **Role:** Provides **text-based remote login**.
+* **Problem:** Insecure (sends data in plaintext).
+* **Use Case:** Rarely used today, replaced by SSH.
+
+---
+
+### 🔒 Secure Shell (**SSH**) – RFC 4253
+
+* **Role:** Secure remote login and administration.
+* **Key Features:**
+
+  * Encryption, authentication, tunneling.
+* **Use Case:**
+
+  * Managing Linux servers remotely.
+  * Secure file transfer (SCP, SFTP).
+
+---
+
+### 📧 Simple Mail Transfer Protocol (**SMTP**) – RFC 5321
+
+* **Role:** Email sending protocol.
+* **Key Features:**
+
+  * Supports authentication & encryption (STARTTLS, SMTPS).
+* **Use Case:**
+
+  * Outlook, Gmail sending emails to mail servers.
+
+---
+
+### 📡 Simple Network Management Protocol (**SNMP**) – RFC 1157
+
+* **Role:** Used for **network monitoring and management**.
+* **Key Features:**
+
+  * Agents run on devices → report data to SNMP manager.
+  * Supports monitoring CPU, memory, bandwidth, etc.
+* **Use Case:** Enterprises monitor switches, routers, servers.
+
+---
+
+### ⏰ Network Time Protocol (**NTP**) – RFC 5905
+
+* **Role:** Synchronizes clocks across devices.
+* **Key Features:**
+
+  * Uses time servers and hierarchical structure (Stratum levels).
+  * Accuracy: within milliseconds over the internet.
+* **Use Case:** Financial systems, databases, logging, authentication (Kerberos).
+
+---
+
+## 📊 OSI Mapping of TCP/IP Protocols
+
+| Protocol (Full Name)                | Abbreviation | RFC  | OSI Layer        | Purpose                       |
+| ----------------------------------- | ------------ | ---- | ---------------- | ----------------------------- |
+| Internet Protocol                   | IP           | 791  | Network (L3)     | Addressing, routing           |
+| Address Resolution Protocol         | ARP          | 826  | Data Link (L2)   | IPv4 → MAC mapping            |
+| Neighbor Discovery Protocol         | NDP          | 4861 | Data Link (L2)   | IPv6 → MAC mapping            |
+| Internet Control Message Protocol   | ICMP         | 792  | Network (L3)     | Diagnostics, error reporting  |
+| Transmission Control Protocol       | TCP          | 793  | Transport (L4)   | Reliable delivery             |
+| User Datagram Protocol              | UDP          | 768  | Transport (L4)   | Fast, connectionless delivery |
+| Dynamic Host Configuration Protocol | DHCP         | 2131 | Application (L7) | Automatic IP allocation       |
+| Domain Name System                  | DNS          | 2929 | Application (L7) | Domain → IP resolution        |
+| HyperText Transfer Protocol         | HTTP         | 2616 | Application (L7) | Web communication             |
+| File Transfer Protocol              | FTP          | 959  | Application (L7) | File transfers                |
+| Terminal Network Protocol           | TELNET       | 854  | Application (L7) | Remote text login             |
+| Secure Shell                        | SSH          | 4253 | Application (L7) | Secure remote access          |
+| Simple Mail Transfer Protocol       | SMTP         | 5321 | Application (L7) | Email transmission            |
+| Simple Network Management Protocol  | SNMP         | 1157 | Application (L7) | Device monitoring             |
+| Network Time Protocol               | NTP          | 5905 | Application (L7) | Time synchronization          |
+
+---
+
