@@ -806,3 +806,113 @@ A **broadcast address** is reserved for sending data to **all devices** in a sub
 * [RFC 6308 – Multicast Addressing](https://tools.ietf.org/html/rfc6308)
 
 ---
+
+# 🌐 **IP Addressing: IPv6, Sockets & Ports**
+
+After IPv4 exhaustion, **IPv6** was introduced as a long-term solution, offering a **128-bit address space**. Alongside IP addressing, the concepts of **sockets** and **ports** enable applications to communicate over networks.
+
+---
+
+## 🔢 IPv6 Addresses
+
+* **Length:** 128 bits (16 bytes).
+* **Representation:** Up to **8 groups of 16-bit hexadecimal numbers**, separated by `:` (colons).
+* **Range:** Each group ranges from `0000` to `FFFF`.
+
+### Example
+
+```
+2001:0b8d:8a52:0000:0000:8b2d:0240:7235
+```
+
+### Shortened Form
+
+* Leading zeros omitted.
+* All-zero groups collapsed to `::`.
+
+```
+2001:b8d:8a52::8b2d:240:7235/64
+```
+
+### Prefix Length (/n)
+
+* `/64` → First **64 bits** represent the **network prefix** (subnet).
+* Similar to **CIDR in IPv4**.
+
+### Example Subnet
+
+```
+2001:b8d:8a52::/64
+```
+
+* First 4 groups (`2001:b8d:8a52:0000`) = **Network ID**
+* Last 4 groups = **Host ID**
+
+📌 Reference: [RFC 2460 – IPv6 Specification](https://tools.ietf.org/html/rfc2460)
+
+---
+
+## ⚡ Sockets
+
+A **socket** is a **software data structure** representing a communication endpoint in networking.
+
+* In Linux, a socket = **file descriptor** managed via system calls.
+* Used by applications to **send/receive data** over the network.
+* Exists only for the lifetime of the **process** that created it.
+* Operates at the **Transport Layer (L4)** of the OSI model.
+
+### 🔑 Characteristics
+
+* Two endpoints: **Sender** & **Receiver**.
+* Each endpoint has an **IP address**.
+* Multiple sockets can exist between two devices (parallel connections).
+
+---
+
+## 🔌 Ports
+
+A **port** is a **logical identifier** that specifies which process/service on a host is communicating.
+
+* **Range:** 0 – 65535
+* **Well-Known Ports (0–1024):** Reserved for common services.
+* **Ephemeral Ports (>1024):** Temporary, used by applications.
+* Always associated with an **IP address** → `(IP address : Port)` pair.
+
+### 📋 Common Well-Known Ports
+
+| Port      | Service                              | Protocol |
+| --------- | ------------------------------------ | -------- |
+| **21**    | FTP (File Transfer Protocol)         | TCP      |
+| **22**    | SSH (Secure Shell)                   | TCP      |
+| **25**    | SMTP (Simple Mail Transfer Protocol) | TCP      |
+| **53**    | DNS (Domain Name System)             | UDP/TCP  |
+| **67/68** | DHCP (67 = server, 68 = client)      | UDP      |
+| **80**    | HTTP (HyperText Transfer Protocol)   | TCP      |
+| **443**   | HTTPS (HTTP Secure)                  | TCP      |
+
+---
+
+## 🔑 Relationship: Socket = IP + Port
+
+A socket is uniquely identified by:
+
+```
+<IP Address> : <Port Number>
+```
+
+### Example
+
+* Web browser connecting to Google:
+
+```
+IP: 142.250.190.14
+Port: 443
+Socket = 142.250.190.14:443
+```
+
+📌 References:
+
+* [RFC 147 – TCP/IP Socket Concepts](https://tools.ietf.org/html/rfc147)
+* [RFC 1340 – Assigned Numbers (Well-Known Ports)](https://tools.ietf.org/html/rfc1340)
+
+---
