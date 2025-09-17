@@ -341,3 +341,101 @@ The **application layer** is the **closest layer to the end user**. It does not 
 * **TCP/IP Model:** Widely used in real-world networking because of its **protocol-centric approach**.
 
 ---
+
+# 🌐 **TCP/IP Network Stack Model**
+
+The **TCP/IP model** is a **four-layer interpretation** of the OSI networking stack, where some of the OSI layers are consolidated.
+
+📌 **Chronology:**
+
+* The **TCP/IP model** was developed **before** the OSI model.
+* Proposed by the **US Department of Defense (DoD)** as part of a DARPA (Defense Advanced Research Projects Agency) project.
+* This project later evolved into the **modern internet**.
+
+Both **OSI** and **TCP/IP** provide a layered approach to networking, but TCP/IP is more **protocol-centric** and practical, whereas OSI is more **theoretical**.
+
+---
+
+## 🗂️ Comparison: OSI vs TCP/IP Models
+
+<div align="center">
+  <img src="./images/03.png" width="500px"/>
+  
+**Figure 7.3 – The OSI and TCP/IP models**
+</div>
+
+
+---
+
+## 📶 Layers of the TCP/IP Model
+
+### 1️⃣ Network Interface Layer
+
+* Responsible for **data delivery over a physical medium** (wire, wireless, optical).
+* Combines **Physical Layer + Data Link Layer** of the OSI model.
+
+🔑 **Protocols:**
+
+* Ethernet
+* Token Ring
+* Frame Relay
+
+---
+
+### 2️⃣ Internet Layer
+
+* Provides **connectionless data delivery** between nodes.
+* Uses **routing functions** to determine the best path.
+* Breaks data into **packets** at sender, reassembles at receiver.
+* Maps to **Network Layer (L3)** in the OSI model.
+
+🔑 **Protocols:**
+
+* IP (Internet Protocol)
+* ARP (Address Resolution Protocol)
+* ICMP (Internet Control Message Protocol)
+* IGMP (Internet Group Management Protocol)
+
+---
+
+### 3️⃣ Transport Layer
+
+* Also called **Transmission Layer** or **Host-to-Host Layer**.
+* Ensures **reliable communication** between endpoints.
+* Implements **error detection & correction**.
+* Maps directly to **Transport Layer (L4)** in the OSI model.
+
+🔑 **Protocols:**
+
+* TCP (Transmission Control Protocol)
+* UDP (User Datagram Protocol)
+
+---
+
+### 4️⃣ Application Layer
+
+* Provides **data communication services** to applications.
+* Combines **Session, Presentation, and Application Layers** of the OSI model.
+
+🔑 **Protocols:**
+
+* DNS (Domain Name System)
+* HTTP/HTTPS (Web communication)
+* FTP (File Transfer Protocol)
+* SMTP, POP, IMAP (Email protocols)
+* SNMP (Simple Network Management Protocol)
+* Telnet
+
+---
+
+## 🌍 Key Differences
+
+| Feature      | OSI Model (7 Layers)                | TCP/IP Model (4 Layers)                 |
+| ------------ | ----------------------------------- | --------------------------------------- |
+| **Concept**  | Theoretical model for communication | Practical model for the internet        |
+| **Layers**   | 7 (detailed separation)             | 4 (consolidated)                        |
+| **Focus**    | Functionality of each layer         | Protocols and real-world implementation |
+| **Examples** | Education, troubleshooting          | Internet, real-world networking         |
+
+---
+
