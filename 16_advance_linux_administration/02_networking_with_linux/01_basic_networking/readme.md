@@ -210,3 +210,55 @@ The **data link layer** ensures a **reliable data flow** between two directly co
   * Binary networking protocol.
   * Widely used in **high-speed broadband communication networks**.
 
+
+## 🌍 Network Layer (Layer 3)
+
+The **network layer** is responsible for **finding the optimal communication path** between devices across networks. It ensures data packets move from **source → destination** effectively.
+
+### 🔑 Responsibilities
+
+* **Routing:** Determines the best path for data using **IP addresses**.
+* **Packetization:**
+
+  * **Transmitting end:** Breaks **transport layer segments** into **network packets**.
+  * **Receiving end:** Reassembles **frames (from Data Link Layer)** into **packets**.
+
+### 🛠️ Key Protocols
+
+* **Internet Control Message Protocol (ICMP):**
+
+  * Used for **diagnosing network issues**.
+  * Sends error/status messages such as:
+
+    * `Destination network unreachable`
+    * `Timer expired`
+    * `Source route failed`
+
+---
+
+## 🚚 Transport Layer (Layer 4)
+
+The **transport layer** ensures reliable **end-to-end delivery** of data, working with **segments (TCP)** or **datagrams (UDP)**.
+
+### 🔑 Responsibilities
+
+* **Data Segmentation:**
+
+  * **Transmitting end:** Breaks data (from Session Layer) into **segments**.
+  * **Receiving end:** Reassembles **packets (from Network Layer)** into **segments**.
+* **Quality of Service (QoS):** Guarantees specific delivery quality.
+* **Reliability:** Maintains integrity with error detection and retransmission.
+* **Flow Control:** Matches transfer rate between sender & receiver to prevent overload.
+* **Error Control:** Requests retransmission if data is corrupted or missing.
+
+### 🛠️ Key Protocols
+
+* **Transmission Control Protocol (TCP):**
+
+  * Reliable, connection-oriented.
+  * Ensures ordered delivery and retransmission if errors occur.
+* **User Datagram Protocol (UDP):**
+
+  * Faster, connectionless.
+  * No error correction—used in streaming, gaming, VoIP.
+
