@@ -262,3 +262,82 @@ The **transport layer** ensures reliable **end-to-end delivery** of data, workin
   * Faster, connectionless.
   * No error correction—used in streaming, gaming, VoIP.
 
+## 💬 Session Layer (Layer 5)
+
+The **session layer** manages the **lifetime of communication sessions** (channels) between devices. A session defines when communication starts, how long it lasts, and how it ends.
+
+### 🔑 Responsibilities
+
+* Establishes, manages, and terminates **sessions**.
+* Uses **network addresses, sockets, and ports** to define sessions.
+* Ensures **data integrity** within a session.
+* Provides **checkpointing & recovery** → if a session is interrupted, it resumes from the last checkpoint.
+
+### 🛠️ Protocols
+
+* **Remote Procedure Call (RPC):** Used in interprocess communications.
+* **NetBIOS (Network Basic Input/Output System):** Provides **file-sharing** and **name-resolution** services.
+
+---
+
+## 🎨 Presentation Layer (Layer 6)
+
+The **presentation layer** acts as the **translator** of the OSI model. It ensures that data sent from one system can be understood by another, regardless of their internal formats.
+
+### 🔑 Responsibilities
+
+* Converts data into a **system-independent representation** before transmission.
+* Transforms incoming data into **application-friendly formats**.
+* Handles:
+
+  * 🔒 **Encryption / Decryption** (e.g., SSL/TLS)
+  * 📦 **Compression / Decompression** (e.g., ZIP)
+  * 🔤 **Encoding / Decoding**
+  * 🔄 **Serialization / Deserialization**
+
+### 📂 Examples of Standard Data Formats
+
+* **ASCII** (American Standard Code for Information Interchange)
+* **XML** (Extensible Markup Language)
+* **JSON** (JavaScript Object Notation)
+* **JPEG** (Image format)
+* **ZIP** (Compression format)
+
+⚡ Note: In practice, the **presentation layer and application layer** are often tightly coupled.
+
+---
+
+## 🖥️ Application Layer (Layer 7)
+
+The **application layer** is the **closest layer to the end user**. It does not run applications themselves, but rather provides **communication services** that applications use.
+
+### 🔑 Responsibilities
+
+* Provides **input/output handling** for application data.
+* Acts as a **bridge** between user applications and the network.
+* Supports end-user services like **web browsing, file transfers, and email**.
+
+### 🛠️ Protocols
+
+* **DNS** (Domain Name System)
+* **HTTP** (HyperText Transfer Protocol)
+* **FTP** (File Transfer Protocol)
+* **Email Protocols:**
+
+  * **POP** (Post Office Protocol)
+  * **IMAP** (Internet Message Access Protocol)
+  * **SMTP** (Simple Mail Transfer Protocol)
+
+---
+
+# 🏗️ OSI vs TCP/IP Model
+
+* The **OSI Model** (7 layers) provides a **theoretical framework** for how network communication should work.
+* The **TCP/IP Model** is a **practical implementation** with fewer layers (some OSI layers are collapsed).
+
+### ✅ Why They Matter
+
+* **OSI Model:** Great for **understanding networking concepts** and troubleshooting.
+* **TCP/IP Model:** Widely used in real-world networking because of its **protocol-centric approach**.
+
+---
