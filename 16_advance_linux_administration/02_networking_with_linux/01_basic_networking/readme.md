@@ -916,3 +916,417 @@ Socket = 142.250.190.14:443
 * [RFC 1340 – Assigned Numbers (Well-Known Ports)](https://tools.ietf.org/html/rfc1340)
 
 ---
+
+# 🐧 **Linux Network Configuration**
+
+## 🧰 Prerequisites
+
+* A Linux system (Ubuntu 22.04 used in examples).
+* Sudo privileges for editing system network settings.
+* Basic familiarity with a text editor like `nano` (or `vim`).
+
+---
+
+## 🔍 Viewing Current IP Configuration
+
+### ✅ Command
+
+```bash
+ip addr show
+```
+
+### 🧠 What it does
+
+* Uses the `ip` (iproute2) suite to **list all network interfaces** and their assigned **IPv4/IPv6 addresses**, **MAC**, **MTU**, link state, and more.
+
+### 🧩 Important output fields
+
+Your sample:
+
+```bash
+hashim@hashim-V:~$ ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host noprefixroute 
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:55:08:5a brd ff:ff:ff:ff:ff:ff
+    altname enx08002755085a
+    inet 10.0.2.15/24 brd 10.0.2.255 scope global dynamic noprefixroute enp0s3
+       valid_lft 84651sec preferred_lft 84651sec
+```
+
+* `1: lo:` — The **loopback** interface (local traffic on the same host).
+
+  * Flags: `LOOPBACK`, `UP` (enabled), `LOWER_UP` (carrier present).
+  * `mtu 65536` — Max packet size (loopback uses a large MTU).
+  * `inet 127.0.0.1/8` — IPv4 loopback.
+  * `inet6 ::1/128` — IPv6 loopback.
+* `2: enp0s3:` — A **physical**/virtual Ethernet interface.
+
+  * Flags: `BROADCAST`, `MULTICAST`, `UP`, `LOWER_UP` (link detected).
+  * `mtu 1500` — Typical Ethernet MTU.
+  * `qdisc fq_codel` — Queue discipline used for buffering/latency control.
+  * `link/ether 08:00:27:55:08:5a` — **MAC address**.
+  * `altname enx08002755085a` — An alternate kernel/udev-generated stable name.
+  * `inet 10.0.2.15/24` — IPv4 address with a `/24` mask.
+  * `brd 10.0.2.255` — Calculated broadcast address.
+  * `scope global` — Globally scoped (not limited to host or link only).
+  * `dynamic` — Assigned by **DHCP**.
+  * `noprefixroute` — Kernel won’t auto-add a connected route; routing handled by manager.
+  * `valid_lft` / `preferred_lft` — Lease lifetimes from DHCP.
+
+> 💡 Tip: On VirtualBox NAT, `10.0.2.15` is the classic DHCP IP for the guest.
+
+---
+
+## 🧭 Ubuntu Network Configuration with **Netplan**
+
+Ubuntu 22.04 uses **Netplan** to generate backend configs for either:
+
+* **NetworkManager** (desktop-oriented), or
+* **systemd-networkd** (server/cloud oriented).
+
+### 📁 Where configs live
+
+```bash
+ls /etc/netplan/
+```
+
+Your output:
+
+```bash
+hashim@hashim-V:~$ ls /etc/netplan/
+01-network-manager-all.yaml  50-cloud-init.yaml  90-NM-1eef7e45-3b9d-3043-bee3-fc5925c90273.yaml
+```
+
+* Multiple YAML files can exist. **Netplan merges** them by filename order.
+* Lower numbers (e.g., `01-...`) apply **first**, higher numbers (e.g., `90-...`) can **override**.
+* Files like `50-cloud-init.yaml` may be provisioned by cloud-init.
+* You can safely **back up** before editing:
+
+### ✅ Command (backup)
+
+```bash
+sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/50-cloud-init.yaml.bak
+```
+
+* **What it does:** Copies the file to a `.bak` backup.
+* **When to use:** Before making changes so you can revert quickly.
+
+---
+
+## 🌐 Dynamic IP (DHCP) Configuration
+
+### 1) Edit the Netplan YAML
+
+```bash
+sudo nano /etc/netplan/50-cloud-init.yaml
+```
+
+Paste/update (your example):
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: true
+```
+
+* `version: 2` — Netplan schema version.
+* `ethernets.enp0s3` — Configure the interface named `enp0s3`.
+* `dhcp4: true` — Enable **DHCPv4** to automatically get IP, gateway, DNS.
+
+### 2) Test the configuration safely
+
+```bash
+sudo netplan try
+```
+
+**What you saw:**
+
+```text
+Press ENTER before the timeout to accept the new configuration
+
+Changes will revert in 114 seconds
+Configuration accepted.
+```
+
+* **What it does:** Applies config **temporarily** with a fail-safe timeout.
+* **Why it’s great:** If you lose connectivity (e.g., remote SSH), it auto-reverts after the countdown.
+* **Accept:** Press **ENTER** to keep changes permanently.
+
+---
+
+## 📍 Static IP Configuration
+
+### 1) Edit the YAML for a static address
+
+```bash
+sudo nano /etc/netplan/50-cloud-init.yaml
+```
+
+Your content:
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      dhcp4: false
+      addresses:
+        - 192.168.122.22/24
+      routes:
+        - to: 0.0.0.0/0
+          via: 192.168.122.1
+      nameservers:
+        addresses: [8.8.8.8, 8.8.4.4]
+```
+
+**Explanation:**
+
+* `dhcp4: false` — Turn off DHCPv4.
+* `addresses` — One or more **CIDR** addresses. Here: `192.168.122.22/24`.
+* `routes` — Static routes. `0.0.0.0/0` means **default route** (send all traffic) via **gateway** `192.168.122.1`.
+* `nameservers.addresses` — DNS servers (**Google DNS** in this case).
+
+> ⚠️ **Caution (remote systems):** Switching to static can drop your SSH session if misconfigured (wrong gateway/DNS). Always use `sudo netplan try` first.
+
+### 2) Test, accept, and verify
+
+```bash
+sudo netplan try
+```
+
+Your prompt:
+
+```text
+Do you want to keep these settings?
+
+Press ENTER before the timeout to accept the new configuration
+
+Changes will revert in 117 seconds
+Configuration accepted.
+```
+
+### 3) Check the result
+
+```bash
+ip addr show
+```
+
+Your intermediate output:
+
+```bash
+...
+inet 192.168.122.22/24 ... enp0s3
+...
+inet 10.0.2.15/24 ... dynamic ... enp0s3
+```
+
+#### 🔎 Why did you see **two IPv4 addresses** on the same interface?
+
+Because **another Netplan YAML** (or the backend) was still enabling DHCP on `enp0s3`. You found it with:
+
+```bash
+sudo grep -nH "dhcp4" /etc/netplan/*.yaml
+```
+
+Output:
+
+```bash
+/etc/netplan/50-cloud-init.yaml:5:      dhcp4: false
+/etc/netplan/90-NM-1eef7e45-3b9d-3043-bee3-fc5925c90273.yaml:7:      dhcp4: true
+```
+
+* `-n` — Show line numbers.
+* `-H` — Show filename.
+* Pattern `"dhcp4"` — Find lines configuring DHCPv4.
+* **Interpretation:** `50-cloud-init.yaml` disables DHCP, but `90-NM-*.yaml` re-enables it later (higher precedence), so both a **static** and a **DHCP** address were active.
+
+### 4) Inspect the other YAML (and what fields mean)
+
+```bash
+sudo cat /etc/netplan/90-NM-1eef7e45-3b9d-3043-bee3-fc5925c90273.yaml
+```
+
+You saw:
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    enp0s3:
+      renderer: NetworkManager
+      match: {}
+      dhcp4: false
+      networkmanager:
+        uuid: "1eef7e45-3b9d-3043-bee3-fc5925c90273"
+        name: "netplan-enp0s3"
+        passthrough:
+          connection.timestamp: "1757402215"
+          ipv6.method: "disabled"
+          ipv6.ip6-privacy: "-1"
+          proxy._: ""
+```
+
+**Explanation of special fields:**
+
+* `renderer: NetworkManager` — Tells Netplan to render configs for **NetworkManager** (desktop). Alternative is `networkd` (servers).
+* `match: {}` — No specific match rules; applies by interface name (`enp0s3`).
+* `networkmanager: ...` — NM-specific metadata:
+
+  * `uuid`/`name` — Connection profile identity in NM.
+  * `passthrough` — Raw NM key/values passed directly (e.g., disable IPv6).
+  * `connection.timestamp` — Last change epoch timestamp.
+  * `ipv6.method: disabled` — IPv6 disabled for this profile.
+  * `ipv6.ip6-privacy: -1` — NM privacy setting (default/auto).
+
+> ✅ You ultimately set **`dhcp4: false`** here and then applied Netplan, removing the DHCP address so only the static address remained.
+
+### 5) Apply permanently
+
+```bash
+sudo netplan apply
+```
+
+* **What it does:** Writes backend configs and activates them permanently (no auto-revert timer).
+* **When to use:** After verifying with `netplan try`, or when working locally.
+
+### 6) Final verification
+
+```bash
+ip addr show
+```
+
+Your final state:
+
+```bash
+...
+inet 192.168.122.22/24 brd 192.168.122.255 scope global noprefixroute enp0s3
+   valid_lft forever preferred_lft forever
+```
+
+Now only the **static** IP remains on `enp0s3`.
+
+---
+
+## 🧪 Command Reference — With Detailed Explanations
+
+### 1) `ip addr show`
+
+* **Purpose:** List interfaces, IPs, MAC, MTU, flags, lifetimes.
+* **Useful flags:**
+
+  * `ip -br addr` — Brief, one-line per interface.
+  * `ip -4 addr` / `ip -6 addr` — Only IPv4 / only IPv6.
+* **When to use:** Quick status before/after changes.
+
+### 2) `ls /etc/netplan/`
+
+* **Purpose:** Show all Netplan YAMLs being merged in order.
+* **When to use:** If behavior is unexpected — there may be **multiple files**.
+
+### 3) `sudo cp SRC DST`
+
+* **Purpose:** Back up configs before editing.
+* **When to use:** **Always** before risky edits.
+
+### 4) `sudo nano /etc/netplan/<file>.yaml`
+
+* **Purpose:** Edit Netplan config.
+* **Tips:** Maintain **YAML indentation** (2 spaces). Tabs break YAML.
+
+### 5) `sudo netplan try`
+
+* **Purpose:** Test configuration with **auto-revert** safety (great over SSH).
+* **Flow:**
+
+  1. Applies config temporarily.
+  2. Countdown displayed.
+  3. Press **ENTER** to keep; do nothing to revert.
+
+### 6) `sudo netplan apply`
+
+* **Purpose:** Apply the configuration **permanently** (no timer).
+* **When to use:** After you’re confident the config is correct.
+
+### 7) `sudo grep -nH "dhcp4" /etc/netplan/*.yaml`
+
+* **Purpose:** Find where DHCP is configured across multiple Netplan files.
+* **Flags:**
+
+  * `-n` (line numbers), `-H` (filenames).
+* **When to use:** Duplicate or conflicting settings symptoms (e.g., two IPs).
+
+### 8) `sudo cat /etc/netplan/<file>.yaml`
+
+* **Purpose:** Inspect exact file contents.
+* **When to use:** Auditing merged behavior and understanding overrides.
+
+---
+
+## 🧠 Netplan Merging & Precedence (Why Multiple Files Matter)
+
+* Netplan **merges all YAMLs** in `/etc/netplan/` in **lexicographical order**.
+* Higher numbers (e.g., `90-...yaml`) can **override** earlier settings (`01-...yaml`, `50-...yaml`).
+* If two files touch the **same interface** (`enp0s3`) and one says `dhcp4: true` while another says `false`, the **later file wins**.
+* **Best practice:** Keep a **single source of truth** for each interface to avoid confusion.
+
+---
+
+## 🧬 DHCP vs Static — When to Use What?
+
+* **DHCP (dynamic)**
+
+  * Pros: Zero manual config, works anywhere, ideal for laptops/VMs that move networks.
+  * Cons: IP can change; not ideal for servers needing stable addresses.
+* **Static**
+
+  * Pros: Stable IP for servers/services, port forwarding, firewall rules, DNS.
+  * Cons: Must set **address**, **gateway**, and **DNS** correctly; mistakes can isolate the machine.
+
+---
+
+## 🧰 Quick Troubleshooting
+
+* See generated backend files:
+
+  ```bash
+  sudo netplan generate --debug
+  ```
+
+  *(Shows how Netplan renders your YAML and which renderer is being used.)*
+
+* Check routing/gateway:
+
+  ```bash
+  ip route
+  ```
+
+  Look for a default route like:
+
+  ```
+  default via 192.168.122.1 dev enp0s3
+  ```
+
+* Test connectivity:
+
+  ```bash
+  ping -c 3 8.8.8.8        # tests basic IP connectivity
+  ping -c 3 google.com      # tests DNS resolution too
+  ```
+
+* If using **NetworkManager**, confirm what NM thinks:
+
+  ```bash
+  nmcli device show enp0s3
+  nmcli connection show
+  ```
+
+> 💡 If you’re on a GUI desktop, NetworkManager might manage the interface even when Netplan is present. Ensuring the **renderer** is consistently `NetworkManager` (or `networkd`) avoids conflicts.
+
+---
