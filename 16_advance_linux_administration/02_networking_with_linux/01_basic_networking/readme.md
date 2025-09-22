@@ -1330,3 +1330,210 @@ Now only the **static** IP remains on `enp0s3`.
 > 💡 If you’re on a GUI desktop, NetworkManager might manage the interface even when Netplan is present. Ensuring the **renderer** is consistently `NetworkManager` (or `networkd`) avoids conflicts.
 
 ---
+
+
+# 🌍 **Linux Hostname Configuration**
+
+
+## 📌 What is a Hostname?
+
+* The **hostname** is the **name of your computer** on a network.
+* It helps other systems and users identify your machine.
+* Example: `hashim-V`, `server01`, `db-node-1`.
+
+---
+
+## 🔎 Viewing the Current Hostname
+
+### ✅ Commands
+
+```bash
+hostname
+```
+
+or
+
+```bash
+hostnamectl
+```
+
+### 🧠 Explanation
+
+* `hostname` → Prints the current short hostname only.
+* `hostnamectl` → Displays **detailed information**, including:
+
+  * Static hostname
+  * Chassis type (e.g., `vm`, `server`, `laptop`)
+  * Machine ID, Boot ID
+  * Virtualization platform
+  * OS, Kernel, Architecture
+  * Hardware vendor/model
+
+### 🖥️ Example (your output)
+
+```bash
+hashim@hashim-V:~$ hostname
+hashim-V
+
+hashim@hashim-V:~$ hostnamectl
+ Static hostname: Hashim
+       Icon name: computer-vm
+         Chassis: vm 🖴
+      Machine ID: e075bdba9be14d3296eb19435df3db2b
+         Boot ID: e2fc4f55bf784f36942c819d22cdcf39
+  Virtualization: oracle
+Operating System: Ubuntu 25.04
+          Kernel: Linux 6.14.0-15-generic
+    Architecture: x86-64
+ Hardware Vendor: innotek GmbH
+  Hardware Model: VirtualBox
+Firmware Version: VirtualBox
+   Firmware Date: Fri 2006-12-01
+    Firmware Age: 18y 9month 3w 1d
+```
+
+---
+
+## 🛠️ Changing the Hostname (Permanent Method)
+
+The most convenient way is with the **`hostnamectl`** command.
+
+### ✅ Command
+
+```bash
+sudo hostnamectl set-hostname Hashim
+```
+
+### 🧠 Explanation
+
+* `hostnamectl` → Systemd tool for managing hostnames.
+* `set-hostname` → Changes the **static hostname** (stored in `/etc/hostname`).
+* Requires `sudo` because it modifies system files.
+
+### 🔎 Verification
+
+```bash
+hostname
+hostnamectl
+```
+
+Your results:
+
+```bash
+hashim@hashim-V:~$ hostname
+Hashim
+
+hashim@hashim-V:~$ hostnamectl
+ Static hostname: Hashim
+ ...
+```
+
+✔️ The hostname is now **Hashim** and will **persist after reboot**.
+
+---
+
+## ⚡ Changing the Hostname (Temporary Method)
+
+Alternatively, you can use the `hostname` command to set the hostname:
+
+### ✅ Command
+
+```bash
+sudo hostname jupiter
+```
+
+### 🧠 Explanation
+
+* This changes the hostname **immediately**, but only in memory.
+* After a reboot, it will **revert** to the permanent hostname (stored in `/etc/hostname`).
+
+---
+
+## 📁 Making Hostname Changes Permanent Manually
+
+If you use the temporary method, you must update the following files:
+
+1. **`/etc/hostname`**
+
+   * Contains the system’s permanent hostname (one line).
+   * Example:
+
+     ```text
+     Hashim
+     ```
+
+2. **`/etc/hosts`**
+
+   * Maps hostnames to IP addresses.
+   * Must be updated to reflect your new hostname.
+   * Example (changing `hashim-V` → `Hashim`):
+
+     ```text
+     127.0.0.1   localhost
+     127.0.1.1   Hashim
+     ```
+
+Without updating `/etc/hosts`, some applications may fail to resolve the hostname.
+
+---
+
+## 🧪 Command Reference — With Explanations
+
+### 1) `hostname`
+
+* **Purpose:** Print or set the hostname temporarily.
+* **Usage:**
+
+  * `hostname` → View current hostname.
+  * `sudo hostname newname` → Change hostname until reboot.
+
+### 2) `hostnamectl`
+
+* **Purpose:** Manage hostnames (via systemd).
+* **Usage:**
+
+  * `hostnamectl` → View detailed system info.
+  * `sudo hostnamectl set-hostname newname` → Change hostname permanently.
+
+### 3) Editing `/etc/hostname`
+
+* **Purpose:** Define the permanent hostname.
+* **Usage:** Place the desired hostname (single line) in the file.
+
+### 4) Editing `/etc/hosts`
+
+* **Purpose:** Ensure the hostname resolves locally.
+* **Usage:** Update `127.0.1.1` entry with your new hostname.
+
+---
+
+## ✅ Quick Checklists
+
+### Permanently Change Hostname
+
+1. Run:
+
+   ```bash
+   sudo hostnamectl set-hostname NewName
+   ```
+2. Verify:
+
+   ```bash
+   hostname
+   hostnamectl
+   ```
+3. Check `/etc/hostname` and `/etc/hosts`.
+
+---
+
+### Temporarily Change Hostname
+
+1. Run:
+
+   ```bash
+   sudo hostname TempName
+   ```
+2. Verify with `hostname`.
+3. Note: Reverts after reboot unless `/etc/hostname` is updated.
+
+---
