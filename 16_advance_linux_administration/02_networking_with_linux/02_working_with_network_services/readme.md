@@ -184,3 +184,227 @@ This proves that:
 * The first step in your network path is your **local gateway/router**.
 
 ---
+
+# 🌐 **DNS Servers in Linux**
+
+## 📝 What is DNS?
+
+**DNS (Domain Name System)**, also known as a **name server**, is a service that:
+
+* Converts **hostnames** (like `wikipedia.org`) into **IP addresses** (like `208.80.154.224`).
+* Makes it easier for users and applications to communicate without remembering complex numeric IPs.
+* Uses the **DNS protocol** (Application Layer, OSI Layer 7).
+
+📖 Analogy:
+DNS is like an **address book** 📖 — you look up a name (hostname) and get the exact address (IP).
+
+---
+
+## 🏗️ DNS in TCP/IP Networks
+
+* Devices can communicate with each other using **hostnames**, not just IPs.
+* On the internet, DNS relies on a **globally distributed network of DNS servers**.
+* Even in small local networks, DNS simplifies communication between machines.
+
+---
+
+## 🛠️ Types of DNS Servers
+
+DNS servers are organized in a **hierarchical system**, working together to resolve queries.
+
+1. **Recursive Servers**
+
+   * Act as resolvers for user queries.
+   * Contact multiple DNS servers on your behalf to find the final IP.
+   * Use **caching** for faster future lookups.
+
+2. **Root Servers**
+
+   * The top-level servers in DNS hierarchy.
+   * Direct queries to appropriate **TLD servers**.
+
+3. **TLD Servers**
+
+   * Manage top-level domains (`.com`, `.org`, `.net`, etc.).
+   * Direct queries to **authoritative servers** for the requested domain.
+
+4. **Authoritative Servers**
+
+   * Contain the **actual DNS records** (zone files) of domains.
+   * Provide the final IP address to complete the lookup.
+
+---
+
+## 🔄 Recursive vs Iterative Queries
+
+* **Recursive Query**:
+
+  * A DNS server (resolver) does all the work and gives you the final answer.
+  * Faster because it uses **caching**.
+
+* **Iterative Query**:
+
+  * Each DNS server replies with a reference to another DNS server.
+  * The client follows the chain until the answer is found.
+
+---
+
+## 📂 DNS Zone Files
+
+* DNS servers store **hostname-to-IP mappings** in **zone files**.
+* Zone files are usually simple **ASCII text files**.
+* On Linux, a local resolver file is:
+
+```bash
+/etc/resolv.conf
+```
+
+---
+
+## 💻 Querying DNS in Linux
+
+### 🔎 1. Checking Local DNS Resolver
+
+```bash
+cat /etc/resolv.conf | grep nameserver
+```
+
+#### Example Output:
+
+```bash
+hashim@Hashim:~$ cat /etc/resolv.conf | grep nameserver
+nameserver 127.0.0.53
+```
+
+✅ **Explanation**:
+
+* `127.0.0.53` → Local loopback DNS resolver (systemd-resolved).
+
+---
+
+### 🔎 2. Using `nslookup`
+
+Install **dnsutils** if not available:
+
+```bash
+sudo apt install dnsutils
+```
+
+#### Example 1: Lookup Local Host
+
+```bash
+nslookup neptune.local
+```
+
+Output:
+
+```bash
+Server:  127.0.0.53
+Address: 127.0.0.53#53
+```
+
+✅ This shows the local DNS resolver is handling the request.
+
+---
+
+#### Example 2: Interactive `nslookup`
+
+```bash
+nslookup
+> wikipedia.org
+```
+
+Output:
+
+```bash
+Server:   127.0.0.53
+Address:  127.0.0.53#53
+
+Non-authoritative answer:
+Name:     wikipedia.org
+Address:  103.102.166.224
+Name:     wikipedia.org
+Address:  2001:df2:e500:ed1a::1
+```
+
+✅ **Explanation**:
+
+* **Server**: Local resolver (loopback).
+* **Name**: Domain being queried (`wikipedia.org`).
+* **Address**: IPv4 (`103.102.166.224`) and IPv6 (`2001:df2:e500:ed1a::1`) results.
+
+To exit → Press **Ctrl + C**.
+
+---
+
+#### Example 3: Reverse Lookup
+
+```bash
+nslookup 8.8.8.8
+```
+
+Output:
+
+```bash
+8.8.8.8.in-addr.arpa  name = dns.google.
+```
+
+✅ This resolves the IP `8.8.8.8` (Google’s public DNS) back to its hostname `dns.google`.
+
+---
+
+### 🔎 3. Using `dig`
+
+Install if missing:
+
+```bash
+sudo apt install dnsutils   # Ubuntu/Debian
+sudo dnf install bind-utils # Fedora
+```
+
+#### Example: Forward Lookup
+
+```bash
+dig google.com
+```
+
+Output (shortened):
+
+```bash
+;; ANSWER SECTION:
+google.com.   278 IN A  216.58.209.142
+```
+
+✅ Shows that `google.com` resolves to **216.58.209.142**.
+
+---
+
+#### Example: Reverse Lookup
+
+```bash
+dig -x 8.8.4.4
+```
+
+Output:
+
+```bash
+;; ANSWER SECTION:
+4.4.8.8.in-addr.arpa. 8199 IN PTR dns.google.
+```
+
+✅ Confirms IP `8.8.4.4` belongs to `dns.google`.
+
+---
+
+## 📊 DNS in OSI Model
+
+* Operates at **Application Layer (Layer 7)**.
+* Uses **Port 53** (both TCP & UDP).
+* Works closely with DHCP to provide:
+
+  * **IP addressing** (DHCP)
+  * **Name resolution** (DNS)
+
+---
+
+
