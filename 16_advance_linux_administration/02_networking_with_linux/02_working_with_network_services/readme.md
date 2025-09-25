@@ -878,3 +878,135 @@ Response:
 ⚠️ SMTP commands are **plaintext by default** → Always use TLS for encryption.
 
 ---
+
+# ⏱️ **NTP Servers in Linux Networking**
+
+## 📝 What is NTP?
+
+**NTP (Network Time Protocol)** is a standard protocol for **clock synchronization** between computers on a network.
+
+* Synchronizes system clocks within a few **milliseconds of UTC (Coordinated Universal Time)**.
+* Ensures all devices share a **consistent and accurate time reference**.
+* Critical for:
+
+  * Logging and monitoring
+  * Security certificates
+  * Scheduling tasks
+  * Distributed systems
+
+---
+
+## ⚙️ How NTP Works
+
+* Follows a **Client-Server model**.
+* **NTP Server**: Acts as a time source.
+
+  * Sends timestamp datagrams to clients.
+  * Broadcasts or unicasts updates.
+* **Clients**: Adjust their system clocks based on received timestamps.
+* **NTP Servers themselves** synchronize with highly accurate **global time servers**.
+* Uses specialized **algorithms** to correct for network latency.
+
+---
+
+## 🛠️ Checking NTP Synchronization
+
+### 1. Install `ntpstat`
+
+On **Ubuntu/Debian**:
+
+```bash
+sudo apt install ntpstat
+```
+
+On **Fedora**:
+
+```bash
+sudo dnf install ntpstat
+```
+
+⚠️ `ntpstat` requires a **local NTP server** to be running.
+
+---
+
+## 📦 Setting Up a Local NTP Server (Ubuntu 22.04 Example)
+
+1. **Install NTP**
+
+   ```bash
+   sudo apt install ntp
+   ```
+
+2. **Check Service Status**
+
+   ```bash
+   sudo systemctl status ntp
+   ```
+
+3. **Enable Service**
+
+   ```bash
+   sudo systemctl enable ntp
+   ```
+
+4. **Allow NTP in Firewall (Port 123/UDP)**
+
+   ```bash
+   sudo ufw allow from any to any port 123 proto udp
+   ```
+
+5. **Install `ntpdate` for manual updates**
+
+   ```bash
+   sudo apt install ntpdate
+   ```
+
+6. **Restart Service**
+
+   ```bash
+   sudo systemctl restart ntp
+   ```
+
+⚠️ Note: Ubuntu uses **`systemd-timesyncd`** by default. Installing `ntpd` will disable `timesyncd`.
+
+---
+
+## 🔎 Checking Synchronization
+
+```bash
+ntpstat
+```
+
+### Example Output:
+
+```bash
+hashim@Hashim:~$ ntpstat
+synchronised to unspecified at stratum 3
+   time correct to within 405 ms
+   polling server every 64 s
+```
+
+✅ **Explanation**:
+
+* **synchronised to unspecified at stratum 3** → System is synced with an NTP server (stratum 3 = relative accuracy).
+* **time correct to within 405 ms** → Clock accuracy margin.
+* **polling server every 64 s** → Interval between sync requests.
+
+---
+
+## 🌍 Digging More Info About the NTP Server
+
+```bash
+dig -x 31.209.85.242
+```
+
+### Example Output:
+
+```bash
+;; ANSWER SECTION:
+242.85.209.31.in-addr.arpa. 505 IN PTR ntp1.lwlcom.net.
+```
+
+✅ Shows that the IP `31.209.85.242` maps to **ntp1.lwlcom.net**, a public NTP server.
+
+---
