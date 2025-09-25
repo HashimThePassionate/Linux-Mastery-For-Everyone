@@ -672,3 +672,78 @@ Printer servers are closely tied to **file sharing**:
 * Closely related to **file-sharing services** since both manage document exchange.
 
 ---
+
+# 📂 **File Transfer in Linux Networking**
+
+## 📝 What is FTP?
+
+**FTP (File Transfer Protocol)** is a **standard network protocol** used to transfer files between computers over a network.
+
+* Operates in a **Client-Server model**.
+* An **FTP client** initiates a connection to an **FTP server**.
+* Files can be transferred **both ways** (upload/download).
+
+---
+
+## ⚙️ FTP Connections
+
+FTP maintains **two types of connections**:
+
+1. **Control Connection**
+
+   * Established on **Port 21 (default)**.
+   * Used for sending **commands** between client and server.
+   * Always open during the session.
+
+2. **Data Connection**
+
+   * Created only during actual **file transfers**.
+   * Uses **dynamic (ephemeral) ports**.
+   * Closed immediately after transfer completes.
+
+---
+
+## 🔄 FTP Modes of Operation
+
+FTP negotiates data connections in two modes:
+
+### 1. 📡 Active Mode
+
+* Client sends **`PORT` command** to the server.
+* The client provides a port number for the server to connect back for data transfer.
+
+### 2. 📴 Passive Mode
+
+* Client sends **`PASV` command** to the server.
+* The server provides a port number where it listens, and the client connects to it.
+
+✅ Passive mode is often preferred because it works better with **firewalls/NAT**.
+
+---
+
+## 🔐 FTP and Firewalls
+
+* Control connection → Always on **Port 21 (insecure FTP)**.
+* Data connection → Often on **Port 20**, but may vary.
+* Inbound data sockets → Use **ephemeral port range (1024–65535)**.
+* ❌ This dynamic port usage makes FTP **messy with firewall configurations**.
+
+---
+
+## 🔒 Secure FTP Implementations
+
+Since plain FTP is **insecure** (credentials & data sent in cleartext), secure alternatives are used:
+
+### 1. 🔑 **FTPS (FTP Secure / FTP over SSL/TLS)**
+
+* Uses **SSL/TLS encryption** for FTP.
+* Default control port: **990**.
+
+### 2. 🛡️ **SFTP (SSH File Transfer Protocol)**
+
+* Runs FTP operations over an **SSH connection**.
+* Default control port: **22**.
+* Much more secure and widely used.
+
+---
+
