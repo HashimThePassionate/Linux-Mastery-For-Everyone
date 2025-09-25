@@ -1,19 +1,144 @@
 # 🌐 **Working with Network Services in Linux**
 
-In this section, we’ll enumerate some of the most common **network services** running on Linux.
+<details>
+<summary>📋 <strong>Table of Contents</strong></summary>
 
-> ⚠️ **Note**: Not all services mentioned here are installed or enabled by default on your Linux distribution.
+## 📋 Table of Contents
 
-📖 For more in-depth details:
+- [🌐 **Working with Network Services in Linux**](#-working-with-network-services-in-linux)
+  - [📋 Table of Contents](#-table-of-contents)
+  - [🖥️ What is a Network Service?](#️-what-is-a-network-service)
+  - [🔄 Peer-to-Peer Networking](#-peer-to-peer-networking)
+  - [👨‍💻 Client-Server Networking](#-client-server-networking)
+- [📡 **DHCP Servers in Linux**](#-dhcp-servers-in-linux)
+  - [📝 What is DHCP?](#-what-is-dhcp)
+  - [⚙️ How DHCP Works](#️-how-dhcp-works)
+  - [🔗 Communication Flow](#-communication-flow)
+  - [💻 Linux Example: Querying DHCP](#-linux-example-querying-dhcp)
+    - [✅ Example Output:](#-example-output)
+    - [🔍 Explanation](#-explanation)
+  - [🌍 Testing Connectivity: `traceroute`](#-testing-connectivity-traceroute)
+    - [✅ Example Output:](#-example-output-1)
+    - [🔍 Explanation](#-explanation-1)
+- [🌐 **DNS Servers in Linux**](#-dns-servers-in-linux)
+  - [📝 What is DNS?](#-what-is-dns)
+  - [🏗️ DNS in TCP/IP Networks](#️-dns-in-tcpip-networks)
+  - [🛠️ Types of DNS Servers](#️-types-of-dns-servers)
+  - [🔄 Recursive vs Iterative Queries](#-recursive-vs-iterative-queries)
+  - [📂 DNS Zone Files](#-dns-zone-files)
+  - [💻 Querying DNS in Linux](#-querying-dns-in-linux)
+    - [🔎 1. Checking Local DNS Resolver](#-1-checking-local-dns-resolver)
+      - [Example Output:](#example-output)
+    - [🔎 2. Using `nslookup`](#-2-using-nslookup)
+      - [Example 1: Lookup Local Host](#example-1-lookup-local-host)
+      - [Example 2: Interactive `nslookup`](#example-2-interactive-nslookup)
+      - [Example 3: Reverse Lookup](#example-3-reverse-lookup)
+    - [🔎 3. Using `dig`](#-3-using-dig)
+      - [Example: Forward Lookup](#example-forward-lookup)
+      - [Example: Reverse Lookup](#example-reverse-lookup)
+  - [📊 DNS in OSI Model](#-dns-in-osi-model)
+- [🔐 **Authentication Servers in Linux**](#-authentication-servers-in-linux)
+  - [📝 Local vs Remote Authentication](#-local-vs-remote-authentication)
+  - [🌍 Centralized Authentication](#-centralized-authentication)
+  - [📂 Example: Accessing a File Server with Active Directory (AD)](#-example-accessing-a-file-server-with-active-directory-ad)
+  - [🔄 Authentication Workflow with LDAP](#-authentication-workflow-with-ldap)
+    - [🧾 Step-by-Step Flow](#-step-by-step-flow)
+- [📂 **File Sharing in Linux Networking**](#-file-sharing-in-linux-networking)
+  - [📝 What is File Sharing?](#-what-is-file-sharing)
+  - [🖥️ Client-Server File Sharing](#️-client-server-file-sharing)
+  - [🔑 Common File-Sharing Protocols](#-common-file-sharing-protocols)
+    - [1. 📡 **Server Message Block (SMB)**](#1--server-message-block-smb)
+    - [2. 🗂️ **Common Internet File System (CIFS)**](#2-️-common-internet-file-system-cifs)
+    - [3. 🖨️ **Samba**](#3-️-samba)
+    - [4. 📡 **Network File System (NFS)**](#4--network-file-system-nfs)
+    - [5. 🍏 **Apple Filing Protocol (AFP)**](#5--apple-filing-protocol-afp)
+  - [🧭 Which Protocol to Use?](#-which-protocol-to-use)
+- [🖨️ **Printer Servers in Linux Networking**](#️-printer-servers-in-linux-networking)
+  - [📝 What is a Printer Server?](#-what-is-a-printer-server)
+  - [⚙️ Tasks of Printing Protocols](#️-tasks-of-printing-protocols)
+  - [🔑 Common Printing Protocols](#-common-printing-protocols)
+    - [1. 📡 **Line Printer Daemon (LPD)**](#1--line-printer-daemon-lpd)
+    - [2. 🖥️ **Generic Protocols**](#2-️-generic-protocols)
+    - [3. 📶 **Wireless Printing**](#3--wireless-printing)
+    - [4. 🌍 **Internet Printing Protocols**](#4--internet-printing-protocols)
+  - [📚 Relationship with Other Services](#-relationship-with-other-services)
+  - [📌 Key Takeaways](#-key-takeaways)
+- [📂 **File Transfer in Linux Networking**](#-file-transfer-in-linux-networking)
+  - [📝 What is FTP?](#-what-is-ftp)
+  - [⚙️ FTP Connections](#️-ftp-connections)
+  - [🔄 FTP Modes of Operation](#-ftp-modes-of-operation)
+    - [1. 📡 Active Mode](#1--active-mode)
+    - [2. 📴 Passive Mode](#2--passive-mode)
+  - [🔐 FTP and Firewalls](#-ftp-and-firewalls)
+  - [🔒 Secure FTP Implementations](#-secure-ftp-implementations)
+    - [1. 🔑 **FTPS (FTP Secure / FTP over SSL/TLS)**](#1--ftps-ftp-secure--ftp-over-ssltls)
+    - [2. 🛡️ **SFTP (SSH File Transfer Protocol)**](#2-️-sftp-ssh-file-transfer-protocol)
+- [📧 **Mail Servers in Linux Networking**](#-mail-servers-in-linux-networking)
+  - [📝 What is a Mail Server?](#-what-is-a-mail-server)
+  - [🧑‍🤝‍🧑 Key Actors in Email Exchange](#-key-actors-in-email-exchange)
+  - [📡 Common Email Protocols](#-common-email-protocols)
+    - [1. 📥 POP3 (Post Office Protocol v3)](#1--pop3-post-office-protocol-v3)
+    - [2. 📥 IMAP (Internet Message Access Protocol)](#2--imap-internet-message-access-protocol)
+    - [3. 📤 SMTP (Simple Mail Transfer Protocol)](#3--smtp-simple-mail-transfer-protocol)
+  - [🔒 Secure Email Communication](#-secure-email-communication)
+  - [💻 Example: Secure SMTP with OpenSSL](#-example-secure-smtp-with-openssl)
+    - [✅ Breakdown](#-breakdown)
+    - [Example Output (Shortened)](#example-output-shortened)
+  - [💬 SMTP Commands in Action](#-smtp-commands-in-action)
+- [⏱️ **NTP Servers in Linux Networking**](#️-ntp-servers-in-linux-networking)
+  - [📝 What is NTP?](#-what-is-ntp)
+  - [⚙️ How NTP Works](#️-how-ntp-works)
+  - [🛠️ Checking NTP Synchronization](#️-checking-ntp-synchronization)
+    - [1. Install `ntpstat`](#1-install-ntpstat)
+  - [📦 Setting Up a Local NTP Server (Ubuntu 22.04 Example)](#-setting-up-a-local-ntp-server-ubuntu-2204-example)
+  - [🔎 Checking Synchronization](#-checking-synchronization)
+    - [Example Output:](#example-output-1)
+  - [🌍 Digging More Info About the NTP Server](#-digging-more-info-about-the-ntp-server)
+    - [Example Output:](#example-output-2)
+- [🔐 **Remote Access in Linux (SSH)**](#-remote-access-in-linux-ssh)
+  - [🧭 Why Remote Access?](#-why-remote-access)
+  - [🛡️ What is SSH?](#️-what-is-ssh)
+  - [🔑 Public-Key Authentication (a.k.a. SSH-key / passwordless auth)](#-public-key-authentication-aka-ssh-key--passwordless-auth)
+    - [How key-based auth works (common flow)](#how-key-based-auth-works-common-flow)
+    - [👤 User-Based Public-Key Authentication](#-user-based-public-key-authentication)
+    - [🖥️ Host-Based Public-Key Authentication](#️-host-based-public-key-authentication)
+  - [🔒 Password Authentication](#-password-authentication)
+  - [⌨️ Keyboard-Interactive Authentication](#️-keyboard-interactive-authentication)
+  - [🧩 Choosing an SSH Auth Method (Quick Ref)](#-choosing-an-ssh-auth-method-quick-ref)
+- [🖥️ **TELNET \& VNC in Linux Networking**](#️-telnet--vnc-in-linux-networking)
+  - [🌐 TELNET](#-telnet)
+    - [📝 What is TELNET?](#-what-is-telnet)
+    - [❌ Limitation](#-limitation)
+    - [✅ Where TELNET Still Helps](#-where-telnet-still-helps)
+  - [🖥️ SSH vs TELNET](#️-ssh-vs-telnet)
+  - [🖥️ VNC (Virtual Network Computing)](#️-vnc-virtual-network-computing)
+    - [📝 What is VNC?](#-what-is-vnc)
+    - [⚙️ How It Works](#️-how-it-works)
+    - [✅ Requirements](#-requirements)
+  - [📌 Key Takeaways](#-key-takeaways-1)
+- [🔐 **Understanding Network Security**](#-understanding-network-security)
+  - [📝 What is Network Security?](#-what-is-network-security)
+  - [🛡️ Key Paradigms of Network Security](#️-key-paradigms-of-network-security)
+    - [1. 🔑 Access Control](#1--access-control)
+    - [2. 📲 Application Security](#2--application-security)
+    - [3. 💻 Endpoint Security](#3--endpoint-security)
+    - [4. 🌐 Network Segmentation](#4--network-segmentation)
+    - [5. 🔒 VPNs (Virtual Private Networks)](#5--vpns-virtual-private-networks)
 
-* **Section** → *Securing Linux*
-* **Section** → *Disaster Recovery, Diagnostics, and Troubleshooting*
+</details>
+
+---
+
+📖 For more in-depth details:<br>
+
+* **Later Section** → *Securing Linux* <br>
+* **Later Section** → *Disaster Recovery, Diagnostics, and Troubleshooting*
 
 Those Sections will explain **installation** and **configuration** of these services.
 Here, our focus is on:
 
-✅ What these network services are
-✅ How they work
+✅ What these network services are <br>
+✅ How they work<br>
 ✅ Which networking protocols they use for communication
 
 ---
