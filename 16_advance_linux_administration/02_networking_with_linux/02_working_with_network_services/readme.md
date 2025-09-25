@@ -582,3 +582,93 @@ This transparency is achieved using **file-sharing services** and **protocols**.
 * Some protocols (like **SMB**) also support **printer sharing** for use in print servers.
 
 ---
+
+# 🖨️ **Printer Servers in Linux Networking**
+
+## 📝 What is a Printer Server?
+
+A **printer server (print server)** is a network service that connects a **printer** to **client machines** (computers or mobile devices) using a **printing protocol**.
+
+This allows multiple users to:
+
+* Discover printers across the network
+* Send print jobs
+* Monitor printer status
+* Manage (queue/cancel) print requests
+
+---
+
+## ⚙️ Tasks of Printing Protocols
+
+Printing protocols handle the following responsibilities over a network:
+
+* 🔍 **Discovering printers/print servers**
+* 📊 **Querying printer status** (ready, busy, error, etc.)
+* 📑 **Sending print jobs** to the printer
+* 📥 **Receiving jobs** and managing them in a **queue**
+* ❌ **Canceling print jobs** when needed
+* 🔎 **Querying job status** (in-progress, completed, failed)
+
+---
+
+## 🔑 Common Printing Protocols
+
+### 1. 📡 **Line Printer Daemon (LPD)**
+
+* One of the oldest printing protocols.
+* Works on a **client-server model**:
+
+  * Client sends a job → Server manages the print queue → Printer executes the job.
+
+---
+
+### 2. 🖥️ **Generic Protocols**
+
+* **SMB** (Server Message Block):
+
+  * Already used for **file sharing**, also supports **printer sharing**.
+* **TELNET**:
+
+  * Originally a remote-access protocol.
+  * Can also be adapted for basic printing tasks.
+
+---
+
+### 3. 📶 **Wireless Printing**
+
+* **AirPrint (Apple)**:
+
+  * Proprietary wireless printing protocol.
+  * Allows iOS/macOS devices to print wirelessly without extra drivers.
+
+---
+
+### 4. 🌍 **Internet Printing Protocols**
+
+* **Google Cloud Print** (now deprecated, but widely used in the past).
+* Enabled printing documents via the **cloud**, from anywhere.
+
+---
+
+## 📚 Relationship with Other Services
+
+Printer servers are closely tied to **file sharing**:
+
+* Both involve **sharing documents** — either as **digital files** or as **printed copies**.
+* Beyond printing, other network services (like **file transfer** and **email services**) often complement document sharing.
+
+---
+
+## 📌 Key Takeaways
+
+* Printer servers connect printers to **multiple clients over a network**.
+* Printing protocols handle **discovery, job submission, queueing, and monitoring**.
+* Protocols include:
+
+  * **LPD** (classic print protocol)
+  * **SMB & TELNET** (generic)
+  * **AirPrint** (wireless)
+  * **Cloud Printing** (internet-based)
+* Closely related to **file-sharing services** since both manage document exchange.
+
+---
