@@ -1124,3 +1124,86 @@ Despite the name, **it does not require a human**—it can also back custom or p
 
 ---
 
+# 🖥️ **TELNET & VNC in Linux Networking**
+
+## 🌐 TELNET
+
+### 📝 What is TELNET?
+
+* **TELNET** is an **application-layer protocol** for **bidirectional communication** with a remote host.
+* Provides a **plaintext command-line interface (CLI)**.
+* Historically, it was **one of the first remote-access protocols**.
+
+### ❌ Limitation
+
+* TELNET **does not provide encryption** → making it insecure for modern use.
+* Replaced by **SSH**, which offers strong encryption and authentication.
+
+### ✅ Where TELNET Still Helps
+
+* Useful for **troubleshooting application-layer protocols**, such as:
+
+  * Web servers (HTTP)
+  * Mail servers (SMTP, POP, IMAP)
+
+📖 More details on **TELNET usage** will be covered in **Chapter 9 – Securing Linux**.
+
+---
+
+## 🖥️ SSH vs TELNET
+
+| Feature         | TELNET                        | SSH                                  |
+| --------------- | ----------------------------- | ------------------------------------ |
+| Security        | ❌ Plaintext (insecure)        | ✅ Encrypted (secure)                 |
+| Usage           | Legacy remote login           | Modern remote login                  |
+| Extra Use Cases | Troubleshooting app protocols | Automation, secure remote management |
+| Default Port    | 23                            | 22                                   |
+
+---
+
+## 🖥️ VNC (Virtual Network Computing)
+
+### 📝 What is VNC?
+
+* **VNC (Virtual Network Computing)** is a **desktop-sharing platform**.
+* Allows access and control of a remote computer’s **Graphical User Interface (GUI)**.
+* Cross-platform → Works across **Linux, Windows, macOS**.
+
+### ⚙️ How It Works
+
+* A **VNC server** runs on the host machine (e.g., Linux).
+* Multiple **VNC clients** (Windows/macOS/Linux) can connect.
+* Communication uses the **Remote Framebuffer (RFB) protocol**, defined in **RFC 6143**.
+
+### ✅ Requirements
+
+* The host must have a **graphical desktop system** installed.
+* Setting up VNC is **relatively simple** (practical steps explained in **Chapter 13 – Configuring Linux Servers**).
+
+---
+
+## 📌 Key Takeaways
+
+* **TELNET**:
+
+  * One of the earliest remote-access protocols.
+  * Insecure (plaintext), but useful for **troubleshooting protocols**.
+  * Largely replaced by **SSH** for secure remote CLI access.
+
+* **VNC**:
+
+  * Provides **remote desktop GUI access**.
+  * Works across platforms (Linux, Windows, macOS).
+  * Uses the **RFB protocol** for communication.
+
+---
+
+⚡ With TELNET and VNC, we complete the overview of **general-purpose network services**:
+
+* We’ve covered **file sharing, printer servers, mail servers, FTP, NTP, DNS, authentication servers, SSH, and now remote-access GUIs**.
+* Practical configuration for many of these will be covered in:
+
+  * **Later Section – Securing Linux**
+  * **Later Section – Configuring Linux Servers**
+
+---
