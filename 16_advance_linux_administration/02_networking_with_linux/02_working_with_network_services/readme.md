@@ -407,4 +407,83 @@ Output:
 
 ---
 
+# 🔐 **Authentication Servers in Linux**
+
+## 📝 Local vs Remote Authentication
+
+* On **standalone Linux systems**, user credentials are stored **locally** in files like:
+
+  * `/etc/passwd`
+  * `/etc/shadow`
+
+* However, as soon as authentication needs to extend **beyond a single machine** (e.g., logging into a file server, email server, or corporate portal), local storage becomes:
+
+  * ❌ **Insecure** (credentials spread across multiple systems).
+  * ❌ **Unscalable** (hard to manage centrally).
+
+✅ The solution: **Centralized Authentication Servers**.
+
+---
+
+## 🌍 Centralized Authentication
+
+* A **centralized authentication server** provides a **single point** of validating user credentials.
+* Benefits:
+
+  * **Security** → Robust encryption during login.
+  * **Scalability** → One set of credentials works across the network.
+  * **Management** → Easier to revoke, reset, or enforce policies.
+
+---
+
+## 📂 Example: Accessing a File Server with Active Directory (AD)
+
+1. A user mounts a shared folder from a file server.
+2. The file server **prompts for credentials**.
+3. The file server passes the credentials to the **authentication server** (e.g., LDAP/AD).
+4. If authentication succeeds → The **share is made available** to the client.
+
+---
+
+## 🔄 Authentication Workflow with LDAP
+
+The following diagram shows the authentication flow:
+
+<div align="center">
+  <img src="./images/01.png" width="500px"/>
+</div>
+
+**Figure 7.33 – Authentication workflow with LDAP**
+
+---
+
+### 🧾 Step-by-Step Flow
+
+1. **Client → Server**:
+
+   * The client requests access to a service.
+
+2. **Server → Client**:
+
+   * The server issues a **login challenge** (asks for username/password).
+
+3. **Client → Server**:
+
+   * The client submits **login credentials**.
+
+4. **Server → LDAP Server**:
+
+   * The server forwards the credentials to the **LDAP authentication server**.
+
+5. **LDAP Server → Server**:
+
+   * The LDAP server validates the login against its **central user database**.
+
+6. **Server → Client**:
+
+   * If validation succeeds → The client is granted access (OK).
+   * Otherwise → Another login challenge or denial.
+
+---
+
 
