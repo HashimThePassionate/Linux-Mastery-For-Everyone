@@ -1207,3 +1207,80 @@ Despite the name, **it does not require a human**—it can also back custom or p
   * **Later Section – Configuring Linux Servers**
 
 ---
+
+# 🔐 **Understanding Network Security**
+
+## 📝 What is Network Security?
+
+**Network security** is the collection of **processes, actions, and policies** designed to:
+
+* Prevent unauthorized access
+* Monitor suspicious activity
+* Protect computer networks from threats
+
+It spans a wide range of **technologies, tools, and best practices**.
+
+---
+
+## 🛡️ Key Paradigms of Network Security
+
+### 1. 🔑 Access Control
+
+* **Definition**: Restricting access selectively based on authentication (identity) and authorization (permissions).
+* **Examples**:
+
+  * User accounts
+  * Groups
+  * Permissions (read/write/execute)
+* 📖 Related Concepts: Covered in **Section 14 – Managing Users and Groups**.
+
+---
+
+### 2. 📲 Application Security
+
+* **Definition**: Protecting both **server applications** and **end-user apps** from vulnerabilities.
+* **Examples**:
+
+  * **SELinux (Security-Enhanced Linux)** → policy-driven mandatory access controls
+  * **Encrypted connections** (TLS/SSL, HTTPS)
+  * **Antivirus & anti-malware** software
+* 📖 SELinux will be covered in **Later – Disaster Recovery, Diagnostics, and Troubleshooting**.
+
+---
+
+### 3. 💻 Endpoint Security
+
+* **Definition**: Securing and protecting devices connected to the network.
+* **Applies to**:
+
+  * Servers
+  * Smartphones
+  * Laptops
+  * Desktops
+* **Examples**:
+
+  * Firewalls
+  * Intrusion Detection Systems (IDS)
+* 📖 Firewalls will be studied in **Later – Disaster Recovery, Diagnostics, and Troubleshooting**.
+
+---
+
+### 4. 🌐 Network Segmentation
+
+* **Definition**: Dividing a computer network into **smaller, isolated segments** for security and performance.
+* **Implementation**: Often via **Virtual LANs (VLANs)**.
+* ⚠️ Do not confuse with **Subnetting**, which is a logical IP addressing division.
+
+---
+
+### 5. 🔒 VPNs (Virtual Private Networks)
+
+* **Definition**: Secure, encrypted tunnels that allow access to a corporate/private network from **public or untrusted networks (like the internet)**.
+* **Use Case**: Remote workers accessing enterprise resources securely.
+* 📖 VPNs will be explained in detail in:
+
+  * **Later – Securing Linux**
+  * **Later – Configuring Linux Servers**
+
+---
+
