@@ -486,4 +486,99 @@ The following diagram shows the authentication flow:
 
 ---
 
+# 📂 **File Sharing in Linux Networking**
 
+## 📝 What is File Sharing?
+
+In networking, **file sharing** means a **client machine** can:
+
+* **Mount** and **access** a remote filesystem on a server.
+* Use it **as if it were local storage**.
+
+👉 Applications on the client (e.g., a text editor) can:
+
+* Open files directly from the server.
+* Modify them.
+* Save them back seamlessly.
+
+This transparency is achieved using **file-sharing services** and **protocols**.
+
+---
+
+## 🖥️ Client-Server File Sharing
+
+* Each **file-sharing protocol** has a **corresponding client-server platform**.
+* Many implementations are **cross-platform**.
+* Choosing the right one depends on:
+
+  * ⚙️ **Compatibility**
+  * 🔐 **Security**
+  * ⚡ **Performance**
+
+---
+
+## 🔑 Common File-Sharing Protocols
+
+### 1. 📡 **Server Message Block (SMB)**
+
+* Provides:
+
+  * **Network discovery**
+  * **File sharing**
+  * **Printer sharing**
+  * **Interprocess communication**
+* Developed by **IBM in the 1980s**, later extended by **Microsoft**.
+* Versions: `SMB 1.0, 2.0, 2.1, 3.0, 3.0.2, 3.1.1`.
+* Still widely used (especially on **Windows networks**).
+
+---
+
+### 2. 🗂️ **Common Internet File System (CIFS)**
+
+* A specific **implementation of SMB**.
+* SMB ↔ CIFS interoperability is possible.
+* Differences: **File locking, batch processing, performance**.
+* ⚠️ Mostly obsolete today (replaced by **SMB 2/3**).
+* ✅ Always prefer modern **SMB** over CIFS.
+
+---
+
+### 3. 🖨️ **Samba**
+
+* **Open-source implementation of SMB**.
+* Allows **Windows clients** to:
+
+  * Access directories, files, and printers on **Linux Samba servers**.
+* As of **version 4**:
+
+  * Supports **Microsoft Active Directory (AD)**.
+  * Can act as a **domain controller**.
+  * Windows domain credentials can be used **transparently on Linux** without duplication.
+
+---
+
+### 4. 📡 **Network File System (NFS)**
+
+* Developed by **Sun Microsystems**.
+* Works on the **same principle as SMB**: access remote files like local ones.
+* ❌ **Not compatible** with SMB/CIFS.
+* ✅ Preferred in **Linux-only networks**.
+
+---
+
+### 5. 🍏 **Apple Filing Protocol (AFP)**
+
+* Proprietary protocol by **Apple**.
+* Exclusively used in **macOS environments**.
+* macOS also supports **SMB** and **NFS**, making it compatible in mixed networks.
+
+---
+
+## 🧭 Which Protocol to Use?
+
+* **Linux-only environments** → Use **NFS**.
+* **Mixed networks (Windows + Linux + macOS)** → Use **SMB/Samba**.
+* **macOS-specific networks** → Use **AFP**, though SMB/NFS are also available.
+* Some protocols (like **SMB**) also support **printer sharing** for use in print servers.
+
+---
