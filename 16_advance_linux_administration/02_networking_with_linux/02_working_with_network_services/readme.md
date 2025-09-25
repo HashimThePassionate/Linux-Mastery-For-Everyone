@@ -747,3 +747,134 @@ Since plain FTP is **insecure** (credentials & data sent in cleartext), secure a
 
 ---
 
+# 📧 **Mail Servers in Linux Networking**
+
+## 📝 What is a Mail Server?
+
+A **mail server (email server)** is responsible for delivering and exchanging **emails over a network**.
+
+Mail servers can:
+
+* Handle **internal email exchanges** (within a company/organization/domain).
+* Deliver emails to **external servers** (over the internet).
+
+---
+
+## 🧑‍🤝‍🧑 Key Actors in Email Exchange
+
+1. **Email Client** → Outlook, Gmail app, Thunderbird.
+2. **Mail Servers** → Exchange, Gmail server, Postfix, etc.
+3. **Users** → Senders and recipients.
+4. **Protocols** → Define how clients and servers communicate.
+
+---
+
+## 📡 Common Email Protocols
+
+### 1. 📥 POP3 (Post Office Protocol v3)
+
+* Used for **receiving & downloading** emails from a server to a local client.
+* Typically, once downloaded → emails are **removed from the server**.
+* Modern clients (Gmail, Outlook) allow keeping copies on the server.
+* Suitable for **offline reading**.
+* Not ideal for users accessing emails on **multiple devices**.
+
+**Ports:**
+
+* `110` → Insecure POP3
+* `995` → Secure POP3 (POP3S using SSL/TLS)
+
+---
+
+### 2. 📥 IMAP (Internet Message Access Protocol)
+
+* Emails are always **retained on the mail server**.
+* Clients download **copies/sync** for local viewing.
+* Allows access from **multiple devices**.
+* Preferred over POP3 in modern email usage.
+
+**Ports:**
+
+* `143` → Insecure IMAP
+* `993` → Secure IMAP (IMAPS using SSL/TLS)
+
+---
+
+### 3. 📤 SMTP (Simple Mail Transfer Protocol)
+
+* Used for **sending emails** over a network or the internet.
+* Supports **authentication** and **encryption** for secure delivery.
+
+**Ports:**
+
+* `25` → Insecure SMTP (legacy, often blocked by ISPs)
+* `465` → Secure SMTP (SSL/TLS)
+* `587` → Secure SMTP (STARTTLS, recommended for modern mail servers)
+
+---
+
+## 🔒 Secure Email Communication
+
+* Always use **secure ports** (`995` POP3S, `993` IMAPS, `465/587` SMTPS).
+* Ensure **TLS encryption** to protect credentials and data.
+* Authentication via **username/password** adds an extra layer of security.
+
+---
+
+## 💻 Example: Secure SMTP with OpenSSL
+
+We can simulate an SMTP client session to **Gmail’s SMTP server**:
+
+```bash
+openssl s_client -starttls smtp -connect smtp.gmail.com:587
+```
+
+### ✅ Breakdown
+
+* `openssl s_client` → Launches OpenSSL in client simulation mode.
+* `-starttls smtp` → Starts a **TLS handshake** for SMTP.
+* `-connect smtp.gmail.com:587` → Connects to Gmail SMTP on **secure port 587**.
+
+---
+
+### Example Output (Shortened)
+
+```bash
+SSL handshake has read 4380 bytes and written 447 bytes
+Verification: OK
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Protocol: TLSv1.3
+Server public key is 256 bit
+Verify return code: 0 (ok)
+---
+250 SMTPUTF8
+```
+
+✅ This confirms a successful **TLS-encrypted SMTP session**.
+
+---
+
+## 💬 SMTP Commands in Action
+
+Once inside the **OpenSSL interactive prompt**:
+
+1. **HELO Command** → Start SMTP communication.
+
+```bash
+HELO hellogoogle
+```
+
+Response:
+
+```bash
+250 smtp.gmail.com at your service
+```
+
+2. **EHLO Command** → Extended version (for ESMTP service extensions).
+
+3. **AUTH LOGIN** → SMTP command for authentication (username/password).
+
+⚠️ SMTP commands are **plaintext by default** → Always use TLS for encryption.
+
+---
