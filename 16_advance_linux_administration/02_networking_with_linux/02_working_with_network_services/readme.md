@@ -1010,3 +1010,117 @@ dig -x 31.209.85.242
 ✅ Shows that the IP `31.209.85.242` maps to **ntp1.lwlcom.net**, a public NTP server.
 
 ---
+
+# 🔐 **Remote Access in Linux (SSH)**
+
+## 🧭 Why Remote Access?
+
+Most Linux network services expose only limited **remote management**; their admin CLIs usually run **locally** on the same host. But direct console access isn’t always possible. That’s where **remote-access servers** step in to provide a **virtual Terminal login** to remote machines.
+
+This section focuses on **SSH**, the most common secure remote-login protocol.
+**Default SSH port:** `22`.
+
+---
+
+## 🛡️ What is SSH?
+
+**SSH (Secure Shell)** provides encrypted, authenticated communication between a **client** and a **server** for secure remote access. SSH servers are easy to install and configure (see in SSH section later).
+
+SSH supports these **authentication types**:
+
+* **Public-key authentication**
+* **Password authentication**
+* **Keyboard-interactive authentication**
+
+Below we explain each, without skipping any detail.
+
+---
+
+## 🔑 Public-Key Authentication (a.k.a. SSH-key / passwordless auth)
+
+### How key-based auth works (common flow)
+
+1. The SSH **client generates** a certificate/key pair (typically via `ssh-keygen`) using algorithms such as **RSA** or **DSA**.
+2. The **public key** is shared with the SSH **server** (one-time step) and recorded among the server’s allowed keys.
+3. During connection, the **server requests** the client’s public key and **verifies** it against its allowed list.
+
+   * If it matches, the handshake succeeds, the **server shares its public key** with the client, and the SSH session is established.
+4. Subsequent traffic uses standard crypto workflows:
+
+   * **Client → Server:** encrypted with the **client’s private key**, decrypted with the **client’s public key**.
+   * **Server → Client:** encrypted with the **server’s private key**, decrypted with the **server’s public key**.
+
+Because no password prompts are required, this is often called **passwordless authentication** and is widely used in **automation scripts** that execute commands across many hosts.
+
+> ℹ️ The key-ownership model can be **user-based** or **host-based**.
+
+---
+
+### 👤 User-Based Public-Key Authentication
+
+Each **user** gets their **own SSH key pair**. Multiple accounts—even on the same machine/domain—use **different keys**, each granting its own access to the remote server.
+
+<div align="center">
+  <img src="./images/02.png" width="300px"/>
+</div>
+**When it’s great**
+
+* Fine-grained per-user access control
+* Easy to revoke a single user’s access without affecting others
+
+---
+
+### 🖥️ Host-Based Public-Key Authentication
+
+A **single key pair per client host** is used to connect to the SSH server.
+
+<div align="center">
+  <img src="./images/03.png" width="300px"/>
+</div>
+
+**Important characteristics**
+
+* The host-based key can **authenticate sessions only from that specific client host**.
+* **Multiple users** from the **same host** can connect using the **same host key**.
+* If a user tries the host-based key **from a different machine** than the one authorized by the server, **access is denied**.
+
+**Security note:** Some environments **combine user-based and host-based** models to raise the security bar (both must be trusted).
+
+---
+
+## 🔒 Password Authentication
+
+With password auth, the client supplies simple credentials (username + password). The server validates them against:
+
+* **Local accounts** (e.g., `/etc/passwd`), or
+* **Selected accounts** configured in the SSH server config (e.g., `/etc/ssh/sshd_config`).
+
+SSH can also **delegate authentication** to **remote identity systems** such as **Kerberos, LDAP, RADIUS**, etc. (as discussed in your Authentication Servers section).
+Because passwords require user entry (or automation that supplies them), they are simpler but typically **less secure** than keys.
+
+---
+
+## ⌨️ Keyboard-Interactive Authentication
+
+This mechanism runs a **multi-step challenge–response dialogue** between the SSH server and the user (or client program):
+
+* The **server asks** one or more questions (challenges).
+* The **client answers** them in plaintext (responses).
+* In a sense, **password authentication** is just a **single-challenge** variant of keyboard-interactive.
+
+Despite the name, **it does not require a human**—it can also back custom or proprietary authentication protocols that your client automates.
+
+---
+
+## 🧩 Choosing an SSH Auth Method (Quick Ref)
+
+| Need                                                      | Recommended Method                                    |
+| --------------------------------------------------------- | ----------------------------------------------------- |
+| Strong non-interactive automation across many hosts       | **Public-key (user-based)** or **combined user+host** |
+| Per-user access control & easy revocation                 | **User-based keys**                                   |
+| Same machine used by many users, trust tied to the box    | **Host-based keys**                                   |
+| Simple, human-entered login for ad-hoc access             | **Password** (or keyboard-interactive)                |
+| Integrate with central identity (AD/LDAP/Kerberos/RADIUS) | **Password/keyboard-interactive with remote auth**    |
+
+---
+
