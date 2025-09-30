@@ -452,3 +452,75 @@ Hello from Shell
 8.  `echo $MY_MESSAGE`: We try printing the variable again. This time, it works and prints "Hello from Shell" because the exported variable was inherited by the new child shell.
 
 ---
+
+# 🗺️ **The Shell's Search Path**
+
+The **`PATH`** variable is essential in Linux. It helps the shell know where all the programs and commands are located. When you enter a command into your Bash shell, it has to search for that command through the Linux filesystem. The `PATH` variable contains a list of directories that the shell will look through.
+
+You can add new directories to this list. Your addition can be **temporary** (for the current session) or **permanent**.
+
+-----
+
+### ⏳ Adding a Directory Temporarily
+
+To make a directory’s path available temporarily, you simply add it to the `PATH` variable. In the following example, we’re adding the `/home/hashim` directory to `PATH`.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
+
+hashim@Hashim:~$ PATH=$PATH:/home/hashim/
+
+hashim@Hashim:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/hashim/
+```
+
+#### Explanation
+
+1.  `echo $PATH`: We first print the current `PATH` to see the list of directories that are already included. Each directory is separated by a colon (`:`).
+2.  `PATH=$PATH:/home/hashim/`: This is the command that does the work.
+      * `PATH=...`: We are assigning a new value to the `PATH` variable.
+      * `$PATH`: We start the new value by including the entire existing `$PATH`. This is crucial so we don't lose access to all the standard commands.
+      * `:`: We add a colon to separate the existing path list from our new directory.
+      * `/home/hashim/`: This is the new directory we are appending to the list.
+3.  `echo $PATH`: We print the `PATH` again to confirm that our new directory, `/home/hashim/`, has been successfully added to the end of the list.
+
+-----
+
+### 💾 Making Changes Permanent
+
+To make any changes to the `PATH` permanent, you must modify a configuration file, such as `~/.bash_profile` or `~/.bashrc`. By adding the `PATH` modification command to one of these files, it will be executed automatically every time you start a new shell session.
+
+> #### 📝 Important Note
+>
+> Some Linux distributions, like openSUSE, add an extra `bin` directory inside the user’s home directory (e.g., `/home/hashim/bin`). This is a convenient place where you can put files that you want the shell to execute from anywhere, for example, your own script files. The shell's `$PATH` variable is very important, especially when using scripts, as you will want to create scripts inside a directory that is known by the shell.
+
+#### Steps for a Permanent Change
+
+Here is the typical process for making a change to your `PATH` permanent.
+
+```bash
+hashim@Hashim:~$ PATH=$PATH:/home/hashim/
+
+hashim@Hashim:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/hashim/
+
+hashim@Hashim:~$ nano ~/.bashrc
+
+hashim@Hashim:~$ source ~/.bashrc
+```
+
+#### Step-by-Step Explanation
+
+1.  `PATH=$PATH:/home/hashim/` and `echo $PATH`: First, you test the change temporarily in your current session to make sure it works as expected.
+2.  `nano ~/.bashrc`: This command opens the `.bashrc` configuration file in the `nano` text editor. Inside this file, you would scroll to the bottom and add the following line:
+    ```bash
+    export PATH="$PATH:/home/hashim/"
+    ```
+    (Using `export` is best practice for modifying `PATH` in configuration files). You would then save the file and exit the editor.
+3.  `source ~/.bashrc`: This command reloads the `.bashrc` file. This applies the changes to your current terminal session immediately, so you don't have to log out and log back in to activate the new permanent `PATH`.
+
+---  
+
