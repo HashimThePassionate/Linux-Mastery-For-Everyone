@@ -1,6 +1,67 @@
 # **Exploring the Linux Shell** 🚀
 
-Back in `Section, The Linux Shell and Filesystem`, we introduced you to the shell by exploring the available virtual consoles, command types, and the filesystem. This gave you a fair foundation for what we are about to explore in this chapter. 📚
+<br/>
+
+<details>
+<summary><strong>📚 Table of Contents</strong></summary>
+
+- [**Exploring the Linux Shell** 🚀](#exploring-the-linux-shell-)
+- [**Bash Shell Features** 🐚](#bash-shell-features-)
+    - [A Little Bit of History: The POSIX Standard 📜](#a-little-bit-of-history-the-posix-standard-)
+- [🐧 **Wildcards and Metacharacters in Linux**](#-wildcards-and-metacharacters-in-linux)
+  - [⚙️ Metacharacters](#️-metacharacters)
+- [🚀 **Advanced Command Usage in Linux**](#-advanced-command-usage-in-linux)
+    - [🔄 Command Substitution](#-command-substitution)
+      - [Code Snippet](#code-snippet)
+      - [Explanation of Commands](#explanation-of-commands)
+    - [🔗 Using the Pipe (`|`)](#-using-the-pipe-)
+      - [Code Snippet](#code-snippet-1)
+      - [Explanation of Commands](#explanation-of-commands-1)
+    - [⛓️ Command Sequencing, Grouping, and Redirection](#️-command-sequencing-grouping-and-redirection)
+      - [Code Snippet](#code-snippet-2)
+      - [Step-by-Step Explanation](#step-by-step-explanation)
+- [🌀 **Brace Expansion in Linux**](#-brace-expansion-in-linux)
+    - [🗑️ Deleting Specific Files](#️-deleting-specific-files)
+      - [Code Snippet](#code-snippet-3)
+      - [Explanation](#explanation)
+    - [createFile Creating Files in a Sequence](#createfile-creating-files-in-a-sequence)
+      - [Code Snippet](#code-snippet-4)
+      - [Explanation](#explanation-1)
+    - [🔥 Deleting Files in a Sequence](#-deleting-files-in-a-sequence)
+      - [Code Snippet](#code-snippet-5)
+      - [Explanation](#explanation-2)
+- [🏷️ **The Shell's Aliases**](#️-the-shells-aliases)
+    - [⏳ Creating a Temporary Alias](#-creating-a-temporary-alias)
+      - [Code Snippet](#code-snippet-6)
+      - [Explanation](#explanation-3)
+    - [💾 Making Aliases Permanent](#-making-aliases-permanent)
+    - [🛠️ A Practical Example](#️-a-practical-example)
+      - [Code Snippet](#code-snippet-7)
+      - [Step-by-Step Explanation](#step-by-step-explanation-1)
+- [📦 **Built-in Shell Variables**](#-built-in-shell-variables)
+      - [Code Snippet](#code-snippet-8)
+    - [✍️ Creating Your Own Shell Variables](#️-creating-your-own-shell-variables)
+      - [Code Snippet](#code-snippet-9)
+      - [Explanation](#explanation-4)
+    - [🌍 Shell vs. Environment Variables](#-shell-vs-environment-variables)
+    - [🛠️ Practical Example: Exporting a Variable](#️-practical-example-exporting-a-variable)
+      - [Code Snippet](#code-snippet-10)
+      - [Step-by-Step Explanation](#step-by-step-explanation-2)
+- [🗺️ **The Shell's Search Path**](#️-the-shells-search-path)
+    - [⏳ Adding a Directory Temporarily](#-adding-a-directory-temporarily)
+      - [Code Snippet](#code-snippet-11)
+      - [Explanation](#explanation-5)
+    - [💾 Making Changes Permanent](#-making-changes-permanent)
+      - [Steps for a Permanent Change](#steps-for-a-permanent-change)
+      - [Step-by-Step Explanation](#step-by-step-explanation-3)
+
+</details>
+
+---
+
+<br/>
+
+Back in `Section, The Linux Shell and Filesystem`, we introduced you to the shell by exploring the available virtual consoles, command types, and the filesystem. This gave you a fair foundation for what we are about to explore in this section. 📚
 
 By now, with everything we have been showing you in this book, you are already well-versed in using the command line. You know some of the most common and useful commands available in Linux, as we explored:
 * File operations 📂
@@ -8,7 +69,7 @@ By now, with everything we have been showing you in this book, you are already w
 * User and disk management 👤💾
 * Network administration 🌐
 
-All this knowledge will eventually be put to use in this chapter, where we will explore **advanced shell features**, **shell variables**, **regular expressions**, and how to take advantage of the powerful **programming and automation features** of the Bash shell. 🛠️
+All this knowledge will eventually be put to use in this section, where we will explore **advanced shell features**, **shell variables**, **regular expressions**, and how to take advantage of the powerful **programming and automation features** of the Bash shell. 🛠️
 
 ---
 
