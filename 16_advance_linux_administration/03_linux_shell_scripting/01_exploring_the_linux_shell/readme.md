@@ -331,3 +331,124 @@ hashim@Hashim:~$ source ~/.bashrc
       * This command "sources" or reloads the `.bashrc` file. Since the default `.bashrc` file is configured to also load the `.bash_aliases` file, this command makes your newly added permanent alias available for use immediately in your current terminal session without needing to log out and log back in.
 
 ---
+
+# 📦 **Built-in Shell Variables**
+
+The shell has a set of standard, pre-defined variables that are always available. Here is a short list of some of them:
+
+  * 🏠 `HOME`: The user’s home directory (for example, `/home/hashim`).
+  * 👤 `LOGNAME`: The user’s login name (for example, `hashim`).
+  * 📂 `PWD`: The shell’s **P**resent **W**orking **D**irectory.
+  * ⏪ `OLDPWD`: The shell’s previous working directory.
+  * 🗺️ `PATH`: The shell’s search path, which is a list of directories separated by colons (`:`) where the shell looks for commands.
+  * 🐚 `SHELL`: The path to the shell program itself (e.g., `/bin/bash`).
+  * 🙋 `USER`: The user’s login name (often the same as `LOGNAME`).
+  * 💻 `TERM`: The type of the Terminal being used (e.g., `xterm-256color`).
+
+To call a variable while in the shell, all you have to do is place a dollar sign (`$`) in front of the variable’s name.
+
+#### Code Snippet
+
+Here is an example showing how to display the values of the variables we just listed using the `echo` command.
+
+```bash
+hashim@Hashim:~$ echo $HOME
+/home/hashim
+
+hashim@Hashim:~$ echo $LOGNAME
+hashim
+
+hashim@Hashim:~$ echo $PWD
+/home/hashim
+
+hashim@Hashim:~$ echo $OLDPWD
+
+
+hashim@Hashim:~$ echo $PATH
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
+
+hashim@Hashim:~$ echo $USER
+hashim
+
+hashim@Hashim:~$ echo $TERM
+xterm-256color
+```
+
+-----
+
+### ✍️ Creating Your Own Shell Variables
+
+You can also assign your own shell variables. In the following example, we’re assigning the string `sysadmin` to a new variable called `MYVAR` and then printing it to the standard output.
+
+The variables listed at the beginning are just a small part of all the variables available. To see **all** the shell variables, you can use the `printenv` command. If the list is too long, you can redirect it to a file. In this example, the list of variables is saved inside the `shell_variables` file.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ MYVAR=sysadmin; echo $MYVAR
+sysadmin
+
+hashim@Hashim:~$ printenv > ~/shell_variables
+
+hashim@Hashim:~$ ls
+Desktop    Downloads  Music      Public           snap       Videos
+Documents  lvm        Pictures   shell_variables  Templates
+
+hashim@Hashim:~$ less shell_variables
+```
+
+#### Explanation
+
+1.  `MYVAR=sysadmin; echo $MYVAR`: First, we create a new variable named `MYVAR` and give it the value `sysadmin`. The semicolon (`;`) allows us to run a second command, `echo $MYVAR`, on the same line, which prints the value of our new variable.
+2.  `printenv > ~/shell_variables`: The `printenv` command lists all environment variables. The `>` symbol redirects this output and saves it into a file named `shell_variables`. The tilde symbol (`~`) is a shortcut for the current user's home directory.
+3.  `ls`: This lists the files, confirming that `shell_variables` was created.
+4.  `less shell_variables`: This command opens the new file in the `less` pager so you can view its contents.
+
+-----
+
+### 🌍 Shell vs. Environment Variables
+
+The shell’s variables are **only available inside the current shell**. If you want variables to be known to other programs that are run *by* the shell (like scripts or new shells), you must **export** them using the `export` command. Once a variable is exported from the shell, it becomes an **environment variable**.
+
+### 🛠️ Practical Example: Exporting a Variable
+
+This example shows the difference between a regular shell variable and an exported environment variable.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ ls ~
+Desktop    Downloads  Music     Public    Templates
+Documents  lvm        Pictures  snap      Videos
+
+hashim@Hashim:~$ MY_MESSAGE="Hello from Shell"; echo $MY_MESSAGE
+Hello from Shell
+
+hashim@Hashim:~$ bash
+
+hashim@Hashim:~$ echo $MY_MESSAGE
+
+
+hashim@Hashim:~$ exit
+exit
+
+hashim@Hashim:~$ export MY_MESSAGE
+
+hashim@Hashim:~$ bash
+
+hashim@Hashim:~$ echo $MY_MESSAGE
+Hello from Shell
+```
+
+#### Step-by-Step Explanation
+
+1.  `ls ~`: This is just a demonstration of the `~` shortcut, listing the contents of the home directory.
+2.  `MY_MESSAGE="Hello from Shell"; echo $MY_MESSAGE`: We create a new **shell variable** called `MY_MESSAGE`. The `echo` command confirms it was set correctly.
+3.  `bash`: We start a new `bash` session. This new session is a "child" of the original one.
+4.  `echo $MY_MESSAGE`: We try to print the variable in the new shell. **Nothing is printed**. This is because `MY_MESSAGE` was only a local shell variable and was not passed down to the child shell.
+5.  `exit`: We exit the child shell and return to our original shell.
+6.  `export MY_MESSAGE`: Now, we use the `export` command. This turns `MY_MESSAGE` from a simple shell variable into an **environment variable**.
+7.  `bash`: We start another new child shell.
+8.  `echo $MY_MESSAGE`: We try printing the variable again. This time, it works and prints "Hello from Shell" because the exported variable was inherited by the new child shell.
+
+---
