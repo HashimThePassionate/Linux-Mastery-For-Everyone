@@ -238,3 +238,96 @@ rm file{1..5}
 This command will delete all five files we created previously (`file1`, `file2`, `file3`, `file4`, and `file5`). The shell expands `file{1..5}` into a list of all five filenames, and the `rm` command then removes them. You can use the `ls` command afterward to see that the contents of the present working directory no longer include those files.
 
 ---
+
+# 🏷️ **The Shell's Aliases**
+
+The Linux shell supports **aliases**, which are a very convenient way to create short commands as substitutes for longer ones. For example, in Ubuntu, there is a predefined alias called `ll` that is shorthand for `ls -alF`.
+
+You can define your own aliases too. You can make them **temporary** (for your current session only) or **permanent**, similar to variables.
+
+-----
+
+### ⏳ Creating a Temporary Alias
+
+In the following example, we check the current alias for the `ll` command and then change it for our current session.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ alias ll
+alias ll='ls -alF'
+
+hashim@Hashim:~$ alias ll='ls -l'
+
+hashim@Hashim:~$ alias ll
+alias ll='ls -l'
+```
+
+#### Explanation
+
+1.  `alias ll`: We first type this to see what the `ll` alias is currently set to. The output shows it's `ls -alF`.
+2.  `alias ll='ls -l'`: We then redefine the alias. Now, whenever we type `ll`, it will execute `ls -l` instead.
+3.  `alias ll`: We run the command again to confirm that the change was successful.
+
+This modification is **only temporary**. It will revert to the default version after you reboot your computer or restart your shell session.
+
+-----
+
+### 💾 Making Aliases Permanent
+
+If you want to make an alias permanent, you should edit the `~/.bashrc` file and add the alias definition inside it.
+
+To do this, open the file with your preferred text editor (like `nano` or `vim`) and add the same lines you used in the terminal to the file. Save the file and then "execute" it to apply the changes.
+
+A better practice is to add your custom aliases to a separate file called `~/.bash_aliases`. You can view the default contents of `.bashrc` for more information on how to use aliases.
+
+> #### 📜 Important Note on `.bashrc`
+>
+> The `~/.bashrc` file is a hidden script file in your home directory that contains different configurations for your terminal sessions. This file can also contain functions that help you automate repetitive tasks. It is automatically executed every time you log in or open a new terminal, but it can also be manually executed by using the command `source ~/.bashrc`.
+
+-----
+
+### 🛠️ A Practical Example
+
+Let's create a useful alias called `update` that updates and upgrades the system, and then make it permanent.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ alias update='sudo apt update && sudo apt upgrade -y'
+
+hashim@Hashim:~$ alias update
+alias update='sudo apt update && sudo apt upgrade -y'
+
+hashim@Hashim:~$ nano ~/.bash_aliases
+
+hashim@Hashim:~$ source ~/.bashrc
+```
+
+#### Step-by-Step Explanation
+
+1.  `alias update='sudo apt update && sudo apt upgrade -y'`
+
+      * This command creates a new temporary alias named `update`.
+      * `sudo apt update`: This part refreshes your system's list of available software packages.
+      * `&&`: This is a logical **AND** operator. The command that follows it will only run if the first command (`sudo apt update`) completes successfully.
+      * `sudo apt upgrade -y`: This part upgrades all the installed packages to their latest versions. The `-y` flag automatically answers "yes" to any confirmation prompts.
+
+2.  `alias update`
+
+      * This command simply displays the definition of the `update` alias we just created, confirming it's set correctly for the current session.
+
+3.  `nano ~/.bash_aliases`
+
+      * This command opens the `.bash_aliases` file located in your home directory (`~/`) using the `nano` text editor.
+      * Inside this file, you would add the following line:
+        ```bash
+        alias update='sudo apt update && sudo apt upgrade -y'
+        ```
+      * You would then save the file and exit the editor. This step makes the alias permanent.
+
+4.  `source ~/.bashrc`
+
+      * This command "sources" or reloads the `.bashrc` file. Since the default `.bashrc` file is configured to also load the `.bash_aliases` file, this command makes your newly added permanent alias available for use immediately in your current terminal session without needing to log out and log back in.
+
+---
