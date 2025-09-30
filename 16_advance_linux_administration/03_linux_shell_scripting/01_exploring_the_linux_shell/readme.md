@@ -162,3 +162,79 @@ hashim
       * `cat`: This command is used to display the contents of files. Here, it concatenates (which is what `cat` stands for) and prints the contents of the `users` file to the screen, showing you the output from the `who` and `pwd` commands that was saved earlier.
 
 ---
+
+# 🌀 **Brace Expansion in Linux**
+
+Curly brackets (`{}`) can be used to expand the arguments of a command. Brace expansion is not limited to filenames like a wildcard; it works with any type of string. Inside these braces, you can use a single string, a sequence of numbers or letters, or several strings separated by commas.
+
+In this section, we will look at some examples of how to use this type of expansion.
+
+-----
+
+### 🗑️ Deleting Specific Files
+
+First, we will use brace expansion to delete multiple specific files from a directory. Let’s say that we have two files named `report` and `new-report` along with the `users` file from a previous example inside our current directory. We want to delete them all at once.
+
+#### Code Snippet
+
+The command `rm {report,new-report,users}` is used. The shell expands this command into `rm report new-report users` before running it.
+
+```bash
+hashim@Hashim:~$ ls
+Desktop    lvm         Pictures  snap       Videos
+Documents  Music       Public    Templates
+Downloads  new-report  report    users
+
+hashim@Hashim:~$ rm {report,new-report,users}
+
+hashim@Hashim:~$ ls
+Desktop    Downloads  Music     Public    Templates
+Documents  lvm        Pictures  snap      Videos
+```
+
+#### Explanation
+
+As you can see from the output, the `ls` command first shows that the files `report`, `new-report`, and `users` exist. After running the `rm` command with brace expansion, the next `ls` command confirms that all three files have been deleted.
+
+-----
+
+### createFile Creating Files in a Sequence
+
+Next, we will show you how to create multiple new files using brace expansion. To create multiple files (five of them, for example) that share parts of their name, like `file1`, `file2`, … `file5`, we can use the following command.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ touch file{1..5}
+
+hashim@Hashim:~$ ls
+Desktop    file1  file4  Music     snap
+Documents  file2  file5  Pictures  Templates
+Downloads  file3  lvm    Public    Videos
+```
+
+#### Explanation
+
+  * `touch`: This is a standard Linux command used to create empty files. If a file already exists, `touch` updates its modification time.
+  * `file{1..5}`: This is the brace expansion. The shell sees `{1..5}` and expands it into a sequence of numbers from 1 to 5. It then prepends the string `file` to each number in the sequence. The command that actually gets executed is `touch file1 file2 file3 file4 file5`.
+  * The `ls` command then shows that all five files have been successfully created.
+
+-----
+
+### 🔥 Deleting Files in a Sequence
+
+Now that we’ve created those files, you can use the same brace expansion logic to delete multiple files at once.
+
+#### Code Snippet
+
+Type the following command into your console:
+
+```bash
+rm file{1..5}
+```
+
+#### Explanation
+
+This command will delete all five files we created previously (`file1`, `file2`, `file3`, `file4`, and `file5`). The shell expands `file{1..5}` into a list of all five filenames, and the `rm` command then removes them. You can use the `ls` command afterward to see that the contents of the present working directory no longer include those files.
+
+---
