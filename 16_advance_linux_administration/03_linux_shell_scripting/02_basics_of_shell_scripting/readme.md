@@ -134,3 +134,107 @@ As shown in the output, the script was executed, and every command inside it ran
 
 
 ---
+
+# 🧩 **Variables in Shell Scripts**
+
+We have already introduced variables, and now it's time to learn how to use them inside a script. Let's quickly recap the types of variables used in Linux.
+
+### 📚 Types of Variables
+
+  * **Environment Variables**: These are available system-wide from the shell (e.g., `HOME`, `USER`). They are available to scripts automatically.
+  * **User-Defined Variables**: These are created by users and are typically only available within the script or shell session where they are defined.
+
+You can see a complete list of environment variables on your system by using the `printenv` and/or `set` commands.
+
+-----
+
+### 🏷️ Understanding Naming Conventions
+
+Inside the Linux shell, the system’s environment variables use **only uppercase letters**. You should consider this when creating your own variables to avoid conflicts.
+
+Here are some key points about naming variables:
+
+  * Names are case-sensitive (`myvar` is different from `MyVar`).
+  * Names should be up to 20 characters in length.
+  * To assign a value, use the equals (`=`) sign with no spaces around it (e.g., `myvar=hello`).
+
+Since system variables are always uppercase, it is a good practice to avoid using all-caps for your own variable names. This prevents you from accidentally overwriting an important system variable. We advise you to consider one of the following rules when creating your variable names:
+
+  * ✅ Use only **lowercase letters**, underscores, and numbers (e.g., `first_name`, `user_id_2`).
+  * ✅ **Capitalize** the first letter of each word in the variable name (e.g., `FirstName`, `UserId`).
+
+Now, let’s learn how to define and use variables inside a shell script.
+
+-----
+
+### 🌍 Defining and Using Environment Variables
+
+Let’s create a new file called `user-script.sh` that will show relevant user information by using existing environment variables. After we create the file and enter the code, we will make it executable and then run it.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ touch user-script.sh
+
+hashim@Hashim:~$ nano user-script.sh
+
+hashim@Hashim:~$ cat user-script.sh 
+#!/bin/bash
+echo "user id: $UID"
+echo "user name: $USER"
+echo "user's home: $HOME"
+echo "user session: $BASH"
+
+hashim@Hashim:~$ chmod u+x user-script.sh 
+
+hashim@Hashim:~$ ./user-script.sh 
+user id: 1000
+user name: hashim
+user's home: /home/hashim
+user session: /bin/bash
+```
+
+#### Explanation
+
+1.  We created the script file, added the commands, and made it executable with `chmod u+x user-script.sh`.
+2.  Inside the script, we used the `echo` command with **double quotes (`"`)**. When you use double quotes, the shell replaces the variable name (like `$UID`) with its actual value.
+3.  **Important**: If you were to use **single quotes (`'`)** (e.g., `echo 'user id: $UID'`), the shell would not replace the variable. It would print the literal string `$UID` to the screen.
+4.  We used four different environment variables to show information about the user: `UID`, `USER`, `HOME`, and `BASH`.
+
+-----
+
+### ✍️ Using Your Own Variables
+
+You can also define and use your own variables inside a script. A useful feature of the shell is that it can automatically determine the data type (like a number or a string) a variable is using.
+
+You should also know that the values of variables defined inside a shell script are **temporary**. They are only active while the shell is running the script, and they will be lost afterward.
+
+Let’s create a new shell script and use our own variables this time.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ nano user-variable.sh
+
+hashim@Hashim:~$ cat user-variable.sh 
+#!/bin/bash
+value=25
+product='shirt'
+echo "The $product cost $value $"
+
+hashim@Hashim:~$ chmod u+x user-variable.sh 
+
+hashim@Hashim:~$ ./user-variable.sh 
+The shirt cost 25 $
+```
+
+#### Explanation
+
+1.  Here, we created a file called `user-variable.sh`.
+2.  Inside the script, we defined two of our own variables:
+      * `value=25`: A variable named `value` with a numeric value of `25`.
+      * `product='shirt'`: A variable named `product` with a string value of `shirt`.
+3.  When we called the variables inside the `echo` command, we used the same dollar sign (`$`) prefix as we did for environment variables.
+4.  The script then printed the sentence, substituting `$product` and `$value` with their assigned values.
+
+---
