@@ -238,3 +238,117 @@ The shirt cost 25 $
 4.  The script then printed the sentence, substituting `$product` and `$value` with their assigned values.
 
 ---
+
+# 🧮 **Using Mathematical Expressions in Shell Scripts**
+
+Being a programming language, the shell has built-in features to work with numbers. The Bash shell provides the `expr` command, which is used for different mathematical operations. To learn about all the operations that are supported, you can visit the internal manual page for the `expr` command.
+
+```bash
+man expr
+```
+
+We will show you how to use some of the operations that `expr` provides. Keep in mind that you may need to "escape" some characters (by using a backslash `\`) when using the `expr` command, as they might otherwise be misinterpreted by the shell.
+
+Let’s create a new script file called `math.sh` to perform some basic mathematical operations.
+
+-----
+
+### 🔢 Method 1: The `expr` Command
+
+This is the traditional way to perform math in shell scripts.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ nano math.sh
+
+hashim@Hashim:~$ cat math.sh 
+#!/bin/bash
+price=20
+vat=2
+total=$(expr $price + $vat)
+echo "The total price is: $total"
+
+hashim@Hashim:~$ chmod u+x math.sh 
+
+hashim@Hashim:~$ ./math.sh 
+The total price is: 22
+```
+
+#### Explanation
+
+  * `total=$(expr $price + $vat)`: This is the line that performs the calculation.
+      * `$(...)`: This is **command substitution**. It tells the shell to execute the command inside the parentheses and substitute the command's output in its place.
+      * `expr $price + $vat`: The `expr` command evaluates the mathematical expression. It takes the values from the `$price` and `$vat` variables and adds them together. The result (`22`) is then assigned to the `total` variable.
+
+-----
+
+### 🔢 Method 2: Arithmetic Expansion `$[...]`
+
+Besides the `expr` command, we can also use square brackets, which is a much simpler way to perform mathematical operations. Let’s modify the script to use this method.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ cat math.sh 
+#!/bin/bash
+price=20
+vat=2
+total=$[($price+$vat)]
+echo "The total price is: $total"
+
+hashim@Hashim:~$ ./math.sh 
+The total price is: 22
+```
+
+#### Explanation
+
+  * `total=$[($price+$vat)]`: This syntax is a form of **arithmetic expansion**. The `$[...]` tells Bash to perform the calculation inside the brackets. This method is often easier to read and write than `expr`.
+      * **Note**: A more modern and widely recommended syntax for arithmetic expansion is `total=$(($price + $vat))`.
+
+-----
+
+### 小数点 Handling Floating-Point Numbers with `bc`
+
+A major limitation of the shell's built-in math features (`expr` and arithmetic expansion) is that they only support **integer arithmetic**. If you try to use a floating-point value (a number with a decimal, like `2.5`), the script will show an error.
+
+The most common way to overcome this limitation is by using the **Bash Calculator**, or the `bc` command.
+
+> #### 💡 Important Note
+>
+> If you need full support for floating-point operations directly in your shell, you might want to consider using the **Z shell (Zsh)**. It is installed by default in some Linux distributions (like Manjaro and Kali Linux) and on macOS.
+
+Let’s see how we can use the `bc` command inside our `math.sh` script to handle decimal numbers.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ nano math.sh
+
+hashim@Hashim:~$ cat math.sh 
+#!/bin/bash
+price=20
+vat=2.50
+total=$(echo "scale=2; $price + $vat" | bc )
+echo "The total price is: $total"
+
+hashim@Hashim:~$ ./math.sh 
+The total price is: 22.50
+```
+
+#### Explanation
+
+In this example, we assigned a floating-point value to the `vat` variable and used the `bc` command to calculate the total.
+
+  * `total=$(echo "scale=2; $price + $vat" | bc )`: This line performs the floating-point calculation.
+      * `echo "scale=2; $price + $vat"`: This part creates a string of instructions for the `bc` command.
+          * `scale=2`: This is a special option for `bc` that sets the number of decimal places to use in the result.
+          * `;`: This separates the option from the actual calculation.
+          * `$price + $vat`: The mathematical expression we want to compute.
+      * `|`: The **pipe** sends the output of the `echo` command (the instruction string) as input to the `bc` command.
+      * `bc`: The Bash Calculator reads the input string, performs the high-precision calculation, and prints the result. The result is then captured by command substitution and stored in the `total` variable.
+
+Creating Bash shell scripts involves more than just math operations or running a sequence of commands. Sometimes, decisions need to be made inside the shell, depending on the input provided and the output expected.
+
+
+---
