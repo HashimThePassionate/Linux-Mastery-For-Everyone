@@ -1,3 +1,45 @@
+# **Basic of Shell Scripting** 📜
+
+<details>
+<summary><strong>📑 Table of Contents</strong></summary>
+
+- [**Basic of Shell Scripting** 📜](#basic-of-shell-scripting-)
+- [📜 **Creating a Shell Script File**](#-creating-a-shell-script-file)
+    - [The Shebang (`#!`)](#the-shebang-)
+    - [✍️ Creating a Basic Script](#️-creating-a-basic-script)
+      - [Code Snippet](#code-snippet)
+      - [Explanation](#explanation)
+    - [🏃‍♂️ Running the Script and Fixing Errors](#️-running-the-script-and-fixing-errors)
+      - [Problem 1: Command Not Found](#problem-1-command-not-found)
+      - [🛠️ Examples for Both Options](#️-examples-for-both-options)
+      - [Problem 2: Permission Denied](#problem-2-permission-denied)
+      - [✅ Successful Execution](#-successful-execution)
+- [🧩 **Variables in Shell Scripts**](#-variables-in-shell-scripts)
+    - [📚 Types of Variables](#-types-of-variables)
+    - [🏷️ Understanding Naming Conventions](#️-understanding-naming-conventions)
+    - [🌍 Defining and Using Environment Variables](#-defining-and-using-environment-variables)
+      - [Code Snippet](#code-snippet-1)
+      - [Explanation](#explanation-1)
+    - [✍️ Using Your Own Variables](#️-using-your-own-variables)
+      - [Code Snippet](#code-snippet-2)
+      - [Explanation](#explanation-2)
+- [🧮 **Using Mathematical Expressions in Shell Scripts**](#-using-mathematical-expressions-in-shell-scripts)
+    - [🔢 Method 1: The `expr` Command](#-method-1-the-expr-command)
+      - [Code Snippet](#code-snippet-3)
+      - [Explanation](#explanation-3)
+    - [🔢 Method 2: Arithmetic Expansion `$[...]`](#-method-2-arithmetic-expansion-)
+      - [Code Snippet](#code-snippet-4)
+      - [Explanation](#explanation-4)
+    - [小数点 Handling Floating-Point Numbers with `bc`](#小数点-handling-floating-point-numbers-with-bc)
+      - [Code Snippet](#code-snippet-5)
+      - [Explanation](#explanation-5)
+
+</details>
+
+<br/>
+
+---
+
 # 📜 **Creating a Shell Script File**
 
 The most appropriate way to write scripts is to create them in a file, called a **shell script file**. In Linux, it's a good practice for these files to use the `.sh` extension for clarity. However, this is not mandatory because Linux file types are not determined by their extensions, unlike in Windows.
