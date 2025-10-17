@@ -173,3 +173,100 @@ KDE Cinnamon Xfce GNOME
       * The `!` prefix is used to print all the **keys** from the `linux_distros` array. The order is also not guaranteed.
 
 ---
+
+# ⌨️ **Reading Input Data**
+
+By default, the shell reads input data from the **standard input**, which is your keyboard. To read from the standard input, you can use the `read` command. This command reads all input data you provide until a new line is entered (which happens when you press the `Enter` key).
+
+With the `read` command, you can provide one or more variables. If you use more variables, each word provided through standard input will be assigned to a variable in order.
+
+-----
+
+### 🖊️ `read` Command Examples
+
+Here is an example of using `read` with one variable and then with multiple variables.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ read name
+Muhammad Hashim
+hashim@Hashim:~$ echo $name
+Muhammad Hashim
+
+hashim@Hashim:~$ read a b c d
+monday
+hashim@Hashim:~$ echo $a
+monday
+hashim@Hashim:~$ echo $b
+
+
+hashim@Hashim:~$ read a b c d
+mondey tuesday wednesday thursday
+hashim@Hashim:~$ echo $a $b $c $d
+mondey tuesday wednesday thursday
+```
+
+#### Detailed Explanation
+
+1.  `read name`:
+
+      * We run the `read` command with a single variable, `name`.
+      * The shell waits for input. The user types `Muhammad Hashim` and presses `Enter`.
+      * The entire line of text is assigned to the `name` variable.
+      * `echo $name` confirms this by printing the full value.
+
+2.  `read a b c d`:
+
+      * We run `read` with four variables: `a`, `b`, `c`, and `d`.
+      * The user types `monday` and presses `Enter`.
+      * The shell assigns the first word (`monday`) to the first variable (`a`).
+      * Since no more input was provided on that line, the remaining variables (`b`, `c`, `d`) are left empty.
+      * `echo $a` prints `monday`, and `echo $b` prints an empty line.
+
+3.  `read a b c d`:
+
+      * We run the same command again.
+      * This time, the user types `mondey tuesday wednesday thursday` and presses `Enter`.
+      * The shell assigns the input word by word:
+          * `mondey` goes to `$a`
+          * `tuesday` goes to `$b`
+          * `wednesday` goes to `$c`
+          * `thursday` goes to `$d`
+      * `echo $a $b $c $d` prints all four values, showing each variable received its relevant value.
+
+-----
+
+### 📂 Reading Input from a File
+
+The `read` command has several options (which you can learn about in its manual: `man read`). It can also receive input from a file by using **input redirection** (the `<` symbol).
+
+For example, if we have a file called `week-days`, we can redirect its content to the `read` command.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ nano week-days
+
+hashim@Hashim:~$ cat week-days 
+Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+
+hashim@Hashim:~$ read d1 d2 d3 d4 d5 d6 d7 < week-days 
+
+hashim@Hashim:~$ echo $d1 $d2 $d3 $d4 $d5 $d6 $d7
+Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+```
+
+#### Detailed Explanation
+
+1.  `nano week-days`: This command is used to create and edit a new file named `week-days`.
+2.  `cat week-days`: This command displays the content of the file, which is a single line containing all seven days of the week.
+3.  `read d1 d2 d3 d4 d5 d6 d7 < week-days`:
+      * We run the `read` command with seven variables (`d1` through `d7`).
+      * The `< week-days` part is the **input redirection**. It tells the shell to use the *contents of the `week-days` file* as the standard input for the `read` command, instead of waiting for keyboard input.
+      * The `read` command takes the line from the file and assigns each word to the variables in order.
+4.  `echo $d1 $d2 $d3 $d4 $d5 $d6 $d7`: This command prints the values of all seven variables, confirming that the data from the file was successfully "read" into them.
+
+The `read` command is very useful for getting user input when creating scripts. We showed you how to use it on the command line, but it is a key component in more advanced scripts.
+
+---
