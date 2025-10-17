@@ -270,3 +270,237 @@ Monday Tuesday Wednesday Thursday Friday Saturday Sunday
 The `read` command is very useful for getting user input when creating scripts. We showed you how to use it on the command line, but it is a key component in more advanced scripts.
 
 ---
+
+# 🖥️ **Formatting Output Data**
+
+In Linux, the standard output is directed by default to your monitor. You have two main commands for this task:
+
+1.  `echo`: We’ve used this command quite extensively.
+2.  `printf`: This section will focus on this command.
+
+-----
+
+## 📢 The `printf` Command
+
+The `printf` command is similar to the one used in the C programming language. It gives you much more control over the output format than `echo`.
+
+A quick manual search (`man printf`) shows the basic syntax:
+
+```bash
+printf FORMAT [ARGUMENT] …
+```
+
+The command prints all the `[ARGUMENT]` values according to the rules defined in the `FORMAT` string. This format string can contain regular characters, **escape sequences**, and **format specifiers**.
+
+### 1\. Escape Sequences
+
+These are special backslash codes that represent non-printing characters. Here are some of the most widely used sequences:
+
+| Sequence | Description |
+| :---: | :--- |
+| `\b` | Backspace |
+| `\e` | Escape |
+| `\f` | Form feed |
+| `\n` | **New line** |
+| `\r` | Carriage return |
+| `\t` | **Horizontal tab** |
+| `\v` | Vertical tab |
+
+🔔 **Important**: When using a backslash with `printf` in the shell, it might need to be escaped by using double quotes or another backslash. Please refer to the manual for more details.
+
+### 2\. Format Specifiers
+
+In addition to escape sequences, `printf` uses format specifiers. These are placeholders that define how an argument should be formatted.
+
+| Specifier | Description |
+| :---: | :--- |
+| `%s` | **String**: Used for basic string output. |
+| `%b` | **String (with escapes)**: A string that allows for the interpretation of escape sequences. |
+| `%d` | **Integer**: Used for integral (whole number) values. |
+| `%f` | **Floating-point**: Used for floating-point (decimal) values. |
+| `%x` | **Hexadecimal**: Used for the hexadecimal values of integers. |
+
+-----
+
+## 🚀 Using `printf`: Examples
+
+Now that you know the basics, let’s look at some examples of how to use `printf`.
+
+### Example 1: Basic Command-Line Usage
+
+In the following example, we use `printf` to show the difference between a plain string and one using a format specifier.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ printf "Hello World"
+Hello Worldhashim@Hashim:~$ printf "%s\n" "Hello World"
+Hello World
+hashim@Hashim:~$ printf "%b\n" "Muhammad" "Hashim"
+Muhammad
+Hashim
+```
+
+#### Explanation
+
+1.  `printf "Hello World"`
+      * This first command prints the string exactly as given. Notice that the shell prompt `hashim@Hashim:~$` appears immediately after "Hello World" on the same line. This is because **`printf` does not add a new line by default**.
+2.  `printf "%s\n" "Hello World"`
+      * This command is much cleaner. It uses:
+          * `%s`: The string specifier, which acts as a placeholder for the argument "Hello World".
+          * `\n`: The new line escape sequence, which moves the cursor to the next line after printing.
+3.  `printf "%b\n" "Muhammad" "Hashim"`
+      * This command shows how `printf` handles multiple arguments. The format string `"%b\n"` is applied to *each argument* ("Muhammad" and "Hashim") in order.
+      * First, it prints "Muhammad" and adds a new line.
+      * Second, it prints "Hashim" and adds another new line.
+
+-----
+
+### Example 2: Script with User Input
+
+Let’s use the `printf` command inside a script to read and display user data.
+
+#### Code Snippet
+
+```bash
+hashim@Hashim:~$ nano user-data.sh
+
+hashim@Hashim:~$ cat user-data.sh 
+#!/bin/bash
+printf "Provide your first name:\n"
+read FirstName
+printf "Provide your last name:\n"
+read LastName
+printf "Welcome: %s\n" "$FirstName $LastName"
+
+hashim@Hashim:~$ chmod u+x user-data.sh 
+
+hashim@Hashim:~$ ./user-data.sh 
+Provide your first name:
+Muhammad
+Provide your last name:
+Hashim
+Welcome: Muhammad Hashim
+```
+
+#### Detailed Explanation
+
+This script reads two variables from the standard input (keyboard) and then shows both variables on the standard output (monitor).
+
+1.  `nano user-data.sh`: Creates a new file.
+2.  `cat user-data.sh`: Displays the contents of the script file.
+3.  `#!/bin/bash`: The standard shebang line.
+4.  `printf "Provide your first name:\n"`: This prompts the user. The `\n` is important here, as it moves the cursor to a new line so the user can type their input clearly.
+5.  `read FirstName`: This command waits for the user to type something and press `Enter`. The input is stored in the `FirstName` variable.
+6.  `printf "Provide your last name:\n"`: A second prompt for the last name.
+7.  `read LastName`: The input is stored in the `LastName` variable.
+8.  `printf "Welcome: %s\n" "$FirstName $LastName"`: This is the final output.
+      * The `%s` is the placeholder for a string.
+      * `"$FirstName $LastName"` is provided as the argument. The shell combines the two variables into a single string (e.g., "Muhammad Hashim"), which is then inserted into the `%s` position.
+9.  `chmod u+x user-data.sh`: This command adds executable permission for the user (`u+x`).
+10. `./user-data.sh`: This runs the script, resulting in the interactive session shown.
+
+-----
+
+### Example 3: Advanced Table Formatting
+
+Now, let’s dig deeper into formatting. We can use escape sequences like `\t` (tab) and `\n` (new line) to mimic table formatting.
+
+#### Code Snippet (Command-Line)
+
+```bash
+hashim@Hashim:~$ printf "%s\t%s\n" "No." "Item"  "1" "Paper"
+No.	Item
+1	Paper
+
+hashim@Hashim:~$ printf "%s\t%s\n" "No." "Item"  "1" "Paper" "2" "Pen"
+No.	Item
+1	Paper
+2	Pen
+```
+
+#### Explanation
+
+The format string `"%s\t%s\n"` expects two string arguments. `printf` re-uses this format string for every pair of arguments it's given.
+
+  * In the first command, it formats `"No."` and `"Item"`, then formats `"1"` and `"Paper"`.
+  * In the second command, it does the same and then continues, formatting `"2"` and `"Pen"`.
+
+This is useful, but we can create a much more complex and precisely aligned table using a script.
+
+#### Code Snippet (Script: `format-output.sh`)
+
+```bash
+hashim@Hashim:~$ nano format-output.sh
+
+hashim@Hashim:~$ cat format-output.sh 
+#!/bin/bash
+separator========================
+header="\n %-10s %8s %10s %11s\n"
+format=" %-10s %08d %10s %11.2f\n"
+width=43
+printf "$header" "PRODUCT" "ID" "ISLE" "PRICE"
+printf "%${width}s\n" "$separator"
+printf "$format" \
+Eggs 2876 D02 10 \
+Meat 8748 M05 58.75 \
+Cereals 3243 C11 25.5
+
+hashim@Hashim:~$ chmod u+x format-output.sh
+
+hashim@Hashim:~$ ./format-output.sh 
+
+ PRODUCT    ID      ISLE       PRICE
+                       =======================
+ Eggs       00002876       D02       10.00
+ Meat       00008748       M05       58.75
+ Cereals    00003243       C11       25.50
+```
+
+#### Detailed Script Explanation
+
+Let’s detail the `format-output.sh` script.
+
+  * `separator========================`
+
+      * This is a regular shell variable holding a string of `=` characters to be used as a visual separator.
+
+  * `header="\n %-10s %8s %10s %11s\n"`
+
+      * This variable defines the format for the table's header row.
+      * `\n`: Start with a new line.
+      * `%-10s`: A string (`s`) that is **10 characters** wide and **left-aligned** (indicated by the `-`).
+      * `%8s`: A string (`s`) that is **8 characters** wide and **right-aligned** (the default).
+      * `%10s`: A string (`s`) that is **10 characters** wide and right-aligned.
+      * `%11s`: A string (`s`) that is **11 characters** wide and right-aligned.
+      * `\n`: End with a new line.
+
+  * `format=" %-10s %08d %10s %11.2f\n"`
+
+      * This variable defines the format for each *data row* in the table.
+      * `%-10s`: A string (`s`), 10 characters wide, left-aligned (for the product name).
+      * `%08d`: An integer (`d`), **8 characters** wide. The `0` indicates that if the number is less than 8 digits, it will be **padded with leading zeros** (e.g., `2876` becomes `00002876`).
+      * `%10s`: A string (`s`), 10 characters wide, right-aligned (for the isle).
+      * `%11.2f`: A floating-point number (`f`), 11 characters wide, with exactly **2 digits after the decimal point** (due to `.2`). This is why `10` becomes `10.00` and `25.5` becomes `25.50`.
+      * `\n`: End with a new line.
+
+  * `width=43`
+
+      * A variable holding the total width for aligning the separator.
+
+  * `printf "$header" "PRODUCT" "ID" "ISLE" "PRICE"`
+
+      * This is the first `printf` command. It uses the `$header` format string and applies it to the four arguments ("PRODUCT", "ID", etc.), printing the formatted table header.
+
+  * `printf "%${width}s\n" "$separator"`
+
+      * This line prints the separator. It uses the `$width` variable to dynamically create the format string `"%43s\n"`. This prints the `$separator` string right-aligned within a 43-character-wide space.
+
+  * `printf "$format" \`
+
+      * This is the final `printf` call, which prints all the data rows. The backslash (`\`) at the end of the line is just to continue the command on the next line for readability.
+      * It uses the `$format` variable as its format string and re-applies it to each group of four arguments.
+
+As you can see, `printf` is a very versatile and powerful tool that gives you fine-grained control over your script's output. Now that you know the basic tools for input and output data formatting, we can proceed to other useful structures.
+
+---
