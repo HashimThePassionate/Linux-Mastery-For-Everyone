@@ -504,3 +504,94 @@ Let’s detail the `format-output.sh` script.
 As you can see, `printf` is a very versatile and powerful tool that gives you fine-grained control over your script's output. Now that you know the basic tools for input and output data formatting, we can proceed to other useful structures.
 
 ---
+
+# 🚦 Understanding Exit Statuses and Testing Structures
+
+To effectively use conditional (`if`) and looping (`for`, `while`) statements, it is essential to understand the **exit status** of a command. When a statement runs, the given condition is checked and tested so that we can see the command's validity.
+
+The status of the most recently executed command is stored inside a special parameter: `$?`.
+
+The question mark (`?`) is replaced by an integer that shows the command's status.
+
+* ✅ **Success:** If the command's execution was successful, the value will be `0` (zero). The parameter will show `$0`.
+* ❌ **Failure:** If the command's execution was not successful, the value can be any integer from `1` to `255`. Most regularly, the error number is `1`, so the parameter will be `$1`.
+
+These values are also called **exit codes**.
+
+***
+
+### 🧱 Testing Structures
+
+Alongside exit codes, **testing structures** are also important for conditional and looping statements in Bash. These structures are the building blocks for the statements mentioned. They are considered the shell’s keywords and are represented as follows:
+
+* `[[ ]]` **Double square brackets**: Used to test the *true* or *false* status of a command; it can also perform operations on regular expressions.
+* `(( ))` **Double parentheses**: Used for arithmetic operations.
+* `test` **Test keyword**: This keyword is used to evaluate expressions such as strings, integers, and file properties.
+
+> 💡 **Important Note**
+>
+> The syntax of Bash requires spaces to be used before and after the brackets. For example: `[ operation ]`.
+
+***
+
+### ⚙️ Conditional Operators
+
+In conditional statements, other types of operators are used for testing. Let’s look at some of the most commonly used operators.
+
+#### 1. Integer Tests
+
+These operators are used for numerical comparisons.
+
+| Operator | Description |
+| :---: | :--- |
+| `-eq` | The equality check operator |
+| `-ne` | The inequality check operator |
+| `-lt` | The less than operator |
+| `-le` | The less than or equal to operator |
+| `-gt` | The greater than operator |
+| `-ge` | The greater than or equal operator |
+
+#### 2. Argument Operators (Positional Parameters)
+
+In addition, there are argument operators in Linux shell scripting:
+
+* `$0`: This variable represents the command used to run the script.
+* `$1` through `$n`: These represent the first through nth arguments passed to the command. For example, `$1` refers to the first argument, `$2` refers to the second argument, and so on.
+
+Besides the operators shown in this section, basic mathematical operators are also currently used in conditional statements.
+
+#### 3. String Tests
+
+There are also testing structures for strings:
+
+| Operator | Description |
+| :---: | :--- |
+| `=` | Tests if strings are identical. (`==` is also accepted) |
+| `!=` | Tests if strings are NOT identical. |
+| `\<` and `\>` | Less than and greater than are accepted for string comparison, but they **must be escaped** (using the backslash character `\`). |
+
+#### 4. File Type Tests
+
+These testing operators are in the form of options:
+
+| Operator | Description |
+| :---: | :--- |
+| `-f` | Tests for a regular file. |
+| `-d` | Tests for a directory. |
+| `-h` or `-L` | Tests for a symbolic link. |
+| `-e` | Tests for a file's existence. |
+
+#### 5. Other Test Operators
+
+Here are some other operators that are used for testing:
+
+| Operator | Description |
+| :---: | :--- |
+| `-a` | The logical **AND**. |
+| `-o` | The logical **OR**. |
+| `-z` | To check if an input string was entered (i.e., if it is null or empty). |
+
+Testing operators are complex and useful, so it’s very important to learn them.
+
+
+---
