@@ -1,0 +1,175 @@
+# 💻 **Using Programming Structures**
+
+In this section, we will demonstrate how to use **conditional** and **looping** statements. These can be invaluable when creating advanced shell scripts. We will also show you how to use arrays, how input reading is used inside scripts, and how to format and print data for the output.
+
+---
+
+## 🗃️ Using Arrays in Bash
+
+We have shown you how to use variables in previous sections. Now, it is time to step up our game and show you how to make use of **arrays**, which are a more complex form of variable.
+
+Let’s say that we need to work with multiple variables that store similar information, such as filenames. Instead of using multiple variables in the form of `filename1`, `filename2`, `filename3` … `filenameN`, we can create a single array that will hold all the filenames.
+
+If you are familiar with other programming languages, arrays may already be familiar to you. But if you do not know any other programming languages, fear not, as Bash provides a simple way to use arrays.
+
+### 1\. Indexed Arrays
+
+Let’s start with an easy example. We need to work with different usernames. Instead of using different variables for each, we can use an **indexed array**:
+
+```bash
+usernames=("paul" "janet" "mike" "john" "anna" "martha")
+```
+
+The elements inside an array start from index number **0 (zero)**. This is important to remember when we need to access the array's contents. If we want to access the *third* element from the `usernames` array (the "mike" string), we must use the following code:
+
+```bash
+echo ${usernames[2]}
+```
+
+The output will be `mike` (without quotes).
+
+To print out the **entire array**, use the following code:
+
+```bash
+echo ${usernames[*]}
+# or
+echo ${usernames[@]}
+```
+
+To print out the **size** of the array (the number of elements), use the following code:
+
+```bash
+echo ${#usernames[@]}
+# or
+echo ${#usernames[*]}
+```
+
+In our case, we have six elements, so the output will be `6`.
+
+#### Adding and Modifying Elements
+
+Let’s say we need to add a new username ("alex") to the array. There are different ways to add it. If we just want to add it to the end, we can use the following code:
+
+```bash
+usernames+=("alex")
+```
+
+The new username will be appended at the end of the array. At this point, the array contains unordered names. We will cover how to arrange them in alphabetical order in the *Using looping statements* section.
+
+Alternatively, we can add or replace an element at a **specific position** inside the array (let’s say position 1) by using the following code:
+
+```bash
+usernames[1]="zack"
+```
+
+### 2\. The `declare` Command and Associative Arrays
+
+So far, we’ve only used strings as examples. You can also use integers for indexed arrays.
+
+The built-in command to create an array is `declare`. To create an indexed array, you can use:
+
+```bash
+declare -a array_name
+```
+
+You can also create **associative arrays** using this command:
+
+```bash
+declare -A array_name
+```
+
+Associative arrays are based on **key-value pairs**. The following is an example of an associative array declaration:
+
+```bash
+declare -A linux_distros=( [KDE]="openSUSE" [GNOME]="Fedora" [Xfce]="Debian" [Cinnamon]="Mint" )
+```
+
+  * The items in square brackets `[ ]` are the **keys**.
+  * The items in double quotes `" "` are the **values**.
+
+To print all the **values**, you can use the same command as for indexed arrays:
+
+```bash
+echo ${linux_distros[@]}
+```
+
+To print all the **keys**, use the following command (note the exclamation mark `!`):
+
+```bash
+echo ${!linux_distros[@]}
+```
+
+The main difference between indexed and associative arrays is that indexed arrays are based on an index value (0, 1, 2...), whereas associative arrays use specific keys to map to their values.
+
+Arrays are important data structures in Bash. We will use them later when we discuss looping statements. But first, let’s learn how to read input data and format output data.
+
+-----
+
+### 🖥️ Full Code Example and Explanation
+
+Here is the full sequence of commands as executed in the terminal.
+
+```bash
+hashim@Hashim:~$ usernames=("paul" "janet" "mike" "john" "anna" "martha")
+hashim@Hashim:~$ echo ${usernames[2]}
+mike
+hashim@Hashim:~$ echo ${usernames[*]}
+paul janet mike john anna martha
+hashim@Hashim:~$ echo ${usernames[@]}
+paul janet mike john anna martha
+hashim@Hashim:~$ echo ${#usernames[@]} 
+6
+hashim@Hashim:~$ echo ${#usernames[*]} 
+6
+hashim@Hashim:~$ usernames+=("alex")
+hashim@Hashim:~$ echo ${usernames[@]}
+paul janet mike john anna martha alex
+hashim@Hashim:~$ usernames[1]="zack"
+hashim@Hashim:~$ echo ${usernames[@]}
+paul zack mike john anna martha alex
+hashim@Hashim:~$ declare -a array_name
+hashim@Hashim:~$ declare -A array_name
+bash: declare: array_name: cannot convert indexed to associative array
+hashim@Hashim:~$ declare -A linux_distros=( [KDE]="openSUSE" [GNOME]="Fedora" [Xfce]="Debian" [Cinnamon]="Mint" )
+hashim@Hashim:~$ echo ${linux_distros[@]}
+openSUSE Mint Debian Fedora
+hashim@Hashim:~$ echo ${!linux_distros[@]}
+KDE Cinnamon Xfce GNOME
+```
+
+#### ✏️ Detailed Explanation
+
+1.  `usernames=("paul" "janet" "mike" "john" "anna" "martha")`
+      * This command creates a new **indexed array** named `usernames` and initializes it with six string elements.
+2.  `echo ${usernames[2]}`
+      * This prints the element at **index 2** (the third element, since indexing starts at 0). The output is `mike`.
+3.  `echo ${usernames[*]}`
+      * This prints all elements of the array, treated as a single word. The output is `paul janet mike john anna martha`.
+4.  `echo ${usernames[@]}`
+      * This also prints all elements of the array. When unquoted, it behaves just like `*`.
+5.  `echo ${#usernames[@]}`
+      * The `#` prefix is used to get the **length** (or size) of the array. The output is `6`.
+6.  `echo ${#usernames[*]}`
+      * This is an alternative syntax for getting the array length, which also outputs `6`.
+7.  `usernames+=("alex")`
+      * The `+=` operator **appends** a new element ("alex") to the end of the `usernames` array.
+8.  `echo ${usernames[@]}`
+      * This prints the array again to confirm the addition. The output now includes "alex" at the end.
+9.  `usernames[1]="zack"`
+      * This command **replaces** the element at **index 1** (which was "janet") with a new value, "zack".
+10. `echo ${usernames[@]}`
+      * This prints the array to confirm the change. The output shows "zack" in the second position.
+11. `declare -a array_name`
+      * This explicitly **declares** a new, empty indexed array (`-a`) named `array_name`.
+12. `declare -A array_name`
+      * This command attempts to re-declare the *same variable* (`array_name`) as an **associative array** (`-A`).
+13. `bash: declare: array_name: cannot convert indexed to associative array`
+      * The shell produces an **error**. You cannot change the type of an existing array from indexed to associative.
+14. `declare -A linux_distros=( ... )`
+      * A new **associative array** named `linux_distros` is successfully created with four key-value pairs.
+15. `echo ${linux_distros[@]}`
+      * This command prints all the **values** from the `linux_distros` array. Note that the output order is not guaranteed.
+16. `echo ${!linux_distros[@]}`
+      * The `!` prefix is used to print all the **keys** from the `linux_distros` array. The order is also not guaranteed.
+
+---
