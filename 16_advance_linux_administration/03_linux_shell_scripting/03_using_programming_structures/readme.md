@@ -593,5 +593,221 @@ Here are some other operators that are used for testing:
 
 Testing operators are complex and useful, so it’s very important to learn them.
 
+---
+
+# ❔ **Using Conditional `if` Statements**
+
+Just like in any other programming language, Bash has conditional execution statements, such as `if-then-fi`, `if-then-else-fi`, and nested `if`. It also uses conditional operators such as `&&` (**AND**) and `||` (**OR**). We will show you how to use them in this section.
+
+We will present the `if` statement in all its appearances (`if-then`, `if-then-else`, and nested `if`).
+
+-----
+
+### 1\. The `if-then-fi` Statement
+
+In its most common form, the `if-then-fi` statement has the following syntax:
+
+```bash
+if [condition]
+then
+    commands
+fi
+```
+
+This Bash `if` statement runs the `condition` after the `if` keyword. If the command or test is completed successfully—meaning it has an **exit status of zero**—then it will run the `commands` that are listed after the `then` keyword.
+
+-----
+
+### 2\. The `if-then-else-fi` Statement
+
+The `if-then-else-fi` statement is similar to `if-then` and has the following syntax:
+
+```bash
+if [condition]
+then
+    commands
+else
+    commands
+fi
+```
+
+Similar to the simpler `if-then` statement, the `condition` is run, and the results are different depending on its exit status.
+
+  * If it completes successfully (exit status 0), the `commands` after the `then` keyword are executed.
+  * If there is another exit status (a non-zero value), the `commands` after the `else` keyword are executed.
+
+This gives you more options and alternatives based on the result of the condition. There are also situations when you need to check for more conditions inside a single `if-then` command; for this, you can use **nested `if` statements**.
+
+-----
+
+### 🔢 Example 1: Checking for Even or Odd Numbers
+
+In this example, we will check if a number a user is typing is even or odd. The script will take the input from the user by using the `read` command. Then, it will check if the remainder from its division by two is zero or not. This is how it determines if the number is odd or even.
+
+We will use the `if-then-else` statement for this example, together with the `read` and `printf` commands. The following screenshot shows the code and the execution’s output.
+
+#### Code Snippet and Execution
+
+```bash
+hashim@Hashim:~$ nano even_odd.sh
+hashim@Hashim:~$ cat even_odd.sh 
+#!/bin/bash
+echo "Enter a number:"
+read number
+if [ $((number % 2)) -eq 0 ]
+then
+    printf "%s\n" "The number $number is even."
+else
+    printf "%s\n" "The number $number is odd."
+fi
+hashim@Hashim:~$ chmod u+x even_odd.sh 
+hashim@Hashim:~$ ./even_odd.sh 
+Enter a number:
+25
+The number 25 is odd.
+hashim@Hashim:~$ ./even_odd.sh 
+Enter a number:
+24
+The number 24 is even.
+```
+
+#### ✏️ Detailed Explanation
+
+1.  `nano even_odd.sh`: This command opens the `nano` text editor to create or edit a file named `even_odd.sh`.
+2.  `cat even_odd.sh`: This command displays the contents of the `even_odd.sh` file after it has been saved.
+3.  `#!/bin/bash`: This is the **shebang**. It tells the operating system to use the Bash interpreter to run this script.
+4.  `echo "Enter a number:"`: This command prints the text "Enter a number:" to the screen, prompting the user for input.
+5.  `read number`: This command waits for the user to type an input and press `Enter`. The value typed by the user is stored in the variable named `number`.
+6.  `if [ $((number % 2)) -eq 0 ]`: This is the core conditional logic.
+      * `$((number % 2))`: This is an **arithmetic expansion**. The modulo operator (`%`) calculates the *remainder* after dividing the value of the `number` variable by 2.
+      * `[ ... -eq 0 ]`: This is the **test**. It checks if the result of the modulo operation (the remainder) is **eq**ual to `0`. If the remainder is 0, the test is true (exits with status 0).
+7.  `then`: This block runs only if the `if` test was true (i.e., the remainder was 0).
+8.  `printf "%s\n" "The number $number is even."`: This command prints a formatted string, indicating that the entered number is even.
+9.  `else`: This block runs if the `if` test was false (i.e., the remainder was not 0).
+10. `printf "%s\n" "The number $number is odd."`: This command prints a formatted string, indicating that the number is odd.
+11. `fi`: This keyword marks the end of the `if` statement block.
+12. `chmod u+x even_odd.sh`: This command modifies the file's permissions. It **a**dds (`+`) e**x**ecutable (`x`) permission for the **u**ser (`u`), which is necessary to run the script.
+13. `./even_odd.sh`: This command executes the script.
+14. `Enter a number: 25`: The user types `25`.
+15. `The number 25 is odd.`: The script's output. Since 25 divided by 2 has a remainder of 1, the `else` block was executed.
+16. `./even_odd.sh`: The script is run a second time.
+17. `Enter a number: 24`: The user types `24`.
+18. `The number 24 is even.`: The script's output. Since 24 divided by 2 has a remainder of 0, the `then` block was executed.
+
+-----
+
+### 📄 Example 2: Testing for a File
+
+The following script checks if a filename introduced by the user is indeed a file by using the `test -f` operator. We will introduce the absolute path of the file we want to run a check on. The script is called `testing_file.sh`.
+
+#### Script Creation
+
+```bash
+hashim@Hashim:~$ nano testing_file.sh
+hashim@Hashim:~$ cat testing_file.sh 
+#!/bin/bash
+#testing if a filename is indeed a file
+echo "Enter a file name using absolute path:"
+read filename
+if [ -z "$filename" ]
+then
+    printf "%s\n" "no filename entered..."
+    exit 1
+else
+    printf "The filename you entered is: %s\n" "$filename"
+fi
+printf "%s\n" "Testing if \"$filename\" is a file..."
+test -f "$filename"
+if [ $? -eq 0 ]
+then
+    printf "%s\n" "The \"$filename\" represents a file. (0=true):" $?
+else
+    printf "%s\n" "The \"$filename\" is not a file. (1=false):" $?
+fi
+hashim@Hashim:~$ chmod u+x testing_file.sh
+```
+
+#### ✏️ Detailed Explanation
+
+1.  `nano testing_file.sh`: Opens the `nano` editor for the script file.
+2.  `cat testing_file.sh`: Displays the content of the script file.
+3.  `#!/bin/bash`: The shebang, indicating the Bash interpreter.
+4.  `#testing if...`: A comment describing the script's function.
+5.  `echo "Enter a file name...:"`: Prompts the user to enter a full file path.
+6.  `read filename`: Stores the user's input in the `filename` variable.
+7.  `if [ -z "$filename" ]`: This is the first `if` statement. The `-z` operator tests if the string in `$filename` is **zero-length** (empty).
+8.  `then`: This block runs if the user provided no input (pressed Enter).
+9.  `printf "%s\n" "no filename entered..."`: Prints an error message.
+10. `exit 1`: This command immediately **terminates the script** with an exit status of `1` (which signifies failure).
+11. `else`: This block runs if the `$filename` variable is *not* empty.
+12. `printf "The filename...: %s\n" "$filename"`: Prints the filename that the user entered.
+13. `fi`: Closes the first `if` statement.
+14. `printf "%s\n" "Testing if \"$filename\" is a file..."`: Prints a status message before performing the test.
+15. `test -f "$filename"`: This is the **key command**. It does not print anything. It performs a test: does the path in `$filename` exist, and is it a **regular file** (`-f`)? It then sets the special `$?` (exit status) variable to `0` if true or `1` if false.
+16. `if [ $? -eq 0 ]`: This second `if` statement **checks the exit status** of the *previous* command (`test -f`). It asks, "Was the exit status (`$?`) **eq**ual to 0?"
+17. `then`: This block runs if the `test -f` command was successful (the file exists).
+18. `printf "... (0=true):" $?`: Prints a success message and also prints the exit status itself, which will be `0`.
+19. `else`: This block runs if the `test -f` command failed (the file does not exist or is not a regular file).
+20. `printf "... (1=false):" $?`: Prints a failure message and prints the exit status, which will be non-zero (e.g., `1`).
+21. `fi`: Closes the second `if` statement.
+22. `chmod u+x testing_file.sh`: Makes the script executable.
+
+#### Script Execution and Scenarios
+
+By running this script, you will be prompted to provide the filename. Let’s do some tests. The output shows three different scenarios:
+
+1.  When we do not provide a filename.
+2.  When we enter a correct filename that exists.
+3.  When we enter a wrong filename that does not exist.
+
+<!-- end list -->
+
+```bash
+hashim@Hashim:~$ ./testing_file.sh 
+Enter a file name using absolute path:
+
+no filename entered...
+hashim@Hashim:~$ ./testing_file.sh 
+Enter a file name using absolute path:
+/etc/passwd
+The filename you entered is: /etc/passwd
+Testing if "/etc/passwd" is a file...
+The "/etc/passwd" represents a file. (0=true):
+0
+hashim@Hashim:~$ ./testing_file.sh 
+Enter a file name using absolute path:
+/etc/hello
+The filename you entered is: /etc/hello
+Testing if "/etc/hello" is a file...
+The "/etc/hello" is not a file. (1=false):
+1
+```
+
+#### ✏️ Detailed Explanation
+
+  * **Test 1 (Empty Input):**
+
+      * `./testing_file.sh` is run.
+      * At the prompt, the user presses `Enter` without typing anything.
+      * The `if [ -z "$filename" ]` test is **true**.
+      * The script prints "no filename entered..." and immediately stops because of the `exit 1` command.
+
+  * **Test 2 (Valid File):**
+
+      * `./testing_file.sh` is run.
+      * The user types `/etc/passwd` (a file that exists on all Linux systems).
+      * The `if [ -z ... ]` test is **false**, so the `else` block runs, printing "The filename you entered is: /etc/passwd".
+      * The script continues. The `test -f "/etc/passwd"` command runs and **succeeds**, setting `$?` to `0`.
+      * The `if [ $? -eq 0 ]` test is **true**.
+      * The `then` block runs, printing "The "/etc/passwd" represents a file. (0=true): 0".
+
+  * **Test 3 (Invalid File):**
+
+      * `./testing_file.sh` is run.
+      * The user types `/etc/hello` (a file that does not exist).
+      * The `if [ -z ... ]` test is **false**, so the `else` block runs, printing "The filename you entered is: /etc/hello".
+      * The script continues. The `test -f "/etc/hello"` command runs and **fails**, setting `$?` to `1`.
+      * The `if [ $? -eq 0 ]` test is **false**.
+      * The `else` block runs, printing "The "/etc/hello" is not a file. (1=false): 1".
 
 ---
