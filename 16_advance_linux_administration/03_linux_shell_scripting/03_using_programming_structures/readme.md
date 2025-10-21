@@ -2,6 +2,77 @@
 
 In this section, we will demonstrate how to use **conditional** and **looping** statements. These can be invaluable when creating advanced shell scripts. We will also show you how to use arrays, how input reading is used inside scripts, and how to format and print data for the output.
 
+<details>
+<summary><b>📑 Table of Contents</b></summary>
+
+### 🗃️ Core Topics
+
+- [🗃️ Using Arrays in Bash](#️-using-arrays-in-bash)
+  - [1. Indexed Arrays](#1-indexed-arrays)
+  - [2. The `declare` Command and Associative Arrays](#2-the-declare-command-and-associative-arrays)
+  - [🖥️ Full Code Example and Explanation](#️-full-code-example-and-explanation)
+
+- [⌨️ Reading Input Data](#️-reading-input-data)
+  - [🖊️ `read` Command Examples](#️-read-command-examples)
+  - [📂 Reading Input from a File](#-reading-input-from-a-file)
+
+- [🖥️ Formatting Output Data](#️-formatting-output-data)
+  - [📢 The `printf` Command](#-the-printf-command)
+    - [1. Escape Sequences](#1-escape-sequences)
+    - [2. Format Specifiers](#2-format-specifiers)
+  - [🚀 Using `printf`: Examples](#-using-printf-examples)
+    - [Example 1: Basic Command-Line Usage](#example-1-basic-command-line-usage)
+    - [Example 2: Script with User Input](#example-2-script-with-user-input)
+    - [Example 3: Advanced Table Formatting](#example-3-advanced-table-formatting)
+
+### 🚦 Testing & Conditionals
+
+- [🚦 Understanding Exit Statuses and Testing Structures](#-understanding-exit-statuses-and-testing-structures)
+  - [🧱 Testing Structures](#️-testing-structures)
+  - [⚙️ Conditional Operators](#️-conditional-operators)
+
+- [❔ Using Conditional `if` Statements](#-using-conditional-if-statements)
+  - [1. The `if-then-fi` Statement](#1-the-if-then-fi-statement)
+  - [2. The `if-then-else-fi` Statement](#2-the-if-then-else-fi-statement)
+  - [🔢 Example 1: Checking for Even or Odd Numbers](#-example-1-checking-for-even-or-odd-numbers)
+  - [📄 Example 2: Testing for a File](#-example-2-testing-for-a-file)
+
+### 🔄 Looping Structures
+
+- [🔄 Using Looping Statements](#-using-looping-statements)
+  - [➡️ Using the `for` statement](#️-using-the-for-statement)
+    - [🔢 Example 1: Looping Through an Array](#-example-1-looping-through-an-array)
+    - [🧠 Advanced Example: Sorting an Array with Bubble Sort](#-advanced-example-sorting-an-array-with-bubble-sort)
+  - [🔄 Using the `while` Statement](#-using-the-while-statement)
+  - [🔁 Using the `until` Statement](#-using-the-until-statement)
+
+- [🛑 Exiting Loop Statements](#-exiting-loop-statements)
+  - [1. Using the `break` Command (Version 1)](#1-using-the-break-command-version-1)
+  - [2. Using the `break` Command (Version 2)](#2-using-the-break-command-version-2)
+  - [3. Using the `continue` Command](#3-using-the-continue-command)
+  - [🛑 `break` vs. `continue` ➡️](#-break-vs-continue-️)
+
+### 🛠️ Functions & Advanced Tools
+
+- [🛠️ Working with Functions](#️-working-with-functions)
+  - [🚀 Calling a Function: A First Example](#-calling-a-function-a-first-example)
+  - [💼 Using Variables Inside Functions](#-using-variables-inside-functions)
+  - [🗃️ Using Arrays Inside Functions](#️-using-arrays-inside-functions)
+
+- [🐍 Python Script: Handling Lists in Functions](#-python-script-handling-lists-in-functions)
+  - [📜 Complete Code](#-complete-code)
+  - [🐍 `test_function_1`](#-test_function_1)
+  - [➡️ `test_function_2`](#️-test_function_2)
+  - [⚙️ Main Script Logic](#️-main-script-logic)
+
+- [🧰 Using `sed` and `(g)awk` Commands](#-using-sed-and-gawk-commands)
+  - [🔧 Using `sed` at the Command Line](#-using-sed-at-the-command-line)
+    - [🚀 Examples of Common `sed` Use Cases](#-examples-of-common-sed-use-cases)
+  - [🐧 Using `awk` from the Command Line](#-using-awk-from-the-command-line)
+    - [🚀 `awk` Example](#-awk-example)
+
+</details>
+
 ---
 
 ## 🗃️ Using Arrays in Bash
