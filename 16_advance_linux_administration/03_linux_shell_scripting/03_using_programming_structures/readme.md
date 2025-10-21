@@ -1787,3 +1787,251 @@ print(f"New second list: {new_list_2}")
       * Finally, this line prints the new list that was successfully returned from the function.
 
 ---
+
+# 🧰 Using `sed` and `(g)awk` Commands
+
+Both `sed` and `(g)awk` are advanced tools used for manipulating text files.
+
+  * **`sed`** is a **stream editor**.
+  * **`awk`** is a **programming language**.
+
+We also use the `gawk` reference (the "g" in parentheses) as it is the GNU implementation of `awk`, which offers more features and extensions.
+
+Let’s learn how to use both at the command line.
+
+-----
+
+## 🔧 Using `sed` at the Command Line
+
+`sed` is more than a simple command. It is a **data stream editor** that edits files based on a strict set of rules you supply beforehand. Based on these rules, the command reads the file line by line, and the data inside the file is then manipulated.
+
+`sed` is a **non-interactive** stream editor that makes changes based on a script. This makes it well-suited for editing multiple files at once or for automating mundane, repetitive tasks.
+
+The general syntax for the `sed` command is as follows:
+
+```bash
+sed OPTIONS… [SCRIPT] [FILE…]
+```
+
+The `sed` command uses different script subcommands, with one of the most common being **text substitution**. There are many other use cases that we will not discuss here, but if you feel the need to learn more about `sed`, there are plenty of great materials online and in print (for example, the IBM documentation).
+
+The common syntax used for text substitution is as follows:
+
+```bash
+sed 's/regex/replacement/flag'
+```
+
+-----
+
+### 🚀 Examples of Common `sed` Use Cases
+
+#### 1\. Replace Text in a File
+
+We will replace one name with another inside a text file. For this example, we will create a new file called `poem` in our home directory. The task is to replace every instance of the name "Jane" with "Elane."
+
+The letter `g` at the end is a **flag** that specifies the operation should be **global**—that is, it should be applied to all matches on each line, not just the first.
+
+##### Code Snippet and Explanation
+
+```bash
+hashim@Hashim:~$ cat << 'EOF' > poem
+> Jane, Jane,
+> Happy Birthday, Jane.
+> There is no shame
+> You are bright as a flame.
+> EOF
+```
+
+  * **`cat << 'EOF' > poem`**: This command uses a **"here document"** (`<< 'EOF'`). It takes all the text you type on the following lines (until you type `EOF`) and redirects (`>`) that text into a new file named `poem`.
+
+<!-- end list -->
+
+```bash
+hashim@Hashim:~$ ls
+array_bubble.sh       Documents           poem                user-variable.sh
+
+hashim@Hashim:~$ cat poem
+Jane, Jane,
+Happy Birthday, Jane.
+There is no shame
+You are bright as a flame.
+```
+
+  * **`ls`**: This command lists the files, showing that our new `poem` file was created.
+  * **`cat poem`**: This command displays the original content of the `poem` file.
+
+<!-- end list -->
+
+```bash
+hashim@Hashim:~$ sed 's/Jane/Elane/g' poem
+Elane, Elane,
+Happy Birthday, Elane.
+There is no shame
+You are bright as a flame.
+```
+
+  * **`sed 's/Jane/Elane/g' poem`**: This is the `sed` command in action.
+      * `'s/Jane/Elane/g'`: This is the script.
+      * `s`: This stands for the **substitute** subcommand.
+      * `/Jane/`: This is the **regex** (regular expression) to find.
+      * `/Elane/`: This is the **replacement** text.
+      * `/g`: This is the **global** flag, which ensures *all* instances of "Jane" on each line are replaced.
+      * `poem`: This is the input file.
+
+If you check the original file again with `cat`, you will see that `sed` only delivered the changed result to the **standard output** (your screen). It did **not** make any changes to the original file. To make the changes permanent, you must use the `-i` (in-place) attribute.
+
+#### 2\. Add Spaces to the Beginning of Each Line
+
+We will add a new space at the beginning of each line and redirect the output to a new file. The beginning of a line is represented by the `^` character.
+
+##### Code Snippet and Explanation
+
+```bash
+hashim@Hashim:~$ cat poem
+Jane, Jane,
+Happy Birthday, Jane.
+There is no shame
+You are bright as a flame.
+
+hashim@Hashim:~$ sed 's/^/ /g' poem > poem-spaces
+
+hashim@Hashim:~$ cat poem-spaces 
+ Jane, Jane,
+ Happy Birthday, Jane.
+ There is no shame
+ You are bright as a flame.
+```
+
+  * **`sed 's/^/ /g' poem > poem-spaces`**: This command executes the substitution and redirects the output.
+      * `'s/^/ /g'`: This is the substitution script.
+          * `s`: **Substitute**.
+          * `/^/`: The `^` character is a regex anchor that matches the **beginning of the line**.
+          * `/ /`: The replacement is a **single space**.
+          * `/g`: The **global** flag (ensures it applies to all lines).
+      * `> poem-spaces`: This redirects the standard output of `sed` into a new file named `poem-spaces`.
+  * **`cat poem-spaces`**: This command displays the content of the new file, showing the added spaces.
+
+#### 3\. Selectively Print or Delete Lines
+
+We will use `sed` to show **only** the second line from the `poem` file and then to show all lines **except** for line 2.
+
+##### Code Snippet and Explanation
+
+```bash
+hashim@Hashim:~$ cat poem
+Jane, Jane,
+Happy Birthday, Jane.
+There is no shame
+You are bright as a flame.
+
+hashim@Hashim:~$ sed -n 2p poem
+Happy Birthday, Jane.
+
+hashim@Hashim:~$ sed 2d poem
+Jane, Jane,
+There is no shame
+You are bright as a flame.
+```
+
+  * **`sed -n 2p poem`**:
+      * `-n`: This option **suppresses** `sed`'s default behavior of printing every line.
+      * `2p`: This command tells `sed` to explicitly **print** (`p`) only line number **2**.
+  * **`sed 2d poem`**:
+      * `2d`: This command tells `sed` to **delete** (`d`) line number **2**. `sed` then prints all other lines.
+
+#### 4\. Print a Range of Lines
+
+Let’s show only lines 4 through 6 from the `/etc/passwd` file.
+
+##### Code Snippet and Explanation
+
+```bash
+hashim@Hashim:~$ sed -n 4,6p /etc/passwd
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+```
+
+  * **`sed -n 4,6p /etc/passwd`**:
+      * `-n`: **Suppresses** automatic printing.
+      * `4,6p`: This command specifies a **range**. It will **print** (`p`) lines **4 through 6**, inclusive.
+
+#### 5\. Remove Commented Lines from a File
+
+Here is a more practical exercise. We will show the contents of `/etc/apt/sources.list.d/ubuntu.sources` from Ubuntu without the commented lines.
+
+##### Code Snippet and Explanation
+
+```bash
+hashim@Hashim:~$ sed '/^#/d' /etc/apt/sources.list.d/ubuntu.sources
+Types: deb
+URIs: http://archive.ubuntu.com/ubuntu/
+Suites: plucky plucky-updates plucky-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: plucky-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+```
+
+  * **`sed '/^#/d' ...`**: This command processes the file and applies a script.
+      * `'/^#/d'`: This is the script.
+      * `^#`: This regex matches lines that **start with** (`^`) a **hashtag** (`#`).
+      * `d`: This is the **delete** command. It deletes any line that matches the pattern.
+  * This command deletes the lines inside the file that start with the hashtag (`#`) character (the comments). The output shows only the lines that were not deleted.
+
+-----
+
+## 🐧 Using `awk` from the Command Line
+
+`awk` is much more than a simple command—it is a **pattern-matching language**. It is a full-fledged programming language that was the base for PERL.
+
+It is used for data extraction from text files and has a syntax similar to C. It views a file as being composed of **records** (usually lines) and **fields** (usually columns separated by spaces).
+
+The general structure of the `awk` command is as follows:
+
+```bash
+awk '/search pattern 1/ {actions} /search pattern 2/ {actions}' file
+```
+
+The true power of `awk` is beyond the scope of this text, so we will show no more than one simple example of its use that could prove practical for a future system administrator.
+
+### 🚀 `awk` Example
+
+As an example, we will generate a list containing the names of all the packages installed by Ubuntu. We only want to print the name of each package, not all the other details.
+
+##### Code Snippet and Explanation
+
+```bash
+hashim@Hashim:~$ sudo dpkg -l | awk '{print $2}' > package-list
+[sudo] password for hashim: 
+
+hashim@Hashim:~$ tail package-list 
+yaru-theme-gtk
+yaru-theme-icon
+yaru-theme-sound
+yelp
+yelp-xsl
+zenity
+zenity-common
+zip
+zlib1g:amd64
+zstd
+```
+
+  * **`sudo dpkg -l | awk '{print $2}' > package-list`**: This command is a chain of three parts.
+      * **`sudo dpkg -l`**: Generally, to see the installed packages in Ubuntu, we would run this command. It produces a list with several columns.
+      * **`|`**: The **pipe** operator takes the output from the `dpkg -l` command and sends it as input to the `awk` command.
+      * **`awk '{print $2}'`**: This is the `awk` program.
+          * `{ ... }`: This is an **action** block, which runs for every line (record) of input.
+          * `print $2`: This command tells `awk` to **print** only the **second field** (`$2`) of each line. In this case, that is the package name.
+      * **`> package-list`**: This redirects the final standard output (from `awk`) into a new file named `package-list`.
+  * **`tail package-list`**: This command is used to see the **last 10 lines** of the newly created file.
+
+Both `sed` and `awk` are very powerful tools, and we have merely scratched the surface of what they can do. Please feel free to dig deeper into these two awesome tools. 🚀
+
+
+---
