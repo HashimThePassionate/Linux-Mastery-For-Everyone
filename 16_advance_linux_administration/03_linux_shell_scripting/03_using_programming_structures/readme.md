@@ -811,3 +811,328 @@ The "/etc/hello" is not a file. (1=false):
       * The `else` block runs, printing "The "/etc/hello" is not a file. (1=false): 1".
 
 ---
+
+# 🔄 **Using Looping Statements**
+
+In Bash, looping statements use the `for`, `while`, and `until` commands. We will show you how to use them in this section. Looping statements are used when repeating processes are needed, such as looping through several commands until a condition is met.
+
+-----
+
+## ➡️ Using the `for` statement
+
+As in any other programming language, the need for iterating appears when repetitive tasks have to be done. This means that some commands need to be repeated until one or more conditions are met. This is similar in Bash as in any other programming language, and one of the commands to use is the `for` command.
+
+It has the following structure:
+
+```bash
+for var in list
+do
+    commands
+done
+```
+
+If you have not had any interaction with such a statement before, we will help you understand what it means.
+
+  * The variables provided through the `var` parameter (e.g., `i`) are assigned a series of values from the `list` parameter, one at a time, in a series of iterations.
+  * At the start of the iteration, the `var` is set with the current value in the `list`.
+  * Each iteration will use the next value from the `list`, until the last item in the list is reached.
+  * The number of items in the `list` will set the total number of iterations.
+  * For each iteration, the `commands` inside the `do...done` block will be executed.
+
+This is a basic loop.
+
+### 🔢 Example 1: Looping Through an Array
+
+Let’s see some basic uses of the `for` command. We will loop through a statically declared array. This means that we will not use the input from our user; instead, we will specify the array directly inside the script. We will use a temporary variable (or counter) called `i` to iterate through the entire length of the array. We use `${array[@]}` to specify all elements in the array. The loop will stop when the counter (`i`) reaches the end of the list.
+
+The following figure shows the script’s code, the commands used to run it, and the output. Keep in mind that we provided an array that had values already ordered. This is not a sorting algorithm.
+
+#### 💻 Code Snippet and Execution
+
+```bash
+hashim@Hashim:~$ nano array_loop.sh
+hashim@Hashim:~$ cat array_loop.sh 
+#!/bin/bash
+array=(0 1 2 3 4 5 6)
+# looping through the entire array
+for i in "${array[@]}"
+do
+    echo $i
+done
+hashim@Hashim:~$ chmod u+x array_loop.sh 
+hashim@Hashim:~$ ./array_loop.sh 
+0
+1
+2
+3
+4
+5
+6
+```
+
+#### ✏️ Detailed Explanation
+
+1.  `nano array_loop.sh`: The user opens the `nano` text editor to create a new file named `array_loop.sh`.
+2.  `cat array_loop.sh`: After saving the file, the `cat` command is used to display the contents of the script.
+3.  `#!/bin/bash`: This is the **shebang**, which tells the operating system to use the Bash interpreter to run the script.
+4.  `array=(0 1 2 3 4 5 6)`: An indexed array named `array` is declared and initialized with seven integer values.
+5.  `# looping through the entire array`: This is a comment explaining the purpose of the code that follows.
+6.  `for i in "${array[@]}"`: This is the `for` loop.
+      * `i` is the variable that will hold the value for each iteration.
+      * `"${array[@]}"` expands to a list of all elements in the array (`"0" "1" "2" "3" "4" "5" "6"`). The loop will run once for each element (7 times in total).
+7.  `do`: Marks the beginning of the command block that will be executed in each loop.
+8.  `echo $i`: This command prints the current value stored in the `i` variable.
+9.  `done`: Marks the end of the `for` loop.
+10. `chmod u+x array_loop.sh`: This command modifies the file's permissions. It **a**dds (`+`) e**x**ecutable (`x`) permission for the **u**ser (`u`), which is required to run the script directly.
+11. `./array_loop.sh`: This command executes the script.
+12. `0`...`6`: This is the output from the script. The `echo $i` command was executed 7 times, printing the value of `i` on a new line for each iteration of the loop.
+
+-----
+
+### 🧠 Advanced Example: Sorting an Array with Bubble Sort
+
+In the following example, we will bring back the discussion on arrays and use some of them inside a `for` statement. This time, we will show you how to sort an array. We will use most of the structures we’ve already learned about, such as input reading, output formatting, arrays, and `for` statements.
+
+> #### 💡 Important Note
+>
+> Sorting algorithms are outside the scope of this text. We will only use one type of sort (bubble) to show you how to use arrays and `for` statements and how powerful Bash can be. However, if you plan on doing any serious programming while using the shell, we advise you to use another programming language that is more suited for this type of action, such as **Python**. Python is incredibly versatile and can successfully be used for many administrative tasks.
+
+Let’s get back to our sorting issue. Let’s say we have a random array that we would like to sort. We will use an array that has integer elements only. To make things more interesting, we will prompt the user to introduce the array elements from the standard input.
+
+#### 📜 Script Code
+
+The following figure shows the code of the script:
+
+```bash
+hashim@Hashim:~$ nano array_bubble.sh
+hashim@Hashim:~$ cat array_bubble.sh 
+#!/bin/bash
+#asking for array length
+echo "total array elements:"
+read n
+echo "enter numbers"
+#asking user to provide the numbers
+for (( i = 0; i < $n; i++ ))
+do
+    read num[$i]
+done
+#start the sorting
+for (( i = 0; i < $n; i++ ))
+do
+    for (( j = $i; j < $n; j++ ))
+    do
+        if [ ${num[$i]} -gt ${num[$j]} ]
+        then
+            k=${num[$i]}
+            num[$i]=${num[$j]}
+            num[$j]=$k
+        fi
+    done
+done
+#sorted array
+printf "%s\n" "Sorted array is:"
+for (( i = 0; i < n; i++ ))
+do
+    echo ${num[$i]}
+done
+```
+
+#### ✏️ Detailed Code Explanation
+
+Let’s explain the code.
+
+  * `echo "total array elements:"`: This prints a prompt asking the user for the length of the array.
+  * `read n`: This command waits for user input and stores the typed value (the length) in the variable `n`.
+  * `echo "enter numbers"`: This prints a second prompt, asking the user to provide the numbers for the array.
+  * `for (( i = 0; i < $n; i++ ))`: This is the first `for` loop, which uses a C-style syntax. It initializes a counter `i` at 0 and loops as long as `i` is less than the value of `$n`, incrementing `i` by one at each step (`i++`).
+  * `read num[$i]`: Inside the loop, this command reads the user's input and stores it in an array called `num` at the index `i`. This loop is used to fill the array.
+  * `#start the sorting`: A comment indicating the sorting logic is about to begin.
+  * `for (( i = 0; i < $n; i++ ))`: This is the **outer** `for` loop of the sorting algorithm. It iterates through each element of the array.
+  * `for (( j = $i; j < $n; j++ ))`: This is a **nested** (inner) `for` loop. A new counter `j` is used. It starts at the current value of `i` and loops to the end of the array. This is used to compare the element at `i` with every subsequent element at `j`.
+  * `if [ ${num[$i]} -gt ${num[$j]} ]`: This is the comparison. It checks if the number at index `i` (`${num[$i]}`) is **g**reater **t**han (`-gt`) the number at index `j` (`${num[$j]}`).
+  * `then`: This block is executed only if the condition is true (the element at `i` is larger than the element at `j`).
+  * `k=${num[$i]}`: A temporary variable `k` is used to store the value of the greater number (`num[i]`).
+  * `num[$i]=${num[$j]}`: The value of the smaller number (`num[j]`) is moved into the position of the larger number (`num[i]`).
+  * `num[$j]=$k`: The original value of the larger number (which was saved in `k`) is placed into the position `num[j]`. This completes the **swap**.
+  * `fi`, `done`, `done`: These keywords close the `if` statement, the inner `for` loop, and the outer `for` loop. The loop is finished when all numbers have been cycled through.
+  * `#sorted array`: A comment indicating the sorted array will now be printed.
+  * `printf "%s\n" "Sorted array is:"`: This prints a clean header message before showing the result.
+  * `for (( i = 0; i < n; i++ ))`: This is the final `for` loop, used to iterate through the array (which is now sorted).
+  * `echo ${num[$i]}`: This prints the element at index `i` of the `num` array.
+
+#### 🚀 Script Execution and Output
+
+The user input and the output of the command are shown here:
+
+```bash
+hashim@Hashim:~$ chmod u+x array_bubble.sh 
+hashim@Hashim:~$ ./array_bubble.sh 
+total array elements:
+3
+enter numbers
+45
+24
+56
+Sorted array is:
+24
+45
+56
+```
+
+#### ⚙️ Execution Analysis
+
+1.  `chmod u+x array_bubble.sh`: First, the script is made executable.
+2.  `./array_bubble.sh`: The script is run.
+3.  `total array elements:`: The script asks for the array size. The user enters `3`.
+4.  `enter numbers`: The script asks for the numbers.
+5.  `45`: The user enters `45` (stored in `num[0]`).
+6.  `24`: The user enters `24` (stored in `num[1]`).
+7.  `56`: The user enters `56` (stored in `num[2]`).
+8.  The script then executes the sorting logic silently.
+9.  `Sorted array is:`: The script prints the header.
+10. `24`, `45`, `56`: The script runs its final `for` loop, printing each element of the now-sorted array.
+
+In the preceding example, the bubble sort works as follows:
+
+  * **Step 1:** The first step is to compare the first two elements in the array, which are `45` and `24`. It sees that `45` is greater than `24`, so the algorithm **swaps** them. The array becomes: `24 45 56`.
+  * **Step 2:** The second step is to compare the next two elements, which are now `45` and `56` (because `45` was greater than `24` and is now in the second position). As `45` is not greater than `56`, their position will remain unchanged.
+  * **Step 3:** The third step is to do one more pass through all the elements and still do the comparison to ensure the array is fully sorted.
+
+> #### 💡 Important Note
+>
+> Bubble sort is not an efficient sorting algorithm, but it was a good example of how to use arrays, `for` and `if` statements, input from the user, and output formatting. For more information on the bubble sort algorithm or any other type of sorting algorithm, we would advise a thorough online search or that you read other titles on the subject.
+
+
+# 🔄 Using the `while` Statement
+
+The `while` loop is similar to the `for` loop, but it also acts as a combination of an `if` statement. The loop will continue executing its commands **as long as a specific condition is true**.
+
+The syntax is as follows:
+
+```bash
+while condition
+do
+    commands
+done
+```
+
+The `condition` is tested every time an iteration is started. If the `condition` remains true (returns an exit status of zero), the `commands` are executed. This continues until the `condition` changes its status to false.
+
+Let’s see an example.
+
+### Code Snippet and Execution
+
+```bash
+hashim@Hashim:~$ nano while_loop_1.sh
+hashim@Hashim:~$ cat while_loop_1.sh 
+#!/bin/bash
+#asking the user for the maximum value
+printf "Provide the maximum value: "
+read max
+#start the loop
+printf "Listing numbers in descending order... \n"
+while [ $max -gt 0 ]
+do
+    printf "%s" $max " "
+    max=$[$max - 1]
+done
+printf "\n"
+
+hashim@Hashim:~$ chmod u+x while_loop_1.sh 
+hashim@Hashim:~$ ./while_loop_1.sh 
+Provide the maximum value: 10
+Listing numbers in descending order... 
+10 9 8 7 6 5 4 3 2 1 
+hashim@Hashim:~$ ./while_loop_1.sh 
+Provide the maximum value: 30
+Listing numbers in descending order... 
+30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1
+```
+
+### ✏️ Detailed Explanation
+
+1.  `nano while_loop_1.sh`: The user opens the `nano` text editor to create the script file.
+2.  `cat while_loop_1.sh`: This command displays the contents of the file after it's saved.
+3.  `#!/bin/bash`: The **shebang**, which specifies that this script should be run by the Bash interpreter.
+4.  `#asking...`: A comment explaining the code's purpose.
+5.  `printf "Provide the maximum value: "`: This prints a prompt for the user. It does not add a new line, so the user types on the same line.
+6.  `read max`: This command waits for the user's input and stores it in a variable named `max`.
+7.  `#start the loop`: Another explanatory comment.
+8.  `printf "Listing numbers... \n"`: Prints a status message, followed by a new line.
+9.  `while [ $max -gt 0 ]`: This is the `while` loop's condition. It checks if the value in the `$max` variable is **g**reater **t**han (`-gt`) 0. The loop will execute as long as this is true.
+10. `do`: This keyword marks the beginning of the command block for the loop.
+11. `printf "%s" $max " "`: This command prints the current value of `$max` (formatted as a string `%s`), followed by a space.
+12. `max=$[$max - 1]`: This is the most critical line for the loop. It performs an arithmetic operation (`$[$... - 1]`) to decrease the value of `max` by 1 and re-assigns the new, lower value to the `max` variable. This is what prevents an **infinite loop**.
+13. `done`: This keyword marks the end of the loop block.
+14. `printf "\n"`: After the loop finishes, this command prints a single new line to clean up the prompt.
+15. `chmod u+x while_loop_1.sh`: This makes the script executable for the user.
+16. `./while_loop_1.sh`: The script is run. The user provides `10`. The loop runs 10 times, printing the number and a space, then decrementing it. When `max` becomes `0`, the condition `[ 0 -gt 0 ]` becomes false, and the loop terminates.
+17. `./while_loop_1.sh`: The script is run a second time with the value `30`, demonstrating the same logic with a different input.
+
+The `while` statement is very useful and straightforward, being a great addition to the `for` statement. Now, let’s see the `until` statement.
+
+-----
+
+## 🔁 Using the `until` Statement
+
+This looping structure is the **opposite** of the `while` loop. It uses a condition that is false from the start. The commands inside the structure will be executed **as long as the condition remains false**.
+
+The syntax is as follows:
+
+```bash
+until condition
+do
+    commands
+done
+```
+
+For a very quick example, let’s redo the `while` loop from the previous example by using the `until` statement this time.
+
+### Code Snippet and Execution
+
+Here’s the code:
+
+```bash
+hashim@Hashim:~$ nano until_loop_1.sh
+hashim@Hashim:~$ cat until_loop_1.sh 
+#!/bin/bash
+#asking the user for the maximum value
+printf "Provide the maximum value: "
+read max
+#starting the loop
+printf "Listing numbers in descending order... \n"
+until [ $max -eq 0 ]
+do
+    printf "%s" $max
+    max=$[$max - 1]
+done
+printf "\n"
+hashim@Hashim:~$ chmod u+x until_loop_1.sh 
+hashim@Hashim:~$ ./until_loop_1.sh 
+Provide the maximum value: 10
+Listing numbers in descending order... 
+10987654321
+```
+
+### ✏️ Detailed Explanation
+
+1.  `nano until_loop_1.sh`: The user opens the `nano` editor to create this new script.
+2.  `cat until_loop_1.sh`: This displays the script's content.
+3.  The setup (`#!/bin/bash`, `printf`, `read max`, `printf`) is identical to the `while` loop example.
+4.  `until [ $max -eq 0 ]`: This is the key difference. The `until` loop's condition checks if the value of `$max` is **eq**ual (`-eq`) to 0. The loop will continue to run *as long as this condition is false*. When `max` is `10`, `[ 10 -eq 0 ]` is false, so the loop runs. This continues until `max` becomes `0`, at which point `[ 0 -eq 0 ]` is **true**, and the loop stops.
+5.  `do`: Marks the start of the command block.
+6.  `printf "%s" $max`: This command prints the current value of `max`. **Note:** Unlike the `while` script, a space (`" "`) was not included here. This is why the final output (`10987654321`) is all run together without spaces.
+7.  `max=$[$max - 1]`: Just like in the `while` loop, the value of `max` is decreased by 1 in each iteration.
+8.  `done`: Marks the end of the loop.
+9.  `printf "\n"`: Prints a final new line.
+10. `chmod u+x until_loop_1.sh`: Makes the script executable.
+11. `./until_loop_1.sh`: The script is run, the user enters `10`, and the loop executes 10 times, printing the numbers without spaces.
+
+Can you spot the differences between the `until` and `while` loops?
+
+  * **`while` loop:** `while [ $max -gt 0 ]` (Runs while the condition is **true**).
+  * **`until` loop:** `until [ $max -eq 0 ]` (Runs while the condition is **false**).
+
+The commands inside the `until` loop are the same as the ones used inside the `while` loop. The **condition** is different. The output, as you might expect, is the same (in terms of the numbers printed) as when using a `while` loop.
+
+---
