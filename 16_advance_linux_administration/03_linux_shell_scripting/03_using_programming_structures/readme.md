@@ -1136,3 +1136,224 @@ Can you spot the differences between the `until` and `while` loops?
 The commands inside the `until` loop are the same as the ones used inside the `while` loop. The **condition** is different. The output, as you might expect, is the same (in terms of the numbers printed) as when using a `while` loop.
 
 ---
+
+# 🛑 Exiting Loop Statements
+
+The two commands that are used in Bash to exit loops are **`break`** and **`continue`**. They are relatively straightforward. Whenever you want to exit a loop, you can use one of them.
+
+Let’s use a simple script that iterates through a series of integer numbers until a specified value is reached, at which point it exits the iteration.
+
+-----
+
+## 1\. Using the `break` Command (Version 1)
+
+Here is the code:
+
+#### 💻 Code Snippet
+
+```bash
+hashim@Hashim:~$ nano break_loop.sh
+hashim@Hashim:~$ cat break_loop.sh 
+#!/bin/bash
+echo "Enter maximum sequence: "
+read max
+echo "Enter break value: "
+read brk
+echo "Starting the iteration..."
+for (( i = 0; i < $max; i++ ))
+do
+    echo $i
+    if [ $i -eq $brk ]
+    then
+        break
+    fi
+done
+hashim@Hashim:~$ chmod u+x break_loop.sh
+```
+
+#### ✏️ Detailed Explanation
+
+  * `nano break_loop.sh`: This command opens the `nano` text editor to create or edit the script file.
+  * `cat break_loop.sh`: This command displays the contents of the `break_loop.sh` file.
+  * `#!/bin/bash`: This is the **shebang**, which tells the operating system to use the Bash interpreter to run this script.
+  * `echo "Enter maximum sequence: "`: This prints a prompt for the user, asking for the maximum value of the sequence.
+  * `read max`: This command waits for the user's input and stores it in the variable named `max`.
+  * `echo "Enter break value: "`: This prints a prompt asking for the value at which the loop should stop.
+  * `read brk`: This command reads the user's input and stores it in the `brk` variable.
+  * `echo "Starting the iteration..."`: This prints a status message to the user.
+  * `for (( i = 0; i < $max; i++ ))`: This is a C-style `for` loop. It initializes a variable `i` at 0, and will loop as long as `i` is less than the value of `$max`. It increments `i` by 1 after each iteration (`i++`).
+  * `do`: This keyword marks the beginning of the block of commands to be executed in each loop.
+  * `echo $i`: This command **prints the current value of `i`** to the screen.
+  * `if [ $i -eq $brk ]`: This is a conditional test. It checks if the current value of `i` is **eq**ual (`-eq`) to the value stored in `$brk`.
+  * `then`: This keyword starts the block of commands to run if the condition is true.
+  * `break`: This is the **`break` command**. It immediately and completely **terminates the `for` loop**. Execution will continue after the `done` keyword.
+  * `fi`: This keyword closes the `if` statement.
+  * `done`: This keyword closes the `for` loop block.
+  * `chmod u+x break_loop.sh`: This command modifies the file's permissions. It **a**dds (`+`) e**x**ecutable (`x`) permission for the **u**ser (`u`), which allows the script to be run.
+
+#### 🚀 Execution and Output
+
+When executing, the user is asked to introduce the maximum value for the sequence and the value of `break`. The `for` loop goes through the sequence until the value of `break` is reached, and it exits the loop. We used the `break` command to exit the loop and started the iteration from zero. You can test the outcome with different values.
+
+The following is the output when using a value of `10` for the maximum sequence and a value of `5` for `break`:
+
+```bash
+hashim@Hashim:~$ ./break_loop.sh 
+Enter maximum sequence: 
+10
+Enter break value: 
+5
+Starting the iteration...
+0
+1
+2
+3
+4
+5
+```
+
+As you can see, the loop exits after 5 is reached. **However, it shows the value of 5; it does not skip it.** This happens because the `echo $i` command is placed *before* the `if` statement that checks for the break condition.
+
+This can be fixed (it is not necessarily an issue, but more of an algorithm design decision). Let’s look at the following code.
+
+-----
+
+## 2\. Using the `break` Command (Version 2)
+
+For the breaking value to *not* be shown, we moved the `echo $i` command *after* the conditional `if-then` statement. This will prevent the script from showing the breaking value provided by the user.
+
+#### 💻 Code Snippet
+
+```bash
+hashim@Hashim:~$ nano break_loop_2.sh
+hashim@Hashim:~$ cat break_loop_2.sh 
+#!/bin/bash
+echo "Enter maximum sequence: "
+read max
+echo "Enter break value: "
+read brk
+echo "Starting the iteration..."
+for (( i = 0; i < $max; i++ ))
+do
+    if [ $i -eq $brk ]
+    then
+        break
+    fi
+    echo $i
+done
+hashim@Hashim:~$ chmod u+x break_loop_2.sh
+```
+
+#### ✏️ Detailed Explanation
+
+The script is almost identical, but the logic inside the loop is reversed:
+
+  * `for (( i = 0; i < $max; i++ ))`: The loop starts.
+  * `if [ $i -eq $brk ]`: The script **checks the condition first**. If the current value of `i` (e.g., 5) equals the break value `$brk` (e.g., 5)...
+  * `then`: ...the `then` block is executed.
+  * `break`: The loop is immediately terminated.
+  * `fi`: The `if` statement ends.
+  * `echo $i`: This command is now *after* the `if` block. It will only be executed if the `break` command was *not* run. When `i` is 5, the loop breaks before this line is ever reached.
+
+#### 🚀 Execution and Output
+
+```bash
+hashim@Hashim:~$ ./break_loop_2.sh 
+Enter maximum sequence: 
+10
+Enter break value: 
+5
+Starting the iteration...
+0
+1
+2
+3
+4
+```
+
+Both use cases are valid, and the position of the output printing command is only relevant to your needs.
+
+-----
+
+## 3\. Using the `continue` Command
+
+In the following example, we will show you how to use the `continue` command. The algorithm is similar to the one used in the `break` example.
+
+### 🛑 `break` vs. `continue` ➡️
+
+This difference is sufficient for you to understand the differences between `break` and `continue`:
+
+  * **`break`**: Exits the loop *completely* when a condition is met.
+  * **`continue`**: **Skips the rest of the commands** in the current iteration when a certain condition is met and **continues to the next iteration** of the loop sequence.
+
+Let’s see the code for the same script, using the `continue` command. This time, the value provided by the user will not be shown in the output, but the loop will continue.
+
+#### 💻 Code Snippet
+
+```bash
+hashim@Hashim:~$ nano continue_loop.sh
+hashim@Hashim:~$ cat continue_loop.sh 
+#!/bin/bash
+echo "Enter maximum sequence: "
+read max
+echo "Enter the value to skip: "
+read skp
+echo "Starting the iteration..."
+for (( i = 0; i < $max; i++ ))
+do
+    if [ $i -eq $skp ]
+    then
+        continue
+    fi
+    echo $i
+done
+hashim@Hashim:~$ chmod u+x continue_loop.sh
+```
+
+#### ✏️ Detailed Explanation
+
+As you can see, the code is similar to what was used in the previous example. The only difference is the use of the `continue` command instead of `break`, and we've renamed the `brk` variable to `skp` (for "skip") for clarity.
+
+  * `nano continue_loop.sh`: Opens the `nano` editor.
+  * `cat continue_loop.sh`: Displays the script's content.
+  * `#!/bin/bash`: The shebang.
+  * `echo "Enter maximum sequence: "`: Prompts for the max value.
+  * `read max`: Stores the value in `max`.
+  * `echo "Enter the value to skip: "`: Prompts for the value to skip.
+  * `read skp`: Stores the value in `skp`.
+  * `echo "Starting the iteration..."`: Prints a status message.
+  * `for (( i = 0; i < $max; i++ ))`: The loop starts, iterating from 0 up to `$max`.
+  * `if [ $i -eq $skp ]`: This checks if the current value of `i` is **eq**ual to the value to skip (`$skp`).
+  * `then`: If the condition is true (e.g., `i` is 5 and `$skp` is 5)...
+  * `continue`: The **`continue` command** is executed. This immediately **stops the current iteration** and tells the loop to jump back to the top and start the **next iteration** (with `i = 6`).
+  * `fi`: Closes the `if` statement.
+  * `echo $i`: This line is only reached if the `if` condition was false. If the `continue` command was run, this `echo` command is skipped for that iteration.
+  * `done`: Closes the `for` loop.
+  * `chmod u+x continue_loop.sh`: Makes the script executable.
+
+#### 🚀 Execution and Output
+
+Now, let’s see the output that’s obtained:
+
+```bash
+hashim@Hashim:~$ ./continue_loop.sh 
+Enter maximum sequence: 
+10
+Enter the value to skip: 
+5
+Starting the iteration...
+0
+1
+2
+3
+4
+6
+7
+8
+9
+```
+
+As shown in the preceding figure, the number **5** is not shown. This means that the loop skipped that iteration when the `continue` command was used.
+
+
+---
