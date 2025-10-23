@@ -1,4 +1,4 @@
-# 🚀 **Using Scripts to Showcase Interprocess Communication**
+# 🚀 **Using Scripts to Showcase Interprocess Communication**   
 
 <details>
 <summary><strong>📑 Table of Contents</strong></summary>
