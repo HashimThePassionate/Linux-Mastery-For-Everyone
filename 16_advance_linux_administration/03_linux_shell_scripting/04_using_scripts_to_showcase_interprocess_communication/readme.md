@@ -1,5 +1,61 @@
 # 🚀 **Using Scripts to Showcase Interprocess Communication**
 
+<details>
+<summary><strong>📑 Table of Contents</strong></summary>
+
+- [🚀 **Using Scripts to Showcase Interprocess Communication**](#-using-scripts-to-showcase-interprocess-communication)
+  - [🏭 The Producer-Consumer Model](#-the-producer-consumer-model)
+  - [💻 Implementation Using Bash Scripts](#-implementation-using-bash-scripts)
+  - [Topics to be Covered](#topics-to-be-covered)
+- [🗄️ **Shared Storage**](#️-shared-storage)
+  - [⚠️ The Challenge: Race Conditions](#️-the-challenge-race-conditions)
+  - [💻 Example: Producer and Consumer Scripts](#-example-producer-and-consumer-scripts)
+    - [Producer Script (`producer.sh`)](#producer-script-producersh)
+      - [Script Content](#script-content)
+      - [📜 Code Explanation](#-code-explanation)
+    - [Consumer Script (`consumer.sh`)](#consumer-script-consumersh)
+      - [Script Content](#script-content-1)
+      - [📜 Code Explanation](#-code-explanation-1)
+    - [Visual Output](#visual-output)
+- [➡️ **Unnamed Pipes**](#️-unnamed-pipes)
+    - [🏭 Producer Script (`producer2.sh`)](#-producer-script-producer2sh)
+      - [Script Content](#script-content-2)
+      - [📜 Code Explanation](#-code-explanation-2)
+    - [📥 Consumer Script (`consumer2.sh`)](#-consumer-script-consumer2sh)
+      - [Script Content](#script-content-3)
+      - [📜 Code Explanation](#-code-explanation-3)
+    - [🚀 Execution and Output](#-execution-and-output)
+      - [Result](#result)
+- [📁 **Named Pipes** (FIFOs)](#-named-pipes-fifos)
+  - [🏭 Producer Script (`producer3.sh`)](#-producer-script-producer3sh)
+      - [Script Content](#script-content-4)
+      - [📜 Code Explanation](#-code-explanation-4)
+  - [📥 Consumer Script (`consumer3.sh`)](#-consumer-script-consumer3sh)
+      - [Script Content](#script-content-5)
+      - [📜 Code Explanation](#-code-explanation-5)
+  - [🚀 Execution Output](#-execution-output)
+      - [Producer Terminal Output](#producer-terminal-output)
+      - [Consumer Terminal Output](#consumer-terminal-output)
+  - [🛡️ Resilience and Persistence Workflow](#️-resilience-and-persistence-workflow)
+  - [⚠️ A Note on Queuing](#️-a-note-on-queuing)
+- [🔌 **Sockets**](#-sockets)
+  - [Socket-Based Communication](#socket-based-communication)
+  - [Example: IPC Sockets with `netcat`](#example-ipc-sockets-with-netcat)
+    - [🔧 Installing `netcat`](#-installing-netcat)
+    - [🏭 Producer Script (`producer4.sh`)](#-producer-script-producer4sh)
+      - [Script Content](#script-content-6)
+      - [📜 Code Explanation](#-code-explanation-6)
+    - [📥 Consumer Script (`consumer4.sh`)](#-consumer-script-consumer4sh)
+      - [Script Content](#script-content-7)
+  - [⚙️ Socket Communication Behavior](#️-socket-communication-behavior)
+    - [📊 Data Flow](#-data-flow)
+    - [🏃 Execution Workflow](#-execution-workflow)
+  - [💡 Alternative Tool](#-alternative-tool)
+
+</details>
+
+---
+
 Interprocess communication (IPC) was initially introduced in previous section. In this chapter, we will revisit these mechanisms, focusing specifically on how they can be demonstrated using scripts.
 
 ## 🏭 The Producer-Consumer Model
