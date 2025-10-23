@@ -265,3 +265,171 @@ The output clearly shows the data being printed by the consumer process. The "Co
 
 
 ---
+
+# 📁 **Named Pipes** (FIFOs)
+
+Named pipes, also known as **First In, First Outs (FIFOs)**, are similar to traditional (unnamed) pipes but are substantially different in their semantics.
+
+  * **Unnamed Pipe ⏳:** An unnamed pipe only persists for as long as the related process is running.
+  * **Named Pipe 💾:** A named pipe has backing storage. It will last as long as the system is up, regardless of the running status of the processes attached to the related IPC channel.
+
+Typically, a named pipe acts as a special file and can be deleted when it is no longer being used. Let’s modify our producer and consumer scripts to use a named pipe as their IPC channel.
+
+## 🏭 Producer Script (`producer3.sh`)
+
+Here are the commands to create the script, make it executable, and view its contents:
+
+```bash
+hashim@Hashim:~$ nano producer3.sh
+hashim@Hashim:~$ chmod u+x producer3.sh 
+hashim@Hashim:~$ cat producer3.sh
+```
+
+#### Script Content
+
+```bash
+#!/bin/bash
+# producer 3
+PIPE="pipe.fifo"
+
+if [[ ! -p ${PIPE} ]]
+then
+    mkfifo ${PIPE}
+fi
+
+while true
+do
+    for (( i=1; i<=10; i++ ))
+    do
+        uid="$(uuidgen)"
+        echo "${uid}"
+        echo "${uid}" > "${PIPE}"
+    done
+    sleep 1s
+done
+```
+
+#### 📜 Code Explanation
+
+  * `#!/bin/bash`: This shebang line specifies that the script should be run using the Bash shell.
+  * `# producer 3`: A comment identifying the script.
+  * `PIPE="pipe.fifo"`: This line declares a variable named `PIPE` and assigns it the file name `pipe.fifo`. This will be our named pipe.
+  * `if [[ ! -p ${PIPE} ]]`: This is a conditional check.
+      * `!`: The "not" operator.
+      * `-p ${PIPE}`: Checks if a file named `pipe.fifo` exists *and* is a named pipe (FIFO).
+      * The full line means: "If a named pipe called `pipe.fifo` does not already exist..."
+  * `then mkfifo ${PIPE}`: If the condition is true (the pipe doesn't exist), this command creates it. `mkfifo` stands for "make FIFO."
+  * `fi`: Marks the end of the `if` block.
+  * `while true`: This starts an infinite outer loop, ensuring the producer runs continuously.
+  * `for (( i=1; i<=10; i++ ))`: This starts an inner `for` loop that will run 10 times.
+  * `uid="$(uuidgen)"`: Generates a random UUID and stores it in the `uid` variable.
+  * `echo "${uid}"`: This prints the generated UUID to the producer's own terminal (standard output).
+  * `echo "${uid}" > "${PIPE}"`: This is the core IPC command. It **writes** (redirects with `>`) the contents of the `uid` variable *into* the named pipe. This operation will **block** (pause) if no other process is currently reading from the pipe.
+  * `done`: Marks the end of the `for` loop.
+  * `sleep 1s`: After the inner loop finishes writing 10 UUIDs, the script pauses for 1 second.
+  * `done`: Marks the end of the `while true` loop, which then repeats, starting the `for` loop again.
+
+## 📥 Consumer Script (`consumer3.sh`)
+
+Here are the commands to create the corresponding consumer script:
+
+```bash
+hashim@Hashim:~$ nano consumer3.sh
+hashim@Hashim:~$ chmod u+x consumer3.sh 
+hashim@Hashim:~$ cat consumer3.sh
+```
+
+#### Script Content
+
+```bash
+#!/bin/bash
+# consumer 3
+PIPE="pipe.fifo"
+
+if [[ ! -p ${PIPE} ]]
+then
+    mkfifo ${PIPE}
+fi
+
+while true
+do
+    if read line <"${PIPE}"
+    then
+        echo "${line}"
+    fi
+done
+```
+
+#### 📜 Code Explanation
+
+  * `#!/bin/bash`: Specifies the Bash interpreter.
+  * `# consumer 3`: A comment.
+  * `PIPE="pipe.fifo"`: Declares the variable for the named pipe, which must match the one used by the producer.
+  * `if [[ ! -p ${PIPE} ]] ... fi`: This is the same check as in the producer. It ensures the pipe file is created, regardless of which script starts first.
+  * `while true`: This starts an infinite loop to keep the consumer continuously listening for data.
+  * `if read line <"${PIPE}"`: This is the core logic for the consumer.
+      * `<"${PIPE}"`: This redirects the named pipe `pipe.fifo` to be the **standard input** for the `read` command.
+      * `read line`: This command waits for data to appear in its standard input (the pipe). When a line of data arrives, it reads it and stores it in the variable `line`. This operation will **block** (pause) indefinitely until data is available to be read.
+      * `if ... then`: The `read` command returns a successful (true) status as long as it successfully reads a line.
+  * `echo "${line}"`: If the `read` command was successful, this line prints the data (which is stored in the `line` variable) to the consumer's terminal.
+  * `fi`: Marks the end of the `if` block.
+  * `done`: Marks the end of the `while true` loop. The script immediately loops back and waits to read the next line from the pipe.
+
+## 🚀 Execution Output
+
+The named pipe is `pipe.fifo` (line 3 in both scripts). The pipe file is created (if it’s not already present) by either the producer or consumer when they start (line 6), using the `mkfifo` command.
+
+The producer writes data to the pipe, and the consumer reads it. This results in both terminals showing the same data.
+
+#### Producer Terminal Output
+
+```bash
+hashim@Hashim:~$ ./producer3.sh 
+5a05164f-0941-41f8-a30a-748f8f39c43a
+dcbdb83e-1d4c-4a20-9b2c-88df5e9a9a74
+4d2bfd69-2aea-44f9-966d-ed81dfa0986c
+13171e3f-1491-4181-8d58-9c02dc3eebcb
+1a6fa150-737b-4389-9139-d3341991dea7
+767d9475-cf4e-4a81-9f1e-863405d13065
+7b08518d-a20e-4bf1-a0af-a93e75f7c09b
+d38e00ac-ac2b-4df7-a3e5-c20de5841b9a
+e4302865-e108-4c4c-b31e-bd5c514408e6
+```
+
+#### Consumer Terminal Output
+
+```bash
+hashim@Hashim:~$ ./consumer3.sh 
+5a05164f-0941-41f8-a30a-748f8f39c43a
+dcbdb83e-1d4c-4a20-9b2c-88df5e9a9a74
+4d2bfd69-2aea-44f9-966d-ed81dfa0986c
+13171e3f-1491-4181-8d58-9c02dc3eebcb
+1a6fa150-737b-4389-9139-d3341991dea7
+767d9475-cf4e-4a81-9f1e-863405d13065
+7b08518d-a20e-4bf1-a0af-a93e75f7c09b
+d38e00ac-ac2b-4df7-a3e5-c20de5841b9a
+e4302865-e108-4c4c-b31e-bd5c514408e6
+```
+
+## 🛡️ Resilience and Persistence Workflow
+
+We started both the producer and the consumer scripts, in an arbitrary order. We can then test the pipe's resilience:
+
+1.  After a while, we **stopped (interrupted) the consumer (Step 1)**.
+2.  The producer continued to run but automatically **stopped sending data** to the pipe (because the write operation blocks until there is a reader).
+3.  Then, we **started the consumer again**.
+4.  The producer **immediately resumed** sending data to the pipe, and the flow of data continued.
+5.  After a while, we **stopped the producer (Step 2)**.
+6.  This time, the consumer became **idle** (it blocked, waiting for data that was no longer being sent).
+7.  After **starting the producer again**, both processes resumed normal operation, and data began flowing through the named pipe.
+
+This workflow has shown the **persistence and resilience** of the named pipe, which operates regardless of the running status of the producer or consumer processes.
+
+
+## ⚠️ A Note on Queuing
+
+Named pipes are essentially **queues**, where data is queued and dequeued on a **first-come-first-served (FIFO)** basis.
+
+When more than two processes communicate on the IPC named pipe channel, the FIFO approach may not fit the bill. This is especially true when specific processes demand a higher priority for data processing.
+
+---
