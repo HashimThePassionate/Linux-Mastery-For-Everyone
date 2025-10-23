@@ -433,3 +433,152 @@ Named pipes are essentially **queues**, where data is queued and dequeued on a *
 When more than two processes communicate on the IPC named pipe channel, the FIFO approach may not fit the bill. This is especially true when specific processes demand a higher priority for data processing.
 
 ---
+
+# 🔌 **Sockets**
+
+There are two primary types of IPC (Interprocess Communication) socket-based facilities:
+
+  * **IPC Sockets:** Also known as **Unix domain sockets**.
+  * **Network Sockets:** These include **Transport Control Protocol (TCP)** and **User Datagram Protocol (UDP)** sockets.
+
+## Socket-Based Communication
+
+**IPC sockets** use a local file as a socket address. They enable bidirectional communication between processes that are running on the **same host**.
+
+On the other hand, **network sockets** extend the IPC data connectivity layer **beyond the local machine** by using TCP/UDP networking.
+
+Apart from the obvious implementation differences, the data communication channels for both IPC and network sockets behave the same:
+
+  * Both sockets are configured as streams.
+  * They support bidirectional communication.
+  * They emulate a **client/server** pattern.
+  * The socket's communication channel remains active until it is closed on either end, which breaks the IPC connection.
+
+## Example: IPC Sockets with `netcat`
+
+Let’s adapt our producer-consumer model to simulate an IPC socket (Unix domain socket) data connectivity layer.
+
+We will use **netcat** to handle the underlying client/server IPC socket connectivity. `netcat` is a powerful networking tool for reading and writing data using TCP, UDP, and IPC socket connections.
+
+### 🔧 Installing `netcat`
+
+If `netcat` is not installed by default on your Linux distribution of choice, you may look to install it as follows.
+
+**On Ubuntu/Debian:**
+
+```bash
+sudo apt install netcat
+```
+
+**On Fedora/RHEL:**
+
+```bash
+sudo dnf install nmap
+```
+
+### 🏭 Producer Script (`producer4.sh`)
+
+These are the commands to create the script, make it executable, and view its content:
+
+```bash
+hashim@Hashim:~$ nano producer4.sh
+hashim@Hashim:~$ chmod u+x producer4.sh 
+hashim@Hashim:~$ cat producer4.sh
+```
+
+#### Script Content
+
+```bash
+#!/bin/bash
+# producer 4
+SOCKET="/var/tmp/ipc.sock"
+
+rm -rf "${SOCKET}"
+
+while true
+do
+    uuidgen;
+    sleep 1s;
+done | tee /dev/tty | nc -lU "${SOCKET}"
+```
+
+#### 📜 Code Explanation
+
+  * `#!/bin/bash`: This "shebang" line specifies that the script should be executed by the Bash shell.
+  * `# producer 4`: A comment identifying the script.
+  * `SOCKET="/var/tmp/ipc.sock"`: This line defines a variable named `SOCKET` and sets its value to the file path `/var/tmp/ipc.sock`. This file will be used as the Unix domain socket.
+  * `rm -rf "${SOCKET}"`: This command forcibly (`-f`) and recursively (`-r`) removes the socket file if it already exists. This ensures the producer starts with a clean socket file.
+  * `while true`: This initiates an infinite loop, causing the code within it to run repeatedly.
+  * `do ... done | tee ... | nc ...`: This structure indicates that the entire output of the `while` loop is being "piped" through two other commands.
+  * `uuidgen;`: This command generates a random UUID and prints it to standard output.
+  * `sleep 1s;`: The script then pauses for 1 second before the loop repeats.
+  * `| tee /dev/tty`: The output of the `while` loop (a new UUID every second) is piped to the `tee` command. `tee` duplicates the data stream.
+      * It sends one copy to `/dev/tty` (the current terminal), which allows you to see the UUIDs as they are generated on the producer's screen.
+      * It passes the second copy along to the next command in the pipe.
+  * `| nc -lU "${SOCKET}"`: The data stream from `tee` is piped to `netcat` (`nc`).
+      * `-l`: This option puts `netcat` in **listener (server)** mode, waiting for a client to connect.
+      * `-U`: This option specifies that it should use a **Unix domain socket** (an IPC socket).
+      * `"${SOCKET}"`: This tells `netcat` to listen on the file path stored in the `SOCKET` variable (i.e., `/var/tmp/ipc.sock`).
+
+### 📥 Consumer Script (`consumer4.sh`)
+
+These are the commands to create the consumer script:
+
+```bash
+hashim@Hashim:~$ nano consumer4.sh
+hashim@Hashim:~$ chmod u+x consumer4.sh 
+hashim@Hashim:~$ cat producer4.sh
+```
+
+*(Note: The text provided for the consumer script's content was identical to the producer script's.)*
+
+#### Script Content
+
+```bash
+#!/bin/bash
+# producer 4
+SOCKET="/var/tmp/ipc.sock"
+
+rm -rf "${SOCKET}"
+
+while true
+do
+    uuidgen;
+    sleep 1s;
+done | tee /dev/tty | nc -lU "${SOCKET}"
+```
+
+## ⚙️ Socket Communication Behavior
+
+The **producer** acts as the **server** by initiating a `netcat` listener endpoint using an IPC socket. This is specified in the last line of `producer4.sh`:
+
+```bash
+nc -lU "${SOCKET}"
+```
+
+  * The `-l` option indicates the **listener (server)** mode.
+  * The `-U "${SOCKET}"` option parameter specifies the **IPC socket type** (Unix domain socket) and its file path.
+
+The **consumer** connects to the `netcat` server endpoint as a **client** with a similar command (as described in the last line of `consumer4.sh`).
+
+Both the producer and consumer use the same (shared) IPC socket file descriptor for communication: `/var/tmp/ipc.sock`.
+
+### 📊 Data Flow
+
+The producer sends random UUID strings every second to the consumer (using the `while-do-done` structure in `producer4.sh`).
+
+The related output is captured in `stdout` (standard output) with the `tee` command (which displays it on the producer's terminal) before being piped to `netcat` (which sends it through the socket).
+
+### 🏃 Execution Workflow
+
+The consumer gets all the messages (UUIDs) that have been generated by the producer. To show you that the consumer listens, we first started the consumer script, which generated two errors. These errors occurred as long as the producer was not sending data through the socket (i.e., the server was not yet running).
+
+  * Once we started the producer script, the consumer started to receive data.
+  * When we interrupted the producer, the consumer stopped immediately.
+
+## 💡 Alternative Tool
+
+In our producer-consumer model, we used `netcat` for the IPC socket communication layer. Alternatively, we could use **socat**, a similar networking tool.
+
+
+---
