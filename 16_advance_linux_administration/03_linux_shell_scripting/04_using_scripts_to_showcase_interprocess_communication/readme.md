@@ -149,3 +149,119 @@ As seen in the image, the producer script (left terminal) generates and prints U
 
 
 ---
+
+# ➡️ **Unnamed Pipes**
+
+Unnamed (or anonymous) pipes, which are also known as regular pipes, function by feeding the standard output of one process directly into the standard input of another.
+
+Using our producer-consumer model, the simplest way to illustrate an unnamed pipe as an IPC mechanism is by using the following command structure:
+
+```bash
+producer.sh | consumer.sh
+```
+
+The key element here is the **pipe (`|`) symbol**. The process on the left-hand side (`producer.sh`) produces an output that is "piped" directly to the process on the right-hand side (`consumer.sh`) for consumption.
+
+To demonstrate this, we will create two new scripts, `producer2.sh` and `consumer2.sh`.
+
+### 🏭 Producer Script (`producer2.sh`)
+
+These commands create the script, make it executable, and display its contents.
+
+```bash
+hashim@Hashim:~$ nano producer2.sh
+hashim@Hashim:~$ chmod u+x producer2.sh
+hashim@Hashim:~$ cat producer2.sh
+```
+
+#### Script Content
+
+```bash
+#!/bin/bash
+# producer 2
+for (( i=1; i<=10; i++ ))
+do
+    uid="$(uuidgen)"
+    echo "${uid}"
+done
+```
+
+#### 📜 Code Explanation
+
+  * `#!/bin/bash`: This shebang line specifies that the script should be executed using the Bash interpreter.
+  * `# producer 2`: This is a comment identifying the script.
+  * `for (( i=1; i<=10; i++ ))`: This line initiates a C-style `for` loop that will iterate 10 times.
+  * `uid="$(uuidgen)"`: Inside the loop, this command executes `uuidgen` to generate a random UUID and stores it in the `uid` variable.
+  * `echo "${uid}"`: This command prints the value of the `uid` variable to **standard output** (the console). This output is what will be captured by the pipe.
+  * `done`: This marks the end of the `for` loop.
+
+### 📥 Consumer Script (`consumer2.sh`)
+
+These commands create the second script, make it executable, and display its contents.
+
+```bash
+hashim@Hashim:~$ nano consumer2.sh
+hashim@Hashim:~$ chmod u+x consumer2.sh
+hashim@Hashim:~$ cat consumer2.sh
+```
+
+#### Script Content
+
+```bash
+#!/bin/bash
+# consumer 2
+echo "Consumer data:"
+echo "--------------"
+if [ -t 0 ]
+then
+    data="$*"
+else
+    data=$(cat)
+fi
+echo "${data}"
+```
+
+#### 📜 Code Explanation
+
+  * `#!/bin/bash`: Specifies the Bash interpreter.
+  * `# consumer 2`: A comment identifying this script.
+  * `echo "Consumer data:"` and `echo "--------------"`: These lines print a static header to the console. This helps confirm that the consumer script is the one printing the final output.
+  * `if [ -t 0 ]`: This is the script's core logic. It performs a test (`[ -t 0 ]`).
+      * `-t`: This flag checks if a file descriptor is open and associated with a terminal.
+      * `0`: This is the file descriptor for **standard input** (`stdin`), which is also represented as `/dev/stdin`.
+      * In simple terms, this line asks: "Is the standard input for this script coming from a user typing at a terminal?"
+  * `then data="$*"`: This block executes if the `if` test is **true** (meaning the input *is* from a terminal, and not a pipe). It captures all command-line arguments (e.g., `./consumer2.sh arg1 arg2`) and stores them in the `data` variable.
+  * `else data=$(cat)`: This block executes if the `if` test is **false** (meaning the input is *not* from a terminal, indicating it's coming from a pipe).
+      * `$(cat)`: The `cat` command, when run without arguments, reads all data from standard input. In this case, it reads all the data being piped from `producer2.sh` and stores it in the `data` variable.
+  * `fi`: Marks the end of the `if` block.
+  * `echo "${data}"`: This line prints the final contents of the `data` variable, which will either be the piped data or the command-line arguments.
+
+### 🚀 Execution and Output
+
+We now run the producer script and pipe its output directly to the consumer script.
+
+```bash
+hashim@Hashim:~$ ./producer2.sh | ./consumer2.sh
+```
+
+#### Result
+
+```
+Consumer data:
+--------------
+6c9ab353-64bb-4438-8496-627c0f1692d1
+31556077-b42b-4e01-8b7b-b21594dff2a7
+048f27e1-2942-4a7a-b7f2-0909edd55bd7
+9e3361d9-2327-4660-a167-39ebe1700608
+4fc0cd37-e7ab-40ad-98a5-9101f44fb7ba
+fe0becf4-b09f-4adc-8da4-7348e563fec4
+4436837f-014e-414f-9b4c-958f4632c6e4
+411af292-81ac-4a6c-ace2-caefca28ed0a
+d193bbef-72e9-4a96-b0b5-a55734529ffc
+1cd11de2-9899-43ee-ae89-36ae12355a08
+```
+
+The output clearly shows the data being printed by the consumer process. The "Consumer data:" header confirms that `consumer2.sh` successfully received the 10 UUID strings that were generated and sent by `producer2.sh` through the anonymous pipe.
+
+
+---
