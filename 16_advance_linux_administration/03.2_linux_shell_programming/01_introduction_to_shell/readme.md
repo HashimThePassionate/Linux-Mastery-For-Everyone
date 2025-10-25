@@ -928,3 +928,313 @@ mv -- -abc.txt renamed-abc.txt
   * `renamed-abc.txt`: This is the new, non-problematic name for the file.
 
 ---
+
+# 🌍 **Working with Environment Variables**
+
+There are many built-in environment variables available. The following subsections discuss the `env` command and then some of the more common variables.
+
+## 🖥️ The `env` Command
+
+The `env` ("environment") command displays the variables that are in your bash environment. These variables are key-value pairs that store configuration information for your system and shell session.
+
+An example of the output of the `env` command is here:
+
+```bash
+HELL=/bin/bash
+SESSION_MANAGER=local/Hashim:@/tmp/.ICE-unix/2702,unix/Hashim:/tmp/.ICE-unix/2702
+QT_ACCESSIBILITY=1
+COLORTERM=truecolor
+XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu-xorg:/etc/xdg
+XDG_MENU_PREFIX=gnome-
+GNOME_DESOP_SESSION_ID=this-is-deprecated
+GNOME_SHELL_SESSION_MODE=ubuntu
+SSH_AUTH_SOCK=/run/user/1000/keyring/ssh
+MEMORY_PRESSURE_WRITE=c29tZSAyMDAwMDAgMjAwMDAwMAA=
+XMODIFIERS=@im=ibus
+DESKTOP_SESSION=ubuntu-xorg
+GTK_MODULES=gail:atk-bridge
+PWD=/home/hashim
+LOGNAME=hashim
+XDG_SESSION_DESKTOP=ubuntu-xorg
+XDG_SESSION_TYPE=x11
+GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
+SYSTEMD_EXEC_PID=2735
+XAUTHORITY=/run/user/1000/gdm/Xauthority
+WINDOWPATH=2
+HOME=/home/hashim
+USERNAME=hashim
+LANG=en_US.UTF-8
+_=/usr/bin/env
+```
+
+### 📜 Output Explanation
+
+This output is a list of all environment variables for the current session. Each line follows a `VARIABLE_NAME=value` format.
+
+  * `HELL=/bin/bash`: This (likely a typo in the source, usually `SHELL`) indicates the path to the current shell.
+  * `PWD=/home/hashim`: The **Print Working Directory** (your current location).
+  * `LOGNAME=hashim`: The user who is logged in.
+  * `HOME=/home/hashim`: The absolute path to the current user's home directory.
+  * `LANG=en_US.UTF-8`: The language and character encoding settings.
+  * `_=/usr/bin/env`: A special variable that holds the last command that was executed.
+
+## 💡 Useful Environment Variables
+
+This section discusses some important environment variables, most of which you probably will not need to modify. However, it is useful to be aware of the existence of these variables and their purpose.
+
+  * 🏠 **`HOME`**: This variable contains the absolute path of the user’s home directory.
+  * 🌐 **`HOSTNAME`**: This variable specifies the Internet name of the host machine.
+  * 👤 **`LOGNAME`**: This variable specifies the user’s login name.
+  * 🗺️ **`PATH`**: This variable specifies the search path (see the next subsection).
+  * 🐚 **`SHELL`**: This variable specifies the absolute path of the current shell (e.g., `/bin/bash`).
+  * 🧑‍💻 **`USER`**: This variable specifies the user’s current username. This value might be different from the `LOGNAME` if a superuser (like root) executes the `su` command to emulate another user’s permissions.
+
+## 🔧 Setting the `PATH` Environment Variable
+
+Programs and other executable files can exist in many different directories. Operating systems provide a **search path** that lists the directories where the OS searches for executable files.
+
+You can add a directory to your `PATH` so that you can invoke an executable file by specifying just its filename. You will not need to specify the full path to the executable file.
+
+The search path is stored in an environment variable, which is a named string maintained by the operating system. These variables contain information available to the command shell and other programs.
+
+The path variable is named **`PATH`** in bash or **`Path`** in Windows (bash is case-sensitive, but Windows is not).
+
+### Examples of Setting the `PATH`
+
+**To set the path in bash/Linux (pre-pending a directory):**
+
+```bash
+export PATH=$HOME/anaconda:$PATH
+```
+
+#### 📜 Code Explanation
+
+  * `export`: This command makes the variable (in this case, `PATH`) available to all child processes and scripts launched from the current shell.
+  * `PATH=...`: This is the assignment operation, setting a new value for the `PATH` variable.
+  * `$HOME/anaconda`: This is the new directory we want to add. `$HOME` is a variable that resolves to your home directory (e.g., `/home/hashim`).
+  * `:`: This is the **delimiter** that separates directories in the `PATH` string.
+  * `$PATH`: This accesses the *current* value of the `PATH` variable and appends it after the new directory. This is crucial for **pre-pending** (adding to the front) so you don't lose all your existing command paths.
+
+**To add the Python directory to the path for a particular session in bash (appending):**
+
+```bash
+export PATH="$PATH:/usr/local/bin/python"
+```
+
+#### 📜 Code Explanation
+
+  * `export PATH=...`: Same as before.
+  * `"$PATH:/usr/local/bin/python"`: This time, the existing path (`$PATH`) is listed first, followed by the delimiter (`:`) and the new directory. This **appends** the new path to the end of the list. The double quotes (`"`) are good practice to prevent errors if any paths contain spaces.
+
+**In the Bourne shell (`sh`) or ksh shell, you might see this:**
+
+```bash
+PATH="$PATH:/usr/local/bin/python"
+```
+
+#### 📜 Code Explanation
+
+  * This is the same assignment as the bash example, but it omits the `export` command. This means the change will apply to the current shell, but it may not be passed down to other scripts or programs that this shell executes.
+
+## 🔬 Practical `PATH` Demonstration
+
+Let's look at how the `PATH` variable changes.
+
+**1. Check the initial `PATH`:**
+
+```bash
+hashim@Hashim:~$ echo $PATH | fold -50
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
+/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/
+snap/bin:/home/hashim/
+```
+
+#### 📜 Code Explanation
+
+  * `echo $PATH`: This command prints the current value stored in the `PATH` variable.
+  * `|`: The pipe symbol. It takes the output from the `echo` command and sends it as input to the next command.
+  * `fold -50`: The `fold` command wraps the incoming text at a maximum width of 50 characters, making the long `PATH` string easier to read.
+
+**2. Add the `anaconda` directory:**
+
+```bash
+hashim@Hashim:~$ export PATH=$PATH:$HOME/anaconda
+hashim@Hashim:~$ echo $PATH | fold -50
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
+/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/
+snap/bin:/home/hashim/:/home/hashim/anaconda
+```
+
+#### 📜 Code Explanation
+
+  * `export PATH=$PATH:$HOME/anaconda`: This command appends the `anaconda` directory (located in the user's home) to the end of the current `PATH`.
+  * `echo $PATH | fold -50`: We run the check command again.
+  * **Result**: The output now clearly shows `:/home/hashim/anaconda` at the very end.
+
+**3. Add the `python` directory:**
+
+```bash
+hashim@Hashim:~$ PATH="$PATH:/usr/local/bin/python"
+hashim@Hashim:~$ echo $PATH | fold -50
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:
+/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/
+snap/bin:/home/hashim/:/home/hashim/anaconda:/usr/
+local/bin/python
+```
+
+#### 📜 Code Explanation
+
+  * `PATH="$PATH:/usr/local/bin/python"`: This command appends the `/usr/local/bin/python` directory to the *new* `PATH` (which already includes the `anaconda` directory).
+  * `echo $PATH | fold -50`: We run the check command a final time.
+  * **Result**: The output now shows both new directories appended to the original path.
+
+## 🏷️ Defining Custom Variables
+
+You can also define your own variables in the shell. The following command defines an environment variable called `h1`:
+
+```bash
+h1=$HOME/test
+```
+
+Now enter the following command:
+
+```bash
+Echo $h1
+```
+
+You will see the following output:
+
+```bash
+hashim@Hashim:~$ h1=$HOME/test
+hashim@Hashim:~$ echo $h1
+/home/hashim/test
+```
+
+#### 📜 Code Explanation
+
+  * `h1=$HOME/test`: This command creates a new shell variable named `h1`. It assigns it the string value `$HOME/test`. The shell expands `$HOME` to `/home/hashim`, so the final value stored is `/home/hashim/test`.
+  * `echo $h1`: This command prints the value stored inside the `h1` variable. The dollar sign (`$`) is used to access the value of a variable.
+
+## 🚀 Specifying Aliases
+
+An **alias** is a shortcut or a nickname for a longer command.
+
+The next code snippet shows you how to set the alias `ll` so that it displays the long listing of a directory:
+
+```bash
+alias ll="ls -l"
+```
+
+#### 📜 Code Explanation
+
+  * `alias`: The command to create an alias.
+  * `ll=`: The new shortcut name you want to use.
+  * `"ls -l"`: The full command that will be executed when you type `ll`.
+
+The following three alias definitions involve the `ls` command and various switches:
+
+```bash
+alias ll="ls -l"
+alias lt="ls -lt"
+alias ltr="ls -ltr"
+```
+
+#### 📜 Code Explanation
+
+  * `alias ll="ls -l"`: Creates the `ll` alias for a long list.
+  * `alias lt="ls -lt"`: Creates the `lt` alias for a long list, sorted by modification **time** (`t`).
+  * `alias ltr="ls -ltr"`: Creates the `ltr` alias for a long list, sorted by time, in **reverse** (`r`) order.
+
+As an example, you can replace the command `ls -ltr` (the letters “l,” “t,” and “r”) that you saw earlier in the chapter with the `ltr` alias and you will see the same reversed time-based long listing of filenames (reproduced here):
+
+```bash
+hashim@Hashim:~/Repo$ ltr
+total 52
+-rw-rw-r-- 1 hashim hashim   32 Oct 25 15:48  apple-care.text
+-rw-rw-r-- 1 hashim hashim   34 Oct 25 15:48  checkin-commands.txt
+-rw-rw-r-- 1 hashim hashim   32 Oct 25 15:49  iphonemeetup.txt
+-rw-rw-r-- 1 hashim hashim   20 Oct 25 15:49  hello.txt
+-rw-rw-r-- 1 hashim hashim   26 Oct 25 15:49  outfile.txt
+-rw-rw-r-- 1 hashim hashim   30 Oct 25 15:50  output.txt
+-rw-rw-r-- 1 hashim hashim   94 Oct 25 15:50  ssl-instructions.txt
+drwxrwxr-x 2 hashim hashim 4096 Oct 25 15:54  instructions
+```
+
+#### 📜 Code Explanation
+
+  * `ltr`: By typing the alias, the shell automatically executes the full command `ls -ltr`.
+
+You can also define an alias that contains the bash pipe (`|`) symbol:
+
+```bash
+hashim@Hashim:~/Repo$ alias ltrm="ls -ltr|more"
+```
+
+#### 📜 Code Explanation
+
+  * `alias ltrm="ls -ltr|more"`: This creates a new alias named `ltrm`.
+  * The command `"ls -ltr|more"` will run `ls -ltr` and then **pipe** its output to the `more` command, which displays the output one page at a time.
+
+Here is the output from running that alias:
+
+```bash
+hashim@Hashim:~/Repo$ alias ltrm="ls -ltr|more"
+hashim@Hashim:~/Repo$ ltrm
+total 52
+-rw-rw-r-- 1 hashim hashim   32 Oct 25 15:48 apple-care.text
+-rw-rw-r-- 1 hashim hashim   34 Oct 25 15:48 checkin-commands.txt
+-rw-rw-r-- 1 hashim hashim   32 Oct 25 15:49 iphonemeetup.txt
+-rw-rw-r-- 1 hashim hashim   20 Oct 25 15:49 hello.txt
+-rw-rw-r-- 1 hashim hashim   26 Oct 25 15:49 outfile.txt
+-rw-rw-r-- 1 hashim hashim   30 Oct 25 15:50 output.txt
+-rw-rw-r-- 1 hashim hashim   94 Oct 25 15:50 ssl-instructions.txt
+drwxrwxr-x 2 hashim hashim 4096 Oct 25 15:54 instructions
+-rw-rw-r-- 1 hashim hashim    0 Oct 25 15:57 poem
+-rw-rw-r-- 1 hashim hashim   69 Oct 25 16:05 temp1
+-rw-rw-r-- 1 hashim hashim   46 Oct 25 16:05 temp2
+-rw-rw-r-- 1 hashim hashim 1364 Oct 25 16:09 longfile.txt
+-rw-rw-r-- 1 hashim hashim  405 Oct 25 17:00 longfile2.txt
+-rwxrw-r-- 1 hashim hashim   21 Oct 25 17:37 python.py
+-rw-rw-r-- 1 hashim hashim    0 Oct 25 17:41 test_script.sh
+-rw-rw-r-- 1 hashim hashim    0 Oct 25 18:01 One Space.txt
+--More--
+```
+
+#### 📜 Code Explanation
+
+  * `ltrm`: Running this alias executes `ls -ltr | more`.
+  * `--More--`: This at the bottom of the screen confirms that the output was successfully piped to the `more` command, which is now pausing the output.
+
+In a similar manner, you can define aliases for directory-related commands:
+
+```bash
+alias ltd="ls -lt | grep '^d'"
+alias ltdm="ls -lt | grep '^d' | more"
+```
+
+#### 📜 Code Explanation
+
+  * `alias ltd="ls -lt | grep '^d'"`: This creates an alias `ltd` (list time directories).
+      * `ls -lt`: Lists files sorted by time.
+      * `| grep '^d'`: Pipes the output to `grep`.
+      * `'^d'`: This is a regular expression that searches for lines that **start with** (`^`) the letter `d`. In an `ls -l` output, `d` signifies a directory.
+      * **Result**: This alias lists *only directories*, sorted by time.
+  * `alias ltdm="ls -lt | grep '^d' | more"`: This creates a similar alias, `ltdm`, but pipes the final filtered list of directories to `more`.
+
+Here is the output from running those aliases:
+
+```bash
+hashim@Hashim:~/Repo$ alias ltd="ls -lt | grep '^d'"
+hashim@Hashim:~/Repo$ alias ltdm="ls -lt | grep '^d' | more"
+hashim@Hashim:~/Repo$ ltd
+drwxrwxr-x 2 hashim hashim 4096 Oct 25 15:54 instructions
+hashim@Hashim:~/Repo$ ltdm
+drwxrwxr-x 2 hashim hashim 4096 Oct 25 15:54 instructions
+```
+
+#### 📜 Code Explanation
+
+  * `ltd`: This command runs, and in this example, it finds only one directory (`instructions`).
+  * `ltdm`: This command runs and finds the same single directory. Because the output is so short (only one line), the `more` command does not need to pause, so the output appears identical to `ltd`.
+
+---
