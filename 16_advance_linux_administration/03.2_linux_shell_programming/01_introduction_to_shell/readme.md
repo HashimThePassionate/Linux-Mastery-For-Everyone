@@ -683,3 +683,131 @@ Notice that some words in the preceding output are split based on the line width
 In Section 4, you will learn how to display the lines in a text file that match a string or a pattern, and in Section 5 you will learn how to replace a string with another string in a text file.
 
 ---
+
+# 🔐 File Ownership: Owner, Group, and World
+
+Bash files can have partial or full **rwx** privileges. These privileges define what can be done with a file:
+
+  * **r (read):** The file's contents can be viewed.
+  * **w (write):** The file's contents can be changed or modified.
+  * **x (execute):** The file can be run as a program from the command line. This is done by typing the file’s name (or its full path if the file is not in your current directory). Invoking an executable file this way causes the operating system to try to execute the commands inside it.
+
+These permissions are set for three distinct levels of ownership:
+
+1.  **u (User):** The owner of the file (usually the person who created it).
+2.  **g (Group):** A specific group of users who share permissions.
+3.  **o (Other):** Everyone else (also referred to as "world").
+
+-----
+
+## 🛠️ Using the `chmod` Command
+
+You use the `chmod` (change mode) command to set permissions for files.
+
+### Setting Absolute Symbolic Permissions
+
+You can set all permissions at once using `u`, `g`, and `o` with the `=` operator.
+
+For example, to set the permissions `rwx rw- r--` for a file:
+
+```bash
+chmod u=rwx g=rw o=r filename
+```
+
+  * `u=rwx`: The **user** (owner) gets read, write, and execute permissions.
+  * `g=rw`: The **group** gets read and write permissions (but not execute).
+  * `o=r`: **Others** (everyone else) get only read permission.
+
+### Adding or Removing Permissions
+
+You can modify existing permissions using `+` (to add) or `-` (to remove).
+
+  * **Add a permission:** To add the execute (`x`) permission for "others" to a file that is `rwx rw- r--`:
+
+    ```bash
+    chmod o+x filename
+    ```
+
+    The new permissions would be `rwx rw- r-x`.
+
+  * **Add to all:** You can use `a` (for "all") to add a permission to all three categories (user, group, and other) at once.
+
+    ```bash
+    chmod a+x filename
+    ```
+
+  * **Remove from all:** Conversely, you can use `a-` to remove a permission from all groups.
+
+    ```bash
+    chmod a-x filename
+    ```
+
+-----
+
+## 🚀 Practical Examples from Scratch
+
+Let's walk through these commands with a real file.
+
+1.  **Create a file:**
+    First, let's create a new file named `test_script.sh`.
+
+    ```bash
+    hashim@Hashim:~$ touch test_script.sh
+    ```
+
+2.  **Check default permissions:**
+    Now, let's see its default permissions using `ls -l`.
+
+    ```bash
+    hashim@Hashim:~$ ls -l test_script.sh
+    -rw-rw-r-- 1 hashim hashim 0 Oct 25 17:30 test_script.sh
+    ```
+
+    As you can see, the default permissions are `rw-rw-r--`. The user (`hashim`) can read/write, the group (`hashim`) can read/write, and others can only read. No one can execute it.
+
+3.  **Set specific permissions (Absolute):**
+    Let's set the permissions to `rwx` for the user, `rw-` for the group, and `r--` for others, as in the first example.
+
+    ```bash
+    hashim@Hashim:~$ chmod u=rwx,g=rw,o=r test_script.sh
+    hashim@Hashim:~$ ls -l test_script.sh
+    -rwxrw-r-- 1 hashim hashim 0 Oct 25 17:31 test_script.sh
+    ```
+
+    The permissions have been updated exactly as specified.
+
+4.  **Add 'execute' for 'others':**
+    Now, let's add the execute (`x`) permission for the "others" category.
+
+    ```bash
+    hashim@Hashim:~$ chmod o+x test_script.sh
+    hashim@Hashim:~$ ls -l test_script.sh
+    -rwxrw-r-x 1 hashim hashim 0 Oct 25 17:32 test_script.sh
+    ```
+
+    Notice the permissions for "others" changed from `r--` to `r-x`.
+
+5.  **Add 'execute' for all (if missing):**
+    The user and group already have write permissions, but let's imagine we wanted to ensure *everyone* has execute permission. We can use `a+x`.
+
+    ```bash
+    hashim@Hashim:~$ chmod a+x test_script.sh
+    hashim@Hashim:~$ ls -l test_script.sh
+    -rwxrwxr-x 1 hashim hashim 0 Oct 25 17:33 test_script.sh
+    ```
+
+    The `x` permission was added to the "group" category (which was `rw-` and became `rwx`). The user and other categories already had `x`, so they remained unchanged.
+
+6.  **Remove 'execute' from all:**
+    Finally, let's remove the execute permission from *everyone* at the same time.
+
+    ```bash
+    hashim@Hashim:~$ chmod a-x test_script.sh
+    hashim@Hashim:~$ ls -l test_script.sh
+    -rw-rw-r-- 1 hashim hashim 0 Oct 25 17:34 test_script.sh
+    ```
+
+    The file is no longer executable by anyone, returning it to its original permission state.
+
+
+---
