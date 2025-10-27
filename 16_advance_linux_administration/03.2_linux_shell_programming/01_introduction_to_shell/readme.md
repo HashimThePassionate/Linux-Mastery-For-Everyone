@@ -1238,3 +1238,316 @@ drwxrwxr-x 2 hashim hashim 4096 Oct 25 15:54 instructions
   * `ltdm`: This command runs and finds the same single directory. Because the output is so short (only one line), the `more` command does not need to pause, so the output appears identical to `ltd`.
 
 ---
+
+# 🔎 **Finding Executable Files**
+
+There are several commands available for finding executable files (binary files or shell scripts) by searching the directories listed in the `PATH` environment variable. These include `which`, `whence`, `whereis`, and `whatis`. These commands produce results similar to the `which` command, as discussed below.
+
+-----
+
+## `which`
+
+The `which` command gives the full path to whatever executable you specify. It will return a blank line if the executable is not in any directory specified in the `PATH` environment variable. This is useful for finding whether a particular command or utility is installed on the system.
+
+```bash
+which rm
+```
+
+The output of the preceding command is here:
+
+```bash
+/usr/bin/rm
+```
+
+### 📜 Code Explanation
+
+  * `which`: This command searches all directories listed in your `$PATH` environment variable to find the location of a specified executable.
+  * `rm`: This is the argument passed to `which`. It is the name of the executable file we are looking for (the "remove" command).
+  * `/usr/bin/rm`: This is the output, showing the absolute path to the `rm` command. This tells you exactly which `rm` program will be run when you type `rm` in your terminal.
+
+## `whereis`
+
+The `whereis` command provides the information that you get from the `which` command, but it also includes the path to the command's manual (man) page and source code, if available.
+
+```bash
+whereis rm
+```
+
+The output is:
+
+```bash
+rm: /usr/bin/rm /usr/share/man/man1/rm.1.gz
+```
+
+### 📜 Code Explanation
+
+  * `whereis`: This command searches a standard set of directories for binaries, manual pages, and source files.
+  * `rm`: The name of the command to locate.
+  * `rm:`: The output is prefixed with the name of the command.
+  * `/usr/bin/rm`: This is the path to the binary executable (the program itself).
+  * `/usr/share/man/man1/rm.1.gz`: This is the path to the compressed manual (man) page for the `rm` command.
+
+## `whatis`
+
+The `whatis` command looks up the specified command in the `whatis` database, which contains short, one-line descriptions of commands. This is useful for quickly identifying system commands and important configuration files.
+
+```bash
+whatis rm
+```
+
+The output is:
+
+```bash
+rm (1)               - remove files or directories
+```
+
+### 📜 Code Explanation
+
+  * `whatis`: This command searches the `whatis` database for a brief description matching the argument.
+  * `rm`: The name of the command to look up.
+  * `rm (1)`: The output shows the command name (`rm`) and the manual section it belongs to (`1` for executable programs or shell commands).
+  * `- remove files or directories`: This is the concise, one-line description of what the `rm` command does.
+
+Consider `whatis` a simplified `man` command. The `man` command (e.g., typing `man ls`) displays several pages of detailed explanation regarding a command.
+
+-----
+
+# 🗣️ **The `printf` Command and The `echo` Command**
+
+In brief, you should use the `printf` command instead of the `echo` command if you need to control the output format.
+
+One key difference is that the `echo` command, by default, prints a **newline character** at the end of its output. The `printf` statement does not print a newline character unless you explicitly tell it to. (Keep this point in mind when you see the `printf` statement in the `awk` code samples in Chapter 7.)
+
+### `printf` Example
+
+As a simple example, place the following code snippet in a shell script:
+
+```bash
+printf "%-5s %-10s %-4s\n" ABC DEF GHI
+printf "%-5s %-10s %-4.2f\n" ABC DEF 12.3456
+```
+
+Make the shell script executable, and then launch the shell script. You will see the following output:
+
+```bash
+ABC DEF GHI
+ABC DEF 12.35
+```
+
+#### 📜 Code Explanation
+
+  * **`printf "%-5s %-10s %-4s\n" ABC DEF GHI`**
+      * `printf`: The "print formatted" command.
+      * `"..."`: This is the format string that defines how the output should look.
+      * `%-5s`: This is a format specifier. `s` means "string." `5` means "allocate 5 character spaces." `-` means "left-justify" the text within those spaces. This is applied to `ABC`.
+      * `%-10s`: A left-justified, 10-space string field. This is applied to `DEF`.
+      * `%-4s`: A left-justified, 4-space string field. This is applied to `GHI`.
+      * `\n`: This is the special character for a **newline**. Without this, the next `printf` would start on the same line.
+  * **`printf "%-5s %-10s %-4.2f\n" ABC DEF 12.3456`**
+      * `%-5s %-10s`: These are the same string specifiers for `ABC` and `DEF`.
+      * `%-4.2f`: This is a format specifier for a floating-point number (`f`). The `.2` instructs `printf` to round the number to **two decimal places**. The `-` and `4` ensure it is left-justified in a 4-space field.
+      * `12.3456`: This number is passed to the `%.2f` specifier, which formats and rounds it to `12.35`.
+
+### `echo` Example
+
+Type the following pair of commands:
+
+```bash
+echo "ABC DEF GHI"
+echo "ABC DEF 12.3456"
+```
+
+You will see the following output:
+
+```bash
+ABC DEF GHI
+ABC DEF 12.3456
+```
+
+#### 📜 Code Explanation
+
+  * `echo "ABC DEF GHI"`: The `echo` command prints the given string exactly as it is. After printing, it automatically adds a newline character.
+  * `echo "ABC DEF 12.3456"`: This command prints its string on the next line (due to the newline from the first `echo`). It prints the number `12.3456` without any formatting or rounding, and then adds its own newline at the end.
+
+-----
+
+# ✂️ **The `cut` Command**
+
+The `cut` command enables you to extract fields (sections of text) from an input stream using a specified delimiter. It can also be used to extract a range of characters based on their position.
+
+(Note: A **delimiter** is another word commonly used for `IFS` (Internal Field Separator), especially when it is part of a command syntax instead of being set as an outside variable.)
+
+### Example 1: Extract by Delimiter
+
+Here is an example of extracting a field using a delimiter.
+
+```bash
+hashim@Hashim:~/Repo$ x="Muhammad Hashim Tahir"
+hashim@Hashim:~/Repo$ echo $x | cut  -d" " -f 2
+Hashim
+```
+
+#### 📜 Code Explanation
+
+  * `x="Muhammad Hashim Tahir"`: This line assigns a string value to the shell variable `x`.
+  * `echo $x`: This command prints the value of `x` (`Muhammad Hashim Tahir`) to standard output.
+  * `|`: This is the pipe. It takes the output from the `echo` command and sends it as the input to the `cut` command.
+  * `cut`: The "cut" command, used for extracting sections of text.
+  * `-d" "`: This is the **delimiter** option. It tells `cut` to use the space character (`" "`) as the separator between fields.
+  * `-f 2`: This is the **field** option. It tells `cut` to extract only the **2nd** field.
+  * **Result:** `cut` receives `Muhammad Hashim Tahir`. It splits this string by spaces into:
+    1.  `Muhammad`
+    2.  `Hashim`
+    3.  `Tahir`
+        It then returns the 2nd field, which is `Hashim`.
+
+### Example 2: Extract by Character Range
+
+Consider this code snippet:
+
+```bash
+hashim@Hashim:~/Repo$ x="Muhammad Hashim Tahir"
+hashim@Hashim:~/Repo$ echo $x | cut -c10-15
+Hashim
+```
+
+#### 📜 Code Explanation
+
+  * `x="Muhammad Hashim Tahir"`: The same variable is set.
+  * `echo $x | cut`: The value of `x` is piped as input to the `cut` command.
+  * `-c10-15`: This is the **character** option. It tells `cut` to extract the characters from position **10** through position **15**. (Character counting starts at 1).
+  * **Result:** In the string `Muhammad Hashim Tahir`:
+      * `H` is the 10th character.
+      * `a` is the 11th.
+      * `s` is the 12th.
+      * `h` is the 13th.
+      * `i` is the 14th.
+      * `m` is the 15th.
+        The command extracts and prints `Hashim`.
+
+# 🚀 Bash Script: Filename Manipulation
+
+This document details a shell script designed to parse, modify, and reconstruct a filename based on dot-delimited fields. Below are the script's contents, a detailed explanation of its logic, and instructions on how to make it executable and run it.
+
+-----
+
+## 📜 Example 3: cut in a Shell Script
+
+Here is the complete, proper shell script, including the necessary shebang (`#!/bin/bash`) line.
+
+```bash
+#!/bin/bash
+# Script to split, modify, and reassemble a filename
+
+fileName="06.22.04p.vp.0.tgz"
+
+f1=`echo $fileName | cut -d"." -f1`
+f2=`echo $fileName | cut -d"." -f2`
+f3=`echo $fileName | cut -d"." -f3`
+f4=`echo $fileName | cut -d"." -f4`
+f5=`echo $fileName | cut -d"." -f5`
+
+f5=`expr $f5 + 12`
+
+newFileName="${f1}.${f2}.${f3}.${f4}.${f5}"
+
+echo "newFileName: $newFileName"
+```
+
+-----
+
+## 💻 Detailed Code Explanation
+
+Each line of the script performs a specific function:
+
+  * `#!/bin/bash`
+    This initial line is called a "shebang." It tells the operating system to execute this file using the `/bin/bash` (Bash shell) interpreter.
+
+  * `fileName="06.22.04p.vp.0.tgz"`
+    This line declares a new variable named `fileName` and assigns it the string value `06.22.04p.vp.0.tgz`.
+
+  * `f1=`echo $fileName | cut -d"." -f1\`` This line uses command substitution (indicated by the backticks `` `...` ``) to set the variable `f1\`.
+
+      * `echo $fileName`: Prints the content of the `fileName` variable.
+      * `|`: The pipe symbol sends the output of the `echo` command as input to the `cut` command.
+      * `cut -d"." -f1`: The `cut` command is instructed to use a period (`-d"."`) as the delimiter and to extract the **first field** (`-f1`).
+      * **Result**: `f1` is set to the value `06`.
+
+  * `f2=`echo $fileName | cut -d"." -f2\``  Following the same logic, this line extracts the **second field** ( `-f2\`).
+
+      * **Result**: `f2` is set to the value `22`.
+
+  * `f3=`echo $fileName | cut -d"." -f3\``  This line extracts the **third field** ( `-f3\`).
+
+      * **Result**: `f3` is set to the value `04p`.
+
+  * `f4=`echo $fileName | cut -d"." -f4\``  This line extracts the **fourth field** ( `-f4\`).
+
+      * **Result**: `f4` is set to the value `vp`.
+
+  * `f5=`echo $fileName | cut -d"." -f5\``  This line extracts the **fifth field** ( `-f5\`).
+
+      * **Result**: `f5` is set to the value `0`.
+
+  * `f5=\`expr $f5 + 12\``This line performs an arithmetic operation to update the`f5\` variable.
+
+      * `expr`: The "expression" command, used for basic math in shell scripts.
+      * `$f5 + 12`: The command evaluates the expression `0 + 12`.
+      * **Result**: The variable `f5` is reassigned the new value `12`.
+
+  * `newFileName="${f1}.${f2}.${f3}.${f4}.${f5}"`
+    This line constructs a new string by combining the values of the variables, separated by literal dots.
+
+      * The values are `06`, `22`, `04p`, `vp`, and the *modified* value `12`.
+      * Note: The original sixth field (`tgz`) was never captured, so it is not included in the new filename.
+      * **Result**: `newFileName` is set to the string `06.22.04p.vp.12`.
+
+  * `echo "newFileName: $newFileName"`
+    Finally, this command prints the string ` newFileName:  ` followed by the value of the `newFileName` variable.
+
+-----
+
+## 🚀 How to Create and Run the Script
+
+Here are the steps to save, add permissions, and execute the script.
+
+### 1\. Create the Script File
+
+First, you need to create the file. You can use a command-line text editor like `nano` or `vi`.
+
+```bash
+nano SplitName1.sh
+```
+
+Inside the editor, paste the complete script content from the section above. Save and exit the editor.
+
+### 2\. Provide Execute Permissions
+
+By default, new files do not have permission to be executed. You must add this permission using the `chmod` command.
+
+```bash
+chmod u+x SplitName1.sh
+```
+
+  * **`chmod`**: The "change mode" command, used to modify file permissions.
+  * **`u+x`**: This flag grants (`+`) execute (`x`) permission to the **user** (`u`) who owns the file.
+
+### 3\. Run the Script
+
+Now that the file is executable, you can run it by specifying its path.
+
+```bash
+./SplitName1.sh
+```
+
+  * **`./`**: This prefix tells the shell to look for the executable file in the current directory (`.`).
+
+
+## 📊 Expected Output
+
+When you run the script, you will see the following output printed to your terminal:
+
+```bash
+newFileName: 06.22.04p.vp.12
+```
+---
