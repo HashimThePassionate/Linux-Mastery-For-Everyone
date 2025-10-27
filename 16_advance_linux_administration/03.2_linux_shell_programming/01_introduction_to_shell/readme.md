@@ -1738,3 +1738,169 @@ The script executes as follows:
 > **Note:** The output depends entirely on whether you have any files with a `.py` suffix in the directory where you execute `CommandSubst.sh`. If no `.py` files exist, the `ls *py` command will likely return an error (or nothing), and the loop will not run.
 
 ---
+
+# ቧ **The Pipe Symbol and Multiple Commands**
+
+You have seen various combinations of Bash commands that are connected with the pipe (`|`) symbol. In this setup, the output of one command is "piped" to become the input of the next command. In addition, you can redirect the final output to a file.
+
+The general form looks something like this:
+
+```bash
+cmd1 | cmd2 | cmd3 .... > mylist
+```
+
+-----
+
+## ⚠️ Handling Errors in Pipelines
+
+A common question is: What happens if there is an error in one of the intermediate commands?
+
+  * You have already seen how to redirect error messages (`stderr`) to `/dev/null` (to discard them) or to a text file if you need to review them.
+  * Another advanced option is to redirect `stderr` ("standard error") to `stdout` ("standard out"), though this is beyond the scope of this chapter.
+
+Can an intermediate error cause the entire "pipeline" to fail? Unfortunately, when dealing with long and complex commands that involve multiple pipe symbols, it is often a trial-and-error process to debug and find the exact command that is failing.
+
+-----
+
+## Redirecting Multiple Commands
+
+Consider the case where you need to redirect the output of **multiple, separate commands** to the same location.
+
+For example, the following line contains three separate commands, and all of their output is displayed on the screen:
+
+```bash
+ls | sort; echo "the contents of /tmp: "; ls /tmp
+```
+
+### 📜 Code Explanation
+
+This single line executes three commands in sequence, separated by semicolons (`;`):
+
+1.  **`ls | sort`**: This command lists the files in the current directory (`ls`), and its output is piped to the `sort` command, which prints a sorted list to the screen.
+2.  **`echo "the contents of /tmp: "`**: This command simply prints the literal string "the contents of /tmp: " to the screen.
+3.  **`ls /tmp`**: This command lists the contents of the `/tmp` directory to the screen.
+
+### Output
+
+```bash
+hashim@Hashim:~/Repo/cmd$ ls | sort; echo "the contents of /tmp: "; ls /tmp
+CommandSubst.sh
+hello.py
+test1.py
+test2.py
+the contents of /tmp: 
+anacron-R41zGV
+gdm3-config-err-KDVJZh
+snap-private-tmp
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-colord.service-kM81I1
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-fwupd.service-2GWKzw
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-ModemManager.service-X1GPQb
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-ntpsec.service-Cz9xp8
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-polkit.service-ZhRpXd
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-power-profiles-daemon.service-lLoHYy
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-switcheroo-control.service-qb6wez
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-systemd-logind.service-GIZheT
+systemd-private-353eaf78245e4bbd94abff177eaec3b8-upower.service-BcEa1k
+```
+
+-----
+
+### Method 1: Grouping with Parentheses `()`
+
+You can easily redirect the output of all these commands to a single file by grouping them with parentheses `()`.
+
+```bash
+(ls | sort; echo "the contents of /tmp:"; ls /tmp) > myfile1
+```
+
+### 📜 Code Explanation
+
+  * **`( ... )`**: The parentheses group all the commands inside them into a single unit.
+  * **Subshell**: This entire group is executed in a **new subshell** (a separate child process).
+  * **`> myfile1`**: The output redirection operator `>` captures *all* standard output generated from within the subshell and writes it to the file `myfile1`.
+
+However, each of the preceding commands inside the parentheses spawns a subshell, which is an extra process that consumes memory and CPU.
+
+-----
+
+### Method 2: Grouping with Curly Braces `{}`
+
+You can avoid spawning subshells by using curly braces `{}` instead of parentheses. This is a more efficient method.
+
+**Note:** The whitespace after `{` and before `}` is required. Also, the last command must be terminated with a semicolon `;`.
+
+```bash
+{ ls | sort; echo "the contents of /tmp:"; ls /tmp; } > myfile1
+```
+
+### 📜 Code Explanation
+
+  * **`{ ... }`**: The curly braces also group the commands into a single unit.
+  * **Current Shell**: Unlike parentheses, this group is executed within the **current shell context**, which avoids the overhead of creating a new process.
+  * **`ls /tmp;`**: Notice the required semicolon (`;`) after the final command, which is necessary for the `{}` syntax.
+  * **`> myfile1`**: This captures all output from the grouped commands and saves it to `myfile1`.
+
+### Output (Verifying File Creation)
+
+After running the command with curly braces, we can see the new file `myfile1` has been created in our directory.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ { ls | sort; echo "the contents of /tmp:"; ls /tmp; } > myfile1
+hashim@Hashim:~/Repo/cmd$ ls
+CommandSubst.sh  hello.py  myfile1  test1.py  test2.py
+```
+
+-----
+
+## Variable Scope and Pipelines
+
+Suppose that you want to set a variable, execute a command, and invoke a second command via a pipe, as shown here:
+
+```bash
+name=SMITH cmd1 | cmd2
+```
+
+Unfortunately, `cmd2` in the preceding code snippet does not recognize the value of `name`. The variable assignment `name=SMITH` only applies to the environment of `cmd1`.
+
+There is a simple solution: use parentheses to group the assignment with the first command.
+
+```bash
+(name=SMITH cmd1) | cmd2
+```
+
+### 📜 Code Explanation
+
+  * **`(name=SMITH cmd1)`**: By grouping the variable assignment and `cmd1` inside a subshell, the `name=SMITH` variable is set within that subshell's environment.
+  * **`| cmd2`**: Because `cmd2` is part of the same pipeline, it is also executed within that same subshell environment. Therefore, it **inherits** the `name` variable and can access its value.
+
+-----
+
+## 🖇️ Conditional Execution: The `&&` Operator
+
+Use the double ampersand (`&&`) symbol if you want to execute a command **only if** a prior command succeeds (i.e., finishes with a zero exit status).
+
+For example, the `cd` command in the following snippet will only work if the `mkdir` command succeeds:
+
+```bash
+mkdir -p /tmp/abc/def && cd /tmp/abc/def
+```
+
+### 📜 Code Explanation
+
+This command sequence has two parts joined by `&&` (the "AND" operator):
+
+1.  **`mkdir -p /tmp/abc/def`**: This command attempts to create the directory `/tmp/abc/def`.
+      * The `-p` flag is important: it creates any necessary parent directories (`/tmp/abc`) and does not report an error if the directory already exists.
+2.  **`&&`**: This operator checks the exit code of the `mkdir` command. If the command was successful (exit code 0), it proceeds to run the next command. If it failed, the sequence stops.
+3.  **`cd /tmp/abc/def`**: This command changes the current directory to `/tmp/abc/def`. It will *only* be executed if the `mkdir` command was successful, preventing an error where you try to `cd` into a non-existent directory.
+
+### Output
+
+The output shows the shell prompt changing, which confirms that both commands ran successfully and the current directory is now `/tmp/abc/def`.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ mkdir -p /tmp/abc/def && cd /tmp/abc/def
+hashim@Hashim:/tmp/abc/def$
+```
+
+---
