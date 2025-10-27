@@ -1145,7 +1145,7 @@ alias ltr="ls -ltr"
   * `alias lt="ls -lt"`: Creates the `lt` alias for a long list, sorted by modification **time** (`t`).
   * `alias ltr="ls -ltr"`: Creates the `ltr` alias for a long list, sorted by time, in **reverse** (`r`) order.
 
-As an example, you can replace the command `ls -ltr` (the letters “l,” “t,” and “r”) that you saw earlier in the chapter with the `ltr` alias and you will see the same reversed time-based long listing of filenames (reproduced here):
+As an example, you can replace the command `ls -ltr` (the letters “l,” “t,” and “r”) that you saw earlier in the Section with the `ltr` alias and you will see the same reversed time-based long listing of filenames (reproduced here):
 
 ```bash
 hashim@Hashim:~/Repo$ ltr
@@ -1316,7 +1316,7 @@ Consider `whatis` a simplified `man` command. The `man` command (e.g., typing `m
 
 In brief, you should use the `printf` command instead of the `echo` command if you need to control the output format.
 
-One key difference is that the `echo` command, by default, prints a **newline character** at the end of its output. The `printf` statement does not print a newline character unless you explicitly tell it to. (Keep this point in mind when you see the `printf` statement in the `awk` code samples in Chapter 7.)
+One key difference is that the `echo` command, by default, prints a **newline character** at the end of its output. The `printf` statement does not print a newline character unless you explicitly tell it to. (Keep this point in mind when you see the `printf` statement in the `awk` code samples in Section 7.)
 
 ### `printf` Example
 
@@ -1643,7 +1643,98 @@ This seemingly minor detail is critical when you write shell scripts that check 
 
 If you read a line into a variable and then `echo` it without quotes, you will lose all that formatting, and your `cut` command will grab the wrong data.
 
-The solution involves the consistent use of **double quote marks** (e.g., `echo "$my_variable"`) to preserve the exact spacing. (Sometimes, the `IFS` variable is also involved, as discussed in Chapter 2).
+The solution involves the consistent use of **double quote marks** (e.g., `echo "$my_variable"`) to preserve the exact spacing. (Sometimes, the `IFS` variable is also involved, as discussed in Section 2).
 
+---
+
+# 🚀 **Command Substitution (Backtick)**
+
+The backtick or **command substitution** feature of the Bourne shell is powerful and enables you to combine multiple Bash commands. You can also write compact and powerful (and sometimes complicated) shell scripts using this feature.
+
+The syntax is to simply precede and follow your command with a **backtick (`     `)** character. The shell executes the command inside the backticks *first*, and then the standard output of that command replaces the entire backtick expression.
+
+In Listing 1.3, the backtick command is `` `ls *py` ``.
+
+-----
+
+## 📜 Listing 1.3: `CommandSubst.sh`
+
+This listing displays the content of `CommandSubst.sh`, which illustrates how to get a subset of the list of files in a directory.
+
+### 1\. Create and Prepare the Script
+
+Here are the commands to create the file, add execute permissions, and view its content.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ nano CommandSubst.sh
+hashim@Hashim:~/Repo/cmd$ chmod u+x CommandSubst.sh 
+hashim@Hashim:~/Repo/cmd$ cat CommandSubst.sh
+```
+
+### Script Content
+
+```bash
+#!/bin/bash
+for f in `ls *py`
+do
+  echo "file is: $f"
+done
+```
+
+### 💻 Detailed Code Explanation
+
+  * `#!/bin/bash`
+    This "shebang" line tells the system to execute this script using the Bash shell interpreter.
+
+  * `for f in `ls *py`This is the core of the script, combining a`for loop with command substitution.
+
+    1.  **Command Substitution:** The shell first encounters the backticks `` `ls *py` ``.
+    2.  **Execution:** It executes the command inside them: `ls *py`. The `*py` is a wildcard (glob) that matches any file in the current directory ending with the suffix `py`.
+    3.  **Replacement:** The `ls` command outputs a space-separated list of matching filenames. For example: `hello.py test1.py test2.py`.
+    4.  **Loop Initialization:** This resulting string replaces the backtick expression. The `for` loop line effectively becomes: `for f in hello.py test1.py test2.py`.
+    5.  **Iteration:** The `for` loop will now iterate over this list of words. The variable `f` will be assigned each filename, one at a time.
+
+  * `do`
+    This keyword marks the beginning of the block of code that will be executed for each item in the loop.
+
+  * `echo "file is: $f"`
+    This is the code inside the loop. For each iteration, it prints the string "file is: " followed by the current value of the `$f` variable (which holds the current filename).
+
+  * `done`
+    This keyword marks the end of the `for` loop.
+
+-----
+
+## 🚀 Execution and Output
+
+First, we need to create some files for the script to find.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ touch test1.py test2.py hello.py
+```
+
+  * **`touch`**: This command creates empty files with the given names.
+
+Now, we run the script:
+
+```bash
+hashim@Hashim:~/Repo/cmd$ ./CommandSubst.sh 
+file is: hello.py
+file is: test1.py
+file is: test2.py
+```
+
+### 📊 Output Explanation
+
+The script executes as follows:
+
+1.  The `ls *py` command runs and finds `hello.py`, `test1.py`, and `test2.py`.
+2.  The `for` loop becomes `for f in hello.py test1.py test2.py`.
+3.  **Loop 1:** `f` is set to `hello.py`. The script prints "file is: hello.py".
+4.  **Loop 2:** `f` is set to `test1.py`. The script prints "file is: test1.py".
+5.  **Loop 3:** `f` is set to `test2.py`. The script prints "file is: test2.py".
+6.  The list is exhausted, and the script ends.
+
+> **Note:** The output depends entirely on whether you have any files with a `.py` suffix in the directory where you execute `CommandSubst.sh`. If no `.py` files exist, the `ls *py` command will likely return an error (or nothing), and the loop will not run.
 
 ---
