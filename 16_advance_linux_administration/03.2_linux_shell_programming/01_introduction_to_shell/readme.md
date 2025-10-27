@@ -1551,3 +1551,99 @@ When you run the script, you will see the following output printed to your termi
 newFileName: 06.22.04p.vp.12
 ```
 ---
+
+# 🗣️ **The `echo` Command and Whitespaces**
+
+The `echo` command preserves whitespaces in variables, but in some cases, the results might be different from your expectations.
+
+Listing 1.2 displays the content of `EchoCut.sh`, which illustrates the differences that can occur when the `echo` command is used with the `cut` command.
+
+## 📜 Script: `EchoCut.sh`
+
+Here are the commands to create the script, make it executable, and display its contents.
+
+```bash
+hashim@Hashim:~/Repo$ nano EchoCut.sh
+hashim@Hashim:~/Repo$ chmod u+x EchoCut.sh 
+hashim@Hashim:~/Repo$ cat EchoCut.sh
+```
+
+### Script Content
+
+```bash
+x1="123 456 789"
+x2="123 456 789"
+
+echo "x1 = $x1"
+echo "x2 = $x2"
+
+x3=`echo $x1 | cut -c1-7`
+x4=`echo "$x1" | cut -c1-7`
+x5=`echo $x2 | cut -c1-7`
+
+echo "x3 = $x3"
+echo "x4 = $x4"
+echo "x5 = $x5"
+```
+
+## 🚀 Execution and Output
+
+Launch the code in Listing 1.2, and you will see the following output:
+
+```bash
+hashim@Hashim:~/Repo$ ./EchoCut.sh 
+x1 = 123 456 789
+x2 = 123 456 789
+x3 = 123 456
+x4 = 123 456
+x5 = 123 456
+```
+
+## 🧐 Detailed Analysis
+
+The value of `x3` is probably different from what you expected. There is only **one blank space** between `123` and `456` instead of the **three blank spaces** that appear in the definition of the variable `x1`.
+
+Let's break down exactly why this happens.
+
+### The Problem: Word Splitting
+
+The difference between `x3` and `x4` is caused by a core shell feature called **word splitting**.
+
+  * **`x3=`echo $x1 | cut -c1-7**
+
+    1.  When you use `$x1` **without quotes**, the shell first performs word splitting.
+    2.  It looks at the string `123 456 789` and uses the `IFS` (Internal Field Separator) variable, which defaults to spaces, tabs, and newlines.
+    3.  The shell treats the three consecutive spaces as a *single* delimiter.
+    4.  It breaks the string into three separate "words" or arguments: `"123"`, `"456"`, and `"789"`.
+    5.  It then passes these three separate arguments to the `echo` command.
+    6.  `echo` receives the three arguments and prints them to standard output, separated by a *single space* (its default behavior).
+    7.  Therefore, the text that gets piped (`|`) to the `cut` command is `123 456 789` (with only one space).
+    8.  `cut -c1-7` then takes the first 7 characters of *that* string, resulting in `123 456`.
+
+  * **`x4=`echo "$x1" | cut -c1-7 (The Solution)**
+
+    1.  When you use `"$x1"` **with double quotes**, you *prevent* the shell from performing word splitting.
+    2.  The shell treats the entire string `123 456 789` as a *single argument*.
+    3.  It passes this single argument to the `echo` command.
+    4.  `echo` receives the single string and prints it exactly as-is, **preserving the three spaces**.
+    5.  Therefore, the text that gets piped to the `cut` command is `123 456 789` (with three spaces).
+    6.  `cut -c1-7` then takes the first 7 characters of *that* string, resulting in `123 45`.
+
+  * **`x5=`echo $x2 | cut -c1-7**
+
+    1.  This line demonstrates that the behavior in `x3` was not a mistake.
+    2.  `x2` (`"123 456 789"`) only had one space to begin with.
+    3.  The unquoted `$x2` is split into three words: `"123"`, `"456"`, and `"789"`.
+    4.  `echo` prints them back with single spaces: `123 456 789`.
+    5.  `cut -c1-7` takes the first 7 characters, resulting in `123 456`. In this case, the output matches the input, but only because the original string *also* had single spaces.
+
+### 💡 Why This Is Important
+
+This seemingly minor detail is critical when you write shell scripts that check values in specific columns of text files, such as payroll files or other files with financial data. In those cases, data fields are often separated by a specific number of spaces to ensure they align in columns.
+
+If you read a line into a variable and then `echo` it without quotes, you will lose all that formatting, and your `cut` command will grab the wrong data.
+
+The solution involves the consistent use of **double quote marks** (e.g., `echo "$my_variable"`) to preserve the exact spacing. (Sometimes, the `IFS` variable is also involved, as discussed in Chapter 2).
+
+
+---
