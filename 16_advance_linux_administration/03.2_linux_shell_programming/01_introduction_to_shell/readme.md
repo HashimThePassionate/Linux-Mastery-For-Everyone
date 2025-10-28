@@ -2464,6 +2464,89 @@ In some (though less common) versions of regular expressions, the `!` metacharac
 * `[! abc ...]`: Matches any character *other than* those specified (a, b, c, ...).
 * `[! a - z ]`: Matches any character *not in* the specified range (i.e., not a lowercase letter).
 
-> ℹ️ **Note:** Chapter 4 contains a section that discusses regular expressions in greater detail, showing how to combine character classes and metacharacters to create sophisticated expressions for matching complex string patterns (such as email addresses).
+> ℹ️ **Note:** Section 4 contains a section that discusses regular expressions in greater detail, showing how to combine character classes and metacharacters to create sophisticated expressions for matching complex string patterns (such as email addresses).
+---
+
+# **Shells: What About Zsh**?
+
+The latest version of OS X provides **Zsh** (Z shell) as the default shell instead of the Bash shell. You can find the directory that contains Zsh by typing this command:
+
+```bash
+which zsh
+```
+
+The result will be:
+
+```bash
+/bin/zsh
+```
+
+## 🆚 Bash and Zsh: A Comparison
+
+Bash and Zsh have some features in common, as shown here:
+
+  * **The z-command**
+  * **Auto-completion**
+  * **Auto-correction**
+  * **Color customization**
+
+
+### Key Differences
+
+  * **Inline Wildcard Expansion**: Unlike Zsh, the Bash shell does not have inline wildcard expansion.
+  * **Tab Completion**:
+      * **Bash**: Tab completion in Bash acts like a command output, listing possibilities.
+      * **Zsh**: Tab completion in Zsh resembles a "drop-down" list that disappears after you type additional characters.
+  * **Command Aliases**: The Bash shell does not support **prefix** or **postfix** command aliases.
+
+A comparison of the Bash shell and Zsh is available online:
+[https://sunlightmedia.org/bash-vs-zsh](https://sunlightmedia.org/bash-vs-zsh)
+
+
+## 🔄 Switching Between Bash and Zsh
+
+### Set Zsh as Default
+
+Type the following command in a command shell to set Zsh as the default shell:
+
+```bash
+chsh -s /bin/zsh
+```
+
+### Switch Back to Bash
+
+Switch from Zsh back to Bash with this command:
+
+```bash
+chsh -s /bin/bash
+```
+
+> 💡 **Note:** Both of the preceding commands only affect the specific command shell where you launched them.
+
+## ⚙️ Configuring Zsh
+
+Configuration files for Bash and Zsh are different.
+
+  * **Bash** 🖥️:
+      * User-related settings: `.bashrc` (in your home directory)
+      * Login-related settings: `.bash_profile`
+  * **Zsh** ⚡:
+      * User-related settings: `.zshrc`
+      * Login-related settings: `.zprofile` (also in your home directory)
+
+You need to **create the `.zshrc` file** yourself because it is not created for you. The `.zprofile` file is invoked when you log into your system.
+
+Consider using configuration managers such as **Prezto** or **Antigen** to help you set values to variables. Perform an online search for more details regarding Zsh.
+
+
+## 📖 Section Summary
+
+This Section started with an introduction to some Unix shells, followed by a brief discussion of files, file permissions, and directories. You also learned how to create files and directories and how to change their permissions.
+
+Next, you learned about environment variables, how to set them, and how to use aliases. You also learned about "sourcing" (also called "dotting") a shell script and how this changes variable behavior from calling a shell script in the normal fashion.
+
+Next, you learned about the `cut` command (for cutting columns and/or fields) and the `paste` command (for pasting text together vertically).
+
+Finally, you saw two use cases. The first involved the `cut` and `paste` commands to switch the order of two columns in a dataset. The second showed you another way to perform the same task using concepts from later section.
 
 ---
