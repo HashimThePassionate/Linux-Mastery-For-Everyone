@@ -49,7 +49,7 @@ The different **C-type shells** are as follows:
 
 While the commands and shell scripts in this section are based on the `bash` shell, many of the commands also work in other shells. If not, those other shells typically have a similar command to accomplish the same goal. 💡
 
-Performing an Internet search for "how do I do \<X\> in \<Y\>" will often get you an answer.
+Performing an Internet search for "how do I do <X> in <Y>" will often get you an answer.
 
 Sometimes the command is essentially the same but with slightly different syntax. Typing `man <command_name>` in a command shell can also provide useful information.
 
@@ -299,13 +299,13 @@ total 28
 
 Here is the description of all the listed columns in the preceding output:
 
-1.  **Column \#1:** Represents file type and permission given on the file (see below).
-2.  **Column \#2:** The number of memory blocks taken by the file or directory.
-3.  **Column \#3:** The (bash user) owner of the file.
-4.  **Column \#4:** Represents the group of the owner.
-5.  **Column \#5:** Represents the file size in bytes.
-6.  **Column \#6:** The date and time when this file was created or last modified.
-7.  **Column \#7:** Represents the file or directory name.
+1.  **Column #1:** Represents file type and permission given on the file (see below).
+2.  **Column #2:** The number of memory blocks taken by the file or directory.
+3.  **Column #3:** The (bash user) owner of the file.
+4.  **Column #4:** Represents the group of the owner.
+5.  **Column #5:** Represents the file size in bytes.
+6.  **Column #6:** The date and time when this file was created or last modified.
+7.  **Column #7:** Represents the file or directory name.
 
 ### 🚩 File Type Indicators
 
@@ -870,7 +870,7 @@ Problematic filenames are those that contain one or more whitespaces, hidden (no
 
 ### Files with Whitespaces
 
-You can use **double quotes** to list filenames that contain whitespaces, or you can precede each whitespace with a **backslash (`\`)** character, which acts as an "escape" character.
+You can use **double quotes** to list filenames that contain whitespaces, or you can precede each whitespace with a **backslash (``)** character, which acts as an "escape" character.
 
 For example, if you have a file named `One Space.txt`, you can use the `ls` command as follows.
 
@@ -899,13 +899,13 @@ hashim@Hashim:~/Repo$ ls -l "One Space.txt"
 **Method 2: Using the Backslash (Escape Character)**
 
 ```bash
-hashim@Hashim:~/Repo$ ls -l One\ Space.txt
+hashim@Hashim:~/Repo$ ls -l One Space.txt
 -rw-rw-r-- 1 hashim hashim 0 Oct 25 18:01 'One Space.txt'
 ```
 
 #### 📜 Code Explanation
 
-  * `ls -l One\ Space.txt`: The backslash (`\`) tells the shell that the *very next character* should be treated literally and not as a special character. In this case, it "escapes" the space, preventing the shell from splitting `One` and `Space.txt` into two separate arguments.
+  * `ls -l One Space.txt`: The backslash (``) tells the shell that the *very next character* should be treated literally and not as a special character. In this case, it "escapes" the space, preventing the shell from splitting `One` and `Space.txt` into two separate arguments.
 
 
 ### Files Starting with a Dash (`-`)
@@ -1323,8 +1323,8 @@ One key difference is that the `echo` command, by default, prints a **newline ch
 As a simple example, place the following code snippet in a shell script:
 
 ```bash
-printf "%-5s %-10s %-4s\n" ABC DEF GHI
-printf "%-5s %-10s %-4.2f\n" ABC DEF 12.3456
+printf "%-5s %-10s %-4sn" ABC DEF GHI
+printf "%-5s %-10s %-4.2fn" ABC DEF 12.3456
 ```
 
 Make the shell script executable, and then launch the shell script. You will see the following output:
@@ -1336,14 +1336,14 @@ ABC DEF 12.35
 
 #### 📜 Code Explanation
 
-  * **`printf "%-5s %-10s %-4s\n" ABC DEF GHI`**
+  * **`printf "%-5s %-10s %-4sn" ABC DEF GHI`**
       * `printf`: The "print formatted" command.
       * `"..."`: This is the format string that defines how the output should look.
       * `%-5s`: This is a format specifier. `s` means "string." `5` means "allocate 5 character spaces." `-` means "left-justify" the text within those spaces. This is applied to `ABC`.
       * `%-10s`: A left-justified, 10-space string field. This is applied to `DEF`.
       * `%-4s`: A left-justified, 4-space string field. This is applied to `GHI`.
-      * `\n`: This is the special character for a **newline**. Without this, the next `printf` would start on the same line.
-  * **`printf "%-5s %-10s %-4.2f\n" ABC DEF 12.3456`**
+      * `n`: This is the special character for a **newline**. Without this, the next `printf` would start on the same line.
+  * **`printf "%-5s %-10s %-4.2fn" ABC DEF 12.3456`**
       * `%-5s %-10s`: These are the same string specifiers for `ABC` and `DEF`.
       * `%-4.2f`: This is a format specifier for a floating-point number (`f`). The `.2` instructs `printf` to round the number to **two decimal places**. The `-` and `4` ensure it is left-justified in a 4-space field.
       * `12.3456`: This number is passed to the `%.2f` specifier, which formats and rounds it to `12.35`.
@@ -1466,30 +1466,30 @@ Each line of the script performs a specific function:
   * `fileName="06.22.04p.vp.0.tgz"`
     This line declares a new variable named `fileName` and assigns it the string value `06.22.04p.vp.0.tgz`.
 
-  * `f1=`echo $fileName | cut -d"." -f1\`` This line uses command substitution (indicated by the backticks `` `...` ``) to set the variable `f1\`.
+  * `f1=`echo $fileName | cut -d"." -f1`` This line uses command substitution (indicated by the backticks `` `...` ``) to set the variable `f1`.
 
       * `echo $fileName`: Prints the content of the `fileName` variable.
       * `|`: The pipe symbol sends the output of the `echo` command as input to the `cut` command.
       * `cut -d"." -f1`: The `cut` command is instructed to use a period (`-d"."`) as the delimiter and to extract the **first field** (`-f1`).
       * **Result**: `f1` is set to the value `06`.
 
-  * `f2=`echo $fileName | cut -d"." -f2\``  Following the same logic, this line extracts the **second field** ( `-f2\`).
+  * `f2=`echo $fileName | cut -d"." -f2``  Following the same logic, this line extracts the **second field** ( `-f2`).
 
       * **Result**: `f2` is set to the value `22`.
 
-  * `f3=`echo $fileName | cut -d"." -f3\``  This line extracts the **third field** ( `-f3\`).
+  * `f3=`echo $fileName | cut -d"." -f3``  This line extracts the **third field** ( `-f3`).
 
       * **Result**: `f3` is set to the value `04p`.
 
-  * `f4=`echo $fileName | cut -d"." -f4\``  This line extracts the **fourth field** ( `-f4\`).
+  * `f4=`echo $fileName | cut -d"." -f4``  This line extracts the **fourth field** ( `-f4`).
 
       * **Result**: `f4` is set to the value `vp`.
 
-  * `f5=`echo $fileName | cut -d"." -f5\``  This line extracts the **fifth field** ( `-f5\`).
+  * `f5=`echo $fileName | cut -d"." -f5``  This line extracts the **fifth field** ( `-f5`).
 
       * **Result**: `f5` is set to the value `0`.
 
-  * `f5=\`expr $f5 + 12\``This line performs an arithmetic operation to update the`f5\` variable.
+  * `f5=`expr $f5 + 12``This line performs an arithmetic operation to update the`f5` variable.
 
       * `expr`: The "expression" command, used for basic math in shell scripts.
       * `$f5 + 12`: The command evaluates the expression `0 + 12`.
@@ -1511,7 +1511,7 @@ Each line of the script performs a specific function:
 
 Here are the steps to save, add permissions, and execute the script.
 
-### 1\. Create the Script File
+### 1. Create the Script File
 
 First, you need to create the file. You can use a command-line text editor like `nano` or `vi`.
 
@@ -1521,7 +1521,7 @@ nano SplitName1.sh
 
 Inside the editor, paste the complete script content from the section above. Save and exit the editor.
 
-### 2\. Provide Execute Permissions
+### 2. Provide Execute Permissions
 
 By default, new files do not have permission to be executed. You must add this permission using the `chmod` command.
 
@@ -1532,7 +1532,7 @@ chmod u+x SplitName1.sh
   * **`chmod`**: The "change mode" command, used to modify file permissions.
   * **`u+x`**: This flag grants (`+`) execute (`x`) permission to the **user** (`u`) who owns the file.
 
-### 3\. Run the Script
+### 3. Run the Script
 
 Now that the file is executable, you can run it by specifying its path.
 
@@ -1661,7 +1661,7 @@ In Listing 1.3, the backtick command is `` `ls *py` ``.
 
 This listing displays the content of `CommandSubst.sh`, which illustrates how to get a subset of the list of files in a directory.
 
-### 1\. Create and Prepare the Script
+### 1. Create and Prepare the Script
 
 Here are the commands to create the file, add execute permissions, and view its content.
 
@@ -1902,5 +1902,169 @@ The output shows the shell prompt changing, which confirms that both commands ra
 hashim@Hashim:~/Repo/cmd$ mkdir -p /tmp/abc/def && cd /tmp/abc/def
 hashim@Hashim:/tmp/abc/def$
 ```
+
+---
+
+# ⛓️ **Using a Semicolon to Separate Commands**
+
+You can combine multiple commands on a single line by separating them with a semicolon (`;`). The shell will execute each command in sequence, one after the other.
+
+### Example 1: Direct Execution
+
+The following code snippet navigates to the `/tmp` directory, prints the current directory, returns to the home directory (`~`), and prints the current directory again.
+
+```bash
+cd /tmp; pwd; cd ~; pwd
+```
+
+The output of the preceding command is here:
+
+```bash
+hashim@Hashim:~$ cd /tmp/; pwd; cd ~; pwd;
+/tmp
+/home/hashim
+```
+
+#### 📜 Code Explanation
+
+The shell executes this line as four separate steps:
+
+1.  `cd /tmp;`: The shell changes the current directory to `/tmp`.
+2.  `pwd;`: The shell executes `pwd` (Print Working Directory), which prints `/tmp` to the screen.
+3.  `cd ~;`: The shell changes the current directory to the home directory (represented by `~`).
+4.  `pwd;`: The shell executes `pwd` again, which now prints `/home/hashim` to the screen.
+
+### Example 2: Command Substitution
+
+You can use command substitution (using backticks `` `...` ``) to assign the *combined output* of a command sequence to a variable.
+
+```bash
+x=`cd /tmp; pwd; cd ~; pwd`
+echo $x
+```
+
+The output of the preceding snippet is here:
+
+```bash
+hashim@Hashim:~$ x=`cd /tmp/; pwd; cd ~; pwd;`
+hashim@Hashim:~$ echo $x
+/tmp /home/hashim
+```
+
+#### 📜 Code Explanation
+
+  * `x=`cd /tmp; pwd; cd ~; pwd`
+      * The shell first executes the commands inside the backticks `` `...` ``.
+      * The `cd` commands do not produce any standard output.
+      * The first `pwd` command outputs `/tmp`.
+      * The second `pwd` command outputs `/home/hashim`.
+      * The shell captures all standard output (`/tmp` and `/home/hashim`, which are separated by a newline) and assigns this combined string to the variable `x`.
+  * `echo $x`
+      * This command prints the value of the variable `x`.
+      * When the unquoted `$x` is processed by `echo`, the newline character between `/tmp` and `/home/hashim` is converted into a space, resulting in the single-line output: `/tmp /home/hashim`.
+
+---
+
+# 📋 **The `paste` Command**
+
+The `paste` command is useful when you need to combine two files in a "pairwise" fashion. It merges files line by line, creating columns.
+
+You can think of `paste` as treating the contents of the second file as an additional column for the first file. By default, the columns are separated by a **TAB** character.
+
+In our first example, the first file has a list of `cp` (copy) commands, and the second file has a list of destination filenames. The `paste` command will merge these two files to create a complete, executable script.
+
+
+### Listing 1.4: `list1` (Input File 1)
+
+First, we create some files to work with and then create `list1`.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ touch abc.sh abc2.sh abc3.sh
+hashim@Hashim:~/Repo/cmd$ ls
+abc2.sh  abc3.sh  abc.sh
+hashim@Hashim:~/Repo/cmd$ nano list1
+hashim@Hashim:~/Repo/cmd$ cat list1 
+cp abc.sh
+cp abc2.sh
+cp abc3.sh
+```
+
+#### 📜 Code Explanation
+
+1.  `touch abc.sh abc2.sh abc3.sh`: This command creates three new, empty files.
+2.  `ls`: This command lists the files, confirming they were created.
+3.  `nano list1`: This opens the `nano` text editor to create and edit the file named `list1`.
+4.  `cat list1`: This displays the final contents of `list1`, which contains the first half of our commands.
+
+### Listing 1.5: `list2` (Input File 2)
+
+Next, we create the second file, `list2`.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ nano list2
+hashim@Hashim:~/Repo/cmd$ cat list2
+def.sh
+def2.sh
+def3.sh
+```
+
+#### 📜 Code Explanation
+
+1.  `nano list2`: This opens the editor to create the `list2` file.
+2.  `cat list2`: This displays the contents of `list2`, which contains the destination filenames.
+
+### Listing 1.6: `list1.sh` (The `paste` Operation)
+
+Now, we use `paste` to merge `list1` and `list2` and save the output to a new file, `list1.sh`.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ paste list1 list2 > list1.sh
+hashim@Hashim:~/Repo/cmd$ cat list1.sh
+cp abc.sh	def.sh
+cp abc2.sh	def2.sh
+cp abc3.sh	def3.sh
+```
+
+#### 📜 Code Explanation
+
+  * `paste list1 list2`
+      * This command reads `list1` and `list2` simultaneously.
+      * It takes line 1 from `list1` (`cp abc.sh`) and line 1 from `list2` (`def.sh`).
+      * It joins them with a `TAB` character.
+      * It repeats this process for line 2 and line 3.
+  * `> list1.sh`
+      * This is the output redirection operator. It takes the entire output from the `paste` command and writes it into a new file named `list1.sh`.
+  * `cat list1.sh`
+      * This displays the content of the new `list1.sh` file. The output shows three complete `cp` commands. (Note: The whitespace between `abc.sh` and `def.sh` is a `TAB`, not spaces).
+
+-----
+
+### Executing the `list1.sh` Script
+
+Listing 1.6 (`list1.sh`) contains three complete `cp` commands. If you want to execute this script, you must first make it executable and then run it.
+
+```bash
+chmod u+x list1.sh
+./list1.sh
+```
+
+After running the script, we can list the directory contents to see the result.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ chmod u+x list1.sh
+hashim@Hashim:~/Repo/cmd$ ./list1.sh 
+hashim@Hashim:~/Repo/cmd$ ls
+abc2.sh  abc3.sh  abc.sh  def2.sh  def3.sh  def.sh  list1  list1.sh  list2
+```
+
+#### 📜 Code Explanation
+
+1.  `chmod u+x list1.sh`: The "change mode" command adds (`+`) execute (`x`) permission for the user (`u`) to the `list1.sh` file.
+2.  `./list1.sh`: This command executes the script. The shell runs each line from the file:
+      * `cp abc.sh def.sh`
+      * `cp abc2.sh def2.sh`
+      * `cp abc3.sh def3.sh`
+3.  `ls`: This final command lists the directory's contents. We can now see the original files (`abc.sh`, etc.) as well as the new files created by the script (`def.sh`, `def2.sh`, `def3.sh`).
+  
 
 ---
