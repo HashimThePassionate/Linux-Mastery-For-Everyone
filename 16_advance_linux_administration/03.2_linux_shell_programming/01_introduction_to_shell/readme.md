@@ -2388,3 +2388,82 @@ jamshed,Sara
 ```
 
 ---
+
+# 🔡 **Working with Character Classes**
+
+Character classes are a feature of regular expressions that allow you to define a set of characters you want to match. This enables you to express a range of digits, letters, or a combination of both.
+
+## Basic Character Sets
+
+Here are the most common character classes:
+
+* `[0-9]`: Matches any single digit from 0 to 9.
+* `[a-z]`: Matches any single lowercase letter from a to z.
+* `[A-Z]`: Matches any single uppercase letter from A to Z.
+
+You can also specify subranges of digits or letters:
+
+* `[3-7]`: Matches any single digit from 3 to 7.
+* `[g-p]`: Matches any single lowercase letter from g to p.
+* `[F-X]`: Matches any single uppercase letter from F to X.
+
+
+## Combinations and Repetition
+
+You can place character classes back-to-back to match consecutive characters.
+
+* `[0-9][0-9]`: Matches a consecutive pair of digits (e.g., "42").
+* `[0-9][0-9][0-9]`: Matches three consecutive digits (e.g., "123").
+* `\d{3}`: This is a common shorthand that also matches three consecutive digits.
+
+## The Dual Role of the `^` (Caret) Metacharacter
+
+The purpose of the `^` character depends entirely on its context within the regular expression.
+
+### 1. As "Start of Line" (Anchor)
+
+When `^` appears *outside* the square brackets (`[]`), it asserts that the match must occur at the **beginning of a line of text**.
+
+* `^[a-z]`: Matches any line of text that **starts with** a lowercase letter.
+* `^[0-9]`: Matches a text string that **starts with** a digit.
+
+### 2. As "Negation" (Inside Brackets)
+
+When `^` appears as the *first character inside* the square brackets, it **negates the set**. It matches any single character that is *not* in the specified class.
+
+* `^[^a-z]`: Matches any line of text that **does not** start with a lowercase letter.
+* `^[^0-9]`: Matches a text string that **does not** start with a digit.
+
+## Grouping and Alternation (`|`)
+
+Based on what you have learned so far, you can understand the purpose of the following regular expressions:
+
+* `([a-z]|[A-Z])`: Matches either a single lowercase letter **or** (`|`) a single uppercase letter.
+* `(^[a-z][a-z])`: Matches a line that **starts with** (`^`) a lowercase letter, which is immediately **followed by** another lowercase letter.
+* `^[^a-z][A-Z]`: Matches a line that **starts with** (`^`) any character that is **not** a lowercase letter (`[^a-z]`), which is immediately **followed by** an uppercase letter (`[A-Z]`).
+
+## 🛡️ The `\` (Backslash) Escape Character
+
+The backslash (`\`) allows you to "escape" the special meaning of a metacharacter, forcing it to be treated as a literal character.
+
+For example, a dot (`.`) is a metacharacter that matches *any single character*. In contrast, the sequence `\.` matches only the literal dot (`.`) character.
+
+Other examples are here:
+
+* `\.H.*`: Matches a literal dot (`.`), followed by "H", followed by zero or more of any character (`.*`). (e.g., ".Hello")
+* `H.*`: Matches "H", followed by zero or more of any character. (e.g., "Hello")
+* `H.*\.`: Matches "H", followed by zero or more characters, ending with a literal dot (`.`). (e.g., "Hello.")
+* `.ell.`: Matches any character, followed by "ell", followed by any character. (e.g., "Hello")
+* `.*`: Matches zero or more of any character. (e.g., "Hello")
+* `\..*`: Matches a literal dot (`.`) followed by zero or more of any character. (e.g., ".Hello")
+
+## 🚫 The `!` (Exclamation Mark) for Negation
+
+In some (though less common) versions of regular expressions, the `!` metacharacter, when used inside brackets, also means negation, similar to the `^`.
+
+* `[! abc ...]`: Matches any character *other than* those specified (a, b, c, ...).
+* `[! a - z ]`: Matches any character *not in* the specified range (i.e., not a lowercase letter).
+
+> ℹ️ **Note:** Chapter 4 contains a section that discusses regular expressions in greater detail, showing how to combine character classes and metacharacters to create sophisticated expressions for matching complex string patterns (such as email addresses).
+
+---
