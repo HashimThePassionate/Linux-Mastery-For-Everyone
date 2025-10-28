@@ -1756,7 +1756,7 @@ cmd1 | cmd2 | cmd3 .... > mylist
 A common question is: What happens if there is an error in one of the intermediate commands?
 
   * You have already seen how to redirect error messages (`stderr`) to `/dev/null` (to discard them) or to a text file if you need to review them.
-  * Another advanced option is to redirect `stderr` ("standard error") to `stdout` ("standard out"), though this is beyond the scope of this chapter.
+  * Another advanced option is to redirect `stderr` ("standard error") to `stdout` ("standard out"), though this is beyond the scope of this section.
 
 Can an intermediate error cause the entire "pipeline" to fail? Unfortunately, when dealing with long and complex commands that involve multiple pipe symbols, it is often a trial-and-error process to debug and find the exact command that is failing.
 
@@ -2242,5 +2242,149 @@ a,b,c,d,e,f,g,h,i,j,k,l
       * `g`: This is the **global** flag, which tells `sed` to replace *all* occurrences on the line, not just the first one.
   * `> outputfile2`: This redirects the final, corrected output from `sed` into a new file named `outputfile2`.
   * `cat outputfile2`: This command displays the content of the final file, which is now correctly formatted as two single, comma-separated lines.
+
+---
+
+# 🖇️ **A Simple Use Case with `cut` and `paste` Commands**
+
+This section demonstrates how to use the `cut` and `paste` commands together to reverse the order of two columns in a dataset.
+
+The purpose of the shell script in Listing 1.10 is to provide practice for writing Bash scripts. A better, more efficient solution, which involves a single line of code, is shown at the end of this section.
+
+
+## 📜 Listing 1.9: `namepairs.csv`
+
+This file displays the content of `namepairs.csv`, which contains the first and last names of a set of people.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ nano namepairs.csv
+hashim@Hashim:~/Repo/cmd$ cat namepairs.csv 
+Muhammad,Hashim
+Ahmad,Raza
+Sara,jamshed
+```
+
+### 💻 Code Explanation
+
+  * **`nano namepairs.csv`**: This command opens the `nano` text editor to create or edit the file named `namepairs.csv`.
+  * **`cat namepairs.csv`**: This command reads the contents of `namepairs.csv` and prints them to the terminal. We can see the file contains three lines, each with a first name and a last name separated by a comma.
+
+## 📜 Listing 1.10: `reversecolums.sh`
+
+This script file, `reversecolums.sh`, contains the logic to reverse the two columns from the input file.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ nano reversecolums.sh
+hashim@Hashim:~/Repo/cmd$ cat reversecolums.sh 
+#!/bin/bash
+# reversecolums.sh
+
+inputfile="namepairs.csv"
+outputfile="reversenames.csv"
+fnames="fnames"
+lnames="lnames"
+
+cat $inputfile | cut -d"," -f1 > $fnames
+cat $inputfile | cut -d"," -f2 > $lnames
+paste -d"," $lnames $fnames > $outputfile
+```
+
+### 💻 Detailed Code Explanation
+
+  * **`#!/bin/bash`**: This "shebang" line indicates that the script should be executed using the Bash shell interpreter.
+  * **`# reversecolums.sh`**: This is a comment identifying the script's name.
+  * **Variable Definitions**:
+      * `inputfile="namepairs.csv"`: Sets a variable for the name of our input file.
+      * `outputfile="reversenames.csv"`: Sets a variable for the name of our final output file.
+      * `fnames="fnames"`: Sets a variable for a temporary file to hold the first names.
+      * `lnames="lnames"`: Sets a variable for a temporary file to hold the last names.
+  * **`cat $inputfile | cut -d"," -f1 > $fnames`**: This is the first main command.
+      * `cat $inputfile`: Reads the content of `namepairs.csv`.
+      * `|`: The pipe sends that content as input to the `cut` command.
+      * `cut -d"," -f1`: The `cut` command is instructed to:
+          * `-d","`: Use a comma (`,`) as the delimiter.
+          * `-f1`: Extract only the **first field** (the first names).
+      * `> $fnames`: The output (the list of first names) is redirected and saved into the file named `fnames`.
+  * **`cat $inputfile | cut -d"," -f2 > $lnames`**: This command does the same thing, but:
+      * `-f2`: It extracts the **second field** (the last names).
+      * `> $lnames`: It redirects this output into the file named `lnames`.
+  * **`paste -d"," $lnames $fnames > $outputfile`**: This is the final step.
+      * `paste`: The `paste` command is used to merge files line by line.
+      * `$lnames $fnames`: It is given the files to merge. **Crucially, the `lnames` file is listed *first*, followed by the `fnames` file.**
+      * `-d","`: This flag tells `paste` to use a comma (`,`) as the delimiter to join the lines.
+      * `> $outputfile`: The final, combined output (e.g., `Hashim,Muhammad`) is redirected and saved into the `reversenames.csv` file.
+
+### 🚀 Execution and Output
+
+The script is made executable and then run.
+
+```bash
+hashim@Hashim:~/Repo/cmd$ chmod +x reversecolums.sh
+hashim@Hashim:~/Repo/cmd$ ./reversecolums.sh
+```
+
+The contents of the output file `$outputfile` are shown here:
+
+```bash
+hashim@Hashim:~/Repo/cmd$ cat reversenames.csv
+Hashim,Muhammad
+Raza,Ahmad
+jamshed,Sara
+```
+
+## 🧐 Critique and a Better Solution
+
+The code in Listing 1.10 (after removing blank lines) consists of seven lines of code and involves creating two extra intermediate files (`fnames` and `lnames`). Unless you need those temporary files, it is a good idea to remove them (which you can do with one `rm` command).
+
+Although Listing 1.10 is straightforward, there is a simpler way to execute this task: use the `cat` command and the `awk` command (discussed in detail in section 7).
+
+Specifically, compare the contents of `reversecolumns.sh` with the following single line of code. It combines the `cat` command and the `awk` command to generate the same output:
+
+```bash
+cat namepairs.txt |awk -F"," '{print $2 "," $1}'
+```
+
+The output from the preceding code snippet is here:
+
+```bash
+hashim@Hashim:~/Repo/cmd$ cat namepairs.csv | awk -F"," '{print $2 "," $1}'
+Hashim,Muhammad
+Raza,Ahmad
+jamshed,Sara
+```
+
+### 💻 `awk` Command Explanation
+
+  * **`cat namepairs.csv`**: Reads the content of the `namepairs.csv` file.
+  * **`|`**: Pipes that content as input to the `awk` command.
+  * **`awk -F"," '{print $2 "," $1}'`**: This is the `awk` program.
+      * `-F","`: The `-F` flag sets the **F**ield separator. We are telling `awk` to treat the comma (`,`) as the delimiter.
+      * `'{print $2 "," $1}'`: This is the code that `awk` runs on every single line of input.
+          * `$2`: This variable represents the **second field** (the last name).
+          * `$1`: This variable represents the **first field** (the first name).
+          * `","`: This is a literal string, a comma, to place between the fields.
+          * `print ...`: This command prints the second field, a comma, and then the first field.
+
+### 💡 Final Thoughts
+
+As you can see, there is a big difference between these two solutions. If you are unfamiliar with the `awk` command, you would not have thought of the second solution.
+
+However, the more you learn about Bash commands and how to combine them, the more adept you will become at writing better shell scripts to solve data cleaning tasks.
+
+Another important point: **document the commands as they get more complex**, as they can be hard to interpret later by others, or even by yourself if enough time has passed. A comment like the following can be extremely helpful to interpreting code:
+
+```bash
+# This command reverses first and last names in namepairs.txt
+cat namepairs.txt |awk -F"," '{print $2 "," $1}'
+```
+
+The output of this commented command is, of course, the same:
+
+```bash
+hashim@Hashim:~/Repo/cmd$ cat namepairs.csv | awk -F"," '{print $2 "," $1}'
+Hashim,Muhammad
+Raza,Ahmad
+jamshed,Sara
+```
 
 ---
