@@ -570,3 +570,222 @@ If there is a possibility you might need some of the files you intend to delete,
 
 This method is much safer and is highly recommended over permanent deletion.
 
+# 📦 **Moving Files with the `mv` Command**
+
+The `mv` (move) command is equivalent to a combination of `cp` (copy) and `rm` (remove). You can use this command to move one or more files to a new directory or to rename a file or directory.
+
+When used in a non-interactive script, `mv` supports the **`-f` (force)** option to bypass any user input prompts (like overwriting).
+
+
+## ➡️ Example 1: Renaming a File
+
+The simplest use for `mv` is to rename a file.
+
+### 🚀 Practical Example
+
+1.  **Create a file:**
+    ```bash
+    hashim@Hashim:~$ touch old_name.txt
+    hashim@Hashim:~$ ls
+    old_name.txt
+    ```
+2.  **Rename it using `mv`:**
+    ```bash
+    hashim@Hashim:~$ mv old_name.txt new_name.txt
+    ```
+3.  **Verify the change:**
+    ```bash
+    hashim@Hashim:~$ ls
+    new_name.txt
+    ```
+
+### 📜 Code Explanation
+
+  * `mv old_name.txt new_name.txt`: The `mv` command takes a **source** (`old_name.txt`) and a **destination** (`new_name.txt`). Since the destination is a filename in the same directory, this operation acts as a "rename." The `old_name.txt` file is gone, and `new_name.txt` now exists.
+
+
+## ➡️ Example 2: Moving Files to a Directory
+
+You can also use `mv` to move one or more files into a directory.
+
+### 🚀 Practical Example
+
+1.  **Create files and a directory:**
+    ```bash
+    hashim@Hashim:~$ touch file1.txt file2.txt
+    hashim@Hashim:~$ mkdir my_folder
+    hashim@Hashim:~$ ls
+    file1.txt  file2.txt  my_folder
+    ```
+2.  **Move both files into `my_folder`:**
+    ```bash
+    hashim@Hashim:~$ mv file1.txt file2.txt my_folder
+    ```
+3.  **Verify the files are moved:**
+    ```bash
+    hashim@Hashim:~$ ls
+    my_folder
+
+    hashim@Hashim:~$ ls my_folder
+    file1.txt  file2.txt
+    ```
+
+### 📜 Code Explanation
+
+  * `mv file1.txt file2.txt my_folder`: When the *last* argument is a directory, `mv` moves all preceding source files (`file1.txt`, `file2.txt`) into that directory.
+
+
+## ➡️ Example 3: Moving a Directory
+
+When a directory is moved to a pre-existing directory, it becomes a sub-directory of the destination.
+
+### 🚀 Practical Example
+
+1.  **Create two directories:**
+    ```bash
+    hashim@Hashim:~$ mkdir dir_A
+    hashim@Hashim:~$ mkdir destination_folder
+    hashim@Hashim:~$ touch dir_A/report.txt
+    ```
+2.  **Move `dir_A` into `destination_folder`:**
+    ```bash
+    hashim@Hashim:~$ mv dir_A destination_folder
+    ```
+3.  **Verify the result:**
+    ```bash
+    hashim@Hashim:~$ ls destination_folder
+    dir_A
+
+    hashim@Hashim:~$ ls destination_folder/dir_A
+    report.txt
+    ```
+
+### 📜 Code Explanation
+
+  * `mv dir_A destination_folder`: Since `destination_folder` already existed, `mv` "places" the entire `dir_A` directory *inside* it, creating `destination_folder/dir_A`.
+
+
+
+# 🔗 The `ln` (Link) Command
+
+The `ln` command enables you to create a **link** to an existing file. The most common type is a **symbolic link** (or "symlink"), created with the `-s` flag.
+
+This is advantageous when the existing file is large because the symbolic link is just a small pointer file and involves minimal additional overhead.
+
+Moreover, changes to the existing file are automatically available in the symbolic link. This means you can maintain one file as **"the source of truth"** instead of making the same update to multiple copies of a file.
+
+
+## 🚀 Practical Example: Creating and Using a Symlink
+
+Let's walk through the entire lifecycle of a symbolic link.
+
+### 1\. Create the Original File
+
+First, we create our "source of truth" file.
+
+```bash
+hashim@Hashim:~$ echo "This is the original document." > document1.txt
+hashim@Hashim:~$ cat document1.txt
+This is the original document.
+```
+
+### 2\. Create the Symbolic Link
+
+Now, we create a symbolic link named `doc2` that points to `document1.txt`.
+
+```bash
+hashim@Hashim:~$ ln -s document1.txt doc2
+```
+
+### 📜 Code Explanation
+
+  * `ln`: The link command.
+  * `-s`: This flag specifies that we want to create a **symbolic** link.
+  * `document1.txt`: This is the **target** (the original file we are pointing to).
+  * `doc2`: This is the **name of the link** (the new shortcut file).
+
+### 3\. Check the Link and File Listing
+
+If you invoke `ls -l` on `doc2`, you will see something like this:
+
+```bash
+hashim@Hashim:~$ ls -l
+total 4
+-rw-rw-r-- 1 hashim hashim  30 Oct 29 20:12 document1.txt
+lrwxrwxrwx 1 hashim hashim  15 Oct 29 20:12 doc2 -> document1.txt
+```
+
+  * **`l`**: Notice the `l` at the beginning of the permissions for `doc2`. This indicates it is a **link**.
+  * **`-> document1.txt`**: This shows you exactly where the link is pointing.
+
+### 4\. Test the "Source of Truth" Concept
+
+Let's read the link. It will show the *original's* content.
+
+```bash
+hashim@Hashim:~$ cat doc2
+This is the original document.
+```
+
+Now, let's **modify the original file** and read the link again.
+
+```bash
+hashim@Hashim:~$ echo "I am adding a new line." >> document1.txt
+hashim@Hashim:~$ cat doc2
+This is the original document.
+I am adding a new line.
+```
+
+As you can see, the changes to `document1.txt` were automatically available in `doc2`.
+
+### 5\. Deleting the Link (Safe)
+
+If you remove the symbolic link (`doc2`), it **will not affect** the original file.
+
+```bash
+hashim@Hashim:~$ rm doc2
+hashim@Hashim:~$ ls
+document1.txt
+hashim@Hashim:~$ cat document1.txt
+This is the original document.
+I am adding a new line.
+```
+
+The original file is perfectly safe.
+
+
+### 6\. adding new text in doc2 will reflect in original file
+
+```bash
+hashim@Hashim:~/Repo$ echo "I am adding a third line." >> doc2
+hashim@Hashim:~/Repo$ cat doc2
+This is the original document.
+I am adding a new line.
+I am adding a third line.
+hashim@Hashim:~/Repo$ cat document1.txt 
+This is the original document.
+I am adding a new line.
+I am adding a third line.
+```
+
+### 7\. Deleting the Original File (Breaking the Link)
+
+If you remove the original file (`document1.txt`) *without* removing the link, the link becomes "broken."
+
+```bash
+# First, let's re-create the link
+hashim@Hashim:~$ ln -s document1.txt doc2
+
+# Now, remove the ORIGINAL file
+hashim@Hashim:~$ rm document1.txt
+```
+
+The link file `doc2` will still appear in a listing (often in red to show it's broken), but when you attempt to view its contents, the file is empty (or gives an error) because its target is gone.
+
+```bash
+hashim@Hashim:~$ ls -l
+lrwxrwxrwx 1 hashim hashim 15 Oct 29 20:15 doc2 -> document1.txt
+
+hashim@Hashim:~$ cat doc2
+cat: doc2: No such file or directory
+```
