@@ -65,7 +65,7 @@ Let's see this in action:
     The original content of `file_B` is gone and has been replaced by the content of `file_A`.
 
 
-## 🗂️ Copying Multiple Files to a Directory
+# 🗂️ Copying Multiple Files to a Directory
 
 You can also copy one or more files into a directory. The syntax is `cp <source_file_1> <source_file_2> <destination_directory>`.
 
@@ -195,3 +195,153 @@ For example, the following commands copy the files and sub-directories (if any) 
     As you can see, the entire contents of the `abc` directory, including its `subdir` and all files, have been successfully copied into the `def` directory.
 
 
+
+# 🚀 Copying Files with Command Substitution
+
+This section details how to use command substitution (the backticks `` `...` ``) to generate a dynamic list of files and pass them to the `cp` (copy) command.
+
+
+## 📜 Listing 2.1: The Basic Command
+
+Listing 2.1 shows a two-step process to create a directory and then copy a specific set of files into it using command substitution.
+
+```bash
+mkdir textfiles
+cp `ls *.txt` textfiles
+```
+
+*(Note: The original text used `*txt`. We are using `*.txt` as it is the standard and more common way to find text files.)*
+
+### 🚀 Practical Example (How it Works)
+
+Let's see this in action from scratch.
+
+1.  **First, create some sample files:**
+
+    ```bash
+    hashim@Hashim:~$ touch file1.txt notes.txt report.doc
+    hashim@Hashim:~$ ls
+    file1.txt  notes.txt  report.doc
+    ```
+
+2.  **Now, run the commands from Listing 2.1:**
+
+    ```bash
+    hashim@Hashim:~$ mkdir textfiles
+    hashim@Hashim:~$ cp `ls *.txt` textfiles
+    ```
+
+3.  **Check the result:**
+
+    ```bash
+    hashim@Hashim:~$ ls textfiles/
+    file1.txt  notes.txt
+    ```
+
+    As you can see, only the `.txt` files were copied. The `report.doc` was ignored.
+
+### 📜 Code Explanation
+
+1.  **`mkdir textfiles`**
+    This command simply **creates a new directory** named `textfiles` in your current location.
+
+2.  cp \`ls *.txt\` textfiles
+    This command has two parts, and the shell processes it from the inside out:
+
+      * **Command Substitution (`` `ls *.txt` ``):** The shell first executes the command inside the backticks. `ls *.txt` finds all files ending in `.txt` and lists them as a string (e.g., `file1.txt notes.txt`).
+      * **Shell Expansion:** The shell then *replaces* the backtick expression with its output. The final command becomes:
+        `cp file1.txt notes.txt textfiles`
+      * **Execution:** The `cp` command runs, copying `file1.txt` and `notes.txt` into the `textfiles` directory.
+
+> **💡 A Better Way: `$(...)`**
+> Using backticks `` `...` `` is an older syntax. The modern, recommended syntax is `$(...)`. It's cleaner and avoids confusion. The command is:
+> `cp $(ls *.txt) textfiles`
+
+
+## ⚠️ The Caveat: This Ignores Directories
+
+This command substitution method **will not copy any subdirectories** that happen to match the pattern (e.g., `archive.txt`). The `cp` command, by default, will skip directories and print an error message.
+
+### 🚀 Practical Example (The Failure)
+
+1.  **Create a file and a directory that match the `*.txt` pattern:**
+
+    ```bash
+    hashim@Hashim:~$ touch regular.txt
+    hashim@Hashim:~$ mkdir archive.txt
+    hashim@Hashim:~$ echo "secret log" > archive.txt/log.dat
+    ```
+
+2.  **Try to copy all `*.txt` items using the same command:**
+
+    ```bash
+    hashim@Hashim:~$ mkdir textfiles2
+    hashim@Hashim:~$ cp $(ls *.txt) textfiles2
+    cp: omitting directory 'archive.txt'
+    ```
+
+3.  **Check the result:**
+
+    ```bash
+    hashim@Hashim:~$ ls textfiles2/
+    regular.txt
+    ```
+
+    The `cp` command failed to copy the `archive.txt` directory and only copied the `regular.txt` file.
+
+
+## ❌ Flawed Attempts to Fix This
+
+The original text notes that just adding the recursive flag (`-r`) to the `cp` command *will not* fix this. Both of the following commands will still fail to copy the contents properly:
+
+  * `cp $(ls -R *.txt) textfiles`
+  * `cp -r $(ls -R *.txt) textfiles`
+
+The `ls -R` command produces a flat list of all matching files (e.g., `archive.txt/log.dat`), which the `cp` command cannot find in the current directory.
+
+
+## ✅ The Correct Way to Copy Directories
+
+If you want to copy a directory, you should **not** use `ls` in command substitution. Just use the `cp` command directly.
+
+### ➡️ Solution A: Copy the Entire Directory
+
+To copy the directory `archive.txt` *into* the `textfiles` directory (so you have `textfiles/archive.txt`), use the `-r` (recursive) flag.
+
+```bash
+cp -r archive.txt textfiles
+```
+
+#### 🚀 Practical Example
+
+```bash
+hashim@Hashim:~$ mkdir textfiles3
+hashim@Hashim:~$ cp -r archive.txt textfiles3
+hashim@Hashim:~$ ls -R textfiles3/
+textfiles3/:
+archive.txt
+
+textfiles3/archive.txt:
+log.dat
+```
+
+As you see, the `archive.txt` folder itself was placed *inside* `textfiles3`.
+
+### ➡️ Solution B: Copy Only the Directory's Contents
+
+If you want to copy *only the contents* of `archive.txt` (i.e., `log.dat`) into `textfiles`, use the `/*` wildcard.
+
+```bash
+cp -r archive.txt/* textfiles
+```
+
+#### 🚀 Practical Example
+
+```bash
+hashim@Hashim:~$ mkdir textfiles4
+hashim@Hashim:~$ cp -r archive.txt/* textfiles4
+hashim@Hashim:~$ ls textfiles4/
+log.dat
+```
+
+Here, the `/*` wildcard tells `cp` to copy all items *inside* `archive.txt`, but not the folder itself.
