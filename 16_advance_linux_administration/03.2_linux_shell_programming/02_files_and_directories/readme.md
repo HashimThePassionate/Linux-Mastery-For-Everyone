@@ -1271,3 +1271,239 @@ WARNING: Low memory
 This is a critical command for monitoring log files in real time.
 
 ---
+
+# 🔍 **Comparing File Contents**
+
+There are several commands for comparing text files, such as the `cmp` command and the `diff` command.
+
+  * `diff`: This command reports the **specific differences** between two files, showing you the exact lines that have changed.
+  * `cmp`: This command is a simpler version. It only shows *at what byte and line number* the files first differ. If the files are identical, it produces no output.
+
+Both `diff` and `cmp` return an **exit status of 0** if the compared files are identical, and **1** if the files are different. This allows you to use them in a test construct within a shell script.
+
+### `cmp` (Compare) Command
+
+This command finds the *first* difference and stops.
+
+#### 🚀 Practical Example from Scratch
+
+1.  **Create three files.** Two will be identical, and one will be different.
+
+    ```bash
+    # Create file 1
+    hashim@Hashim:~$ echo "Hello, this is file 1." > file1.txt
+    hashim@Hashim:~$ echo "This line is the same." >> file1.txt
+
+    # Create file 2 (identical to file 1)
+    hashim@Hashim:~$ echo "Hello, this is file 1." > file2.txt
+    hashim@Hashim:~$ echo "This line is the same." >> file2.txt
+
+    # Create file 3 (different from file 1)
+    hashim@Hashim:~$ echo "Hello, this is file 1." > file3.txt
+    hashim@Hashim:~$ echo "This line is different." >> file3.txt
+    ```
+
+2.  **Compare the identical files:**
+
+    ```bash
+    hashim@Hashim:~$ cmp file1.txt file2.txt
+    hashim@Hashim:~$ echo $?
+    0
+    ```
+
+      * **📜 Explanation:** `cmp` found no differences, so it printed **nothing**. We check the exit status with `echo $?`, which prints `0` (success/identical).
+
+3.  **Compare the different files:**
+
+    ```bash
+    hashim@Hashim:~$ cmp file1.txt file3.txt
+    file1.txt file3.txt differ: byte 40, line 2
+    hashim@Hashim:~$ echo $?
+    1
+    ```
+
+      * **📜 Explanation:** `cmp` immediately stopped at the first difference and reported its location: **byte 40, line 2**. The exit status `1` confirms the files are different.
+
+### `diff` (Difference) Command
+
+This command finds *all* differences and displays them.
+
+#### 🚀 Practical Example from Scratch
+
+We will use the same files (`file1.txt` and `file3.txt`) from the previous example.
+
+1.  **Run the `diff` command:**
+
+    ```bash
+    hashim@Hashim:~$ diff file1.txt file3.txt
+    2c2
+    < This line is the same.
+    ---
+    > This line is different.
+    ```
+
+2.  **📜 Code Explanation:**
+
+      * `2c2`: This is `diff`'s notation. It means "Line 2 in file 1 (`2c`) needs to be **changed** to match line 2 in file 2 (`c2`)."
+      * `< This line is the same.`: The `<` symbol indicates a line from **file 1**.
+      * `---`: This is a separator.
+      * `> This line is different.`: The `>` symbol indicates a line from **file 2**.
+        This output clearly shows you *what* needs to be changed to make the files identical.
+
+### `comm` (Common) Command
+
+The `comm` command is useful for comparing **sorted** files. It outputs three columns:
+
+  * **Column 1:** Lines unique to `file1`.
+  * **Column 2:** Lines unique to `file2`.
+  * **Column 3:** Lines common to both files.
+
+#### 🚀 Practical Example from Scratch
+
+1.  **Create two sorted files.**
+
+    ```bash
+    hashim@Hashim:~$ echo -e "apple\nbanana\ncherry" > fruit1.txt
+    hashim@Hashim:~$ echo -e "apple\ncherry\ngrapes" > fruit2.txt
+    ```
+
+2.  **Run the `comm` command:**
+
+    ```bash
+    hashim@Hashim:~$ comm fruit1.txt fruit2.txt
+    banana
+    		grapes
+    	apple
+    	cherry
+    ```
+
+3.  **📜 Code Explanation:**
+
+      * `banana`: This is in **Column 1** (indented 0 tabs). It is unique to `fruit1.txt`.
+      * `grapes`: This is in **Column 2** (indented 1 tab). It is unique to `fruit2.txt`.
+      * `apple` and `cherry`: These are in **Column 3** (indented 2 tabs). They are common to both files.
+
+4.  **Suppressing columns:** You can use options to suppress columns:
+
+      * `-1`: Suppresses column 1 (unique to file1)
+      * `-2`: Suppresses column 2 (unique to file2)
+      * `-3`: Suppresses column 3 (common lines)
+
+5.  **Example: Show only lines common to both files**
+
+    ```bash
+    hashim@Hashim:~$ comm -12 fruit1.txt fruit2.txt
+    apple
+    cherry
+    ```
+
+      * **📜 Code Explanation:** By using `-12`, we suppressed both Column 1 and Column 2, leaving only Column 3 (the common lines).
+
+---
+
+# 🧩 **The Parts of a Filename**
+
+### `basename` and `dirname`
+
+  * `basename`: "Strips" the path information from a filename, printing only the filename.
+  * `dirname`: Strips the `basename` from a filename, printing only the path information.
+
+> **Note:** These commands can operate on any arbitrary string. The argument does not need to refer to an existing file.
+
+#### 🚀 Practical Example from Scratch
+
+1.  **Set a variable:**
+
+    ```bash
+    hashim@Hashim:~$ my_path="/usr/local/bin/my_script.sh"
+    ```
+
+2.  **Use `basename` to get the file:**
+
+    ```bash
+    hashim@Hashim:~$ basename $my_path
+    my_script.sh
+    ```
+
+      * **📜 Explanation:** It removed the entire path `/usr/local/bin/`.
+
+3.  **Use `dirname` to get the path:**
+
+    ```bash
+    hashim@Hashim:~$ dirname $my_path
+    /usr/local/bin
+    ```
+
+      * **📜 Explanation:** It removed the filename `my_script.sh`.
+
+4.  **Using `basename $0` in a script:**
+    The construction `basename $0` is often used to get the name of the currently executing script. This is helpful for "usage" messages if a script is called with missing arguments.
+
+5.  **Create a simple script:**
+
+    ```bash
+    hashim@Hashim:~$ nano check_args.sh
+
+    # Inside nano, add these lines:
+    #!/bin/bash
+    if [ "$#" -ne 2 ]; then
+      echo "Usage: `basename $0` user_id password"
+      exit 1
+    fi
+    echo "Processing arguments..."
+
+    # Save and exit nano
+    ```
+
+6.  **Make the script executable and run it with no arguments:**
+
+    ```bash
+    hashim@Hashim:~$ chmod +x check_args.sh
+    hashim@Hashim:~$ ./check_args.sh
+    Usage: check_args.sh user_id password
+    ```
+
+      * **📜 Code Explanation:**
+          * `$0` holds the name of the script *as it was called* (e.g., `./check_args.sh`).
+          * `` `basename $0` `` runs `basename` on `./check_args.sh`, which cleans it up to just `check_args.sh`.
+          * This makes the error message clear and dynamic, no matter how the script was called.
+
+
+## 📜 The `strings` Command
+
+The `strings` command displays any printable strings (sequences of text characters) that it finds inside a binary or data file (a non-text file).
+
+#### 🚀 Practical Example from Scratch
+
+We will look for text inside the `/bin/ls` executable program.
+
+1.  **Run the `strings` command:**
+
+    ```bash
+    hashim@Hashim:~$ strings /bin/ls
+    ```
+
+2.  **Observe the output (a few sample lines):**
+
+    ```
+    $FreeBSD: src/bin/ls/cmp.c,v 1.12 2002/06/30 05:13:54 obrien Exp $
+    @(#) Copyright (c) 1989, 1993, 1994
+    The Regents of the University of California. All rights reserved.
+    $FreeBSD: src/bin/ls/ls.c,v 1.66 2002/09/21 01:28:36 wollman Exp $
+    $FreeBSD: src/bin/ls/print.c,v 1.57 2002/08/29 14:29:09 keramida Exp $
+    $FreeBSD: src/bin/ls/util.c,v 1.38 2005/06/03 11:05:58 dd Exp $
+    \"\"
+    @(#)PROGRAM:ls PROJECT:file_cmds-264.50.1
+    COLUMNS
+    1@ABCFGHLOPRSTUWabcdefghiklmnopqrstuvwx
+    bin/ls
+    Unix2003
+    ```
+
+3.  **📜 Code Explanation:**
+
+      * `/bin/ls` is a compiled program, not a text file. If you `cat` it, you see unreadable garbage.
+      * `strings` scans that binary file and prints only the sequences of human-readable characters.
+      * This is useful for quickly finding information like copyright notices, error messages (`COLUMNS`), or other plain text data embedded within a program.
+
+---
