@@ -1507,3 +1507,473 @@ We will look for text inside the `/bin/ls` executable program.
       * This is useful for quickly finding information like copyright notices, error messages (`COLUMNS`), or other plain text data embedded within a program.
 
 ---
+
+# 🔐 **Working with File Permissions**
+
+In a previous section, you used the `touch` command to create an empty file `abc` and then saw its long listing:
+
+```bash
+-rw-r--r-- 1 owner staff 0 Nov 2 17:12 abc
+```
+
+Each file in Bash contains a set of permissions for three different user groups: **the owner, the group, and the world (others)**.
+
+The set of permissions are:
+
+  * **r (read):** View the contents of a file.
+  * **w (write):** Change or modify the contents of a file.
+  * **x (execute):** Run the file as a program.
+
+## File Permissions Explained
+
+Let's break down the permission string `-rw-r--r--`:
+
+| Character(s) | Group | Meaning |
+| :--- | :--- | :--- |
+| **`_`** | **File Type** | The first character. `_` is a file, `d` is a directory, `l` is a link. |
+| **`rw_`** | **Owner** | The user who owns the file. In this case, they can **r**ead and **w**rite. |
+| **`r__`** | **Group** | The group assigned to the file. In this case, group members can only **r**ead. |
+| **`r__`** | **Others** | "The world." All other users. In this case, they can only **r**ead. |
+
+## Permissions in Octal (Numeric) Mode
+
+These permissions can also be represented by numbers in base-8 (octal).
+
+| Number | Permission | Symbol |
+| :--- | :--- | :--- |
+| **4** | **read** | `r` |
+| **2** | **write** | `w` |
+| **1** | **execute** | `x` |
+
+These values are added together for each user group.
+
+  * **0**: (0+0+0) --- No permissions
+  * **1**: (0+0+1) --x Execute only
+  * **2**: (0+2+0) -w- Write only
+  * **3**: (0+2+1) -wx Write and execute
+  * **4**: (4+0+0) r-- Read only
+  * **5**: (4+0+1) r-x Read and execute
+  * **6**: (4+2+0) rw- Read and write
+  * **7**: (4+2+1) rwx Read, write, and execute
+
+For example, a file whose permissions are **755** indicates:
+
+  * **Owner**: `7` (4+2+1) -\> `rwx` permissions
+  * **Group**: `5` (4+0+1) -\> `r-x` permissions
+  * **World**: `5` (4+0+1) -\> `r-x` permissions
+
+## Changing Permissions with `chmod`
+
+The `chmod` (change mode) command enables you to change permissions for files and directories. You can use it in two ways: **symbolic** (with letters) or **octal** (with numbers).
+
+### 🚀 Practical Example: Symbolic Mode (`+x`, `u+x`)
+
+Symbolic mode is good for adding or removing single permissions.
+
+1.  **Create a script file:**
+
+    ```bash
+    hashim@Hashim:~$ echo '#!/bin/bash' > my_script.sh
+    hashim@Hashim:~$ echo "echo 'Hello World'" >> my_script.sh
+    ```
+
+2.  **Check its permissions (it's not executable):**
+
+    ```bash
+    hashim@Hashim:~$ ls -l my_script.sh
+    -rw-rw-r-- 1 hashim hashim 31 Nov  1 20:43 my_script.sh
+    ```
+
+3.  **Make it executable for *all* users:**
+    The following command makes `my_script.sh` executable for all users.
+
+    ```bash
+    hashim@Hashim:~$ chmod +x my_script.sh
+    hashim@Hashim:~$ ls -l my_script.sh
+    -rwxrwxr-x 1 hashim hashim 31 Nov  1 20:43 my_script.sh
+    ```
+
+      * **📜 Code Explanation:** The `+x` adds the "execute" permission to the owner, group, and others.
+
+4.  **Make another file executable *only* for the owner:**
+
+    ```bash
+    hashim@Hashim:~$ touch script2.sh
+    hashim@Hashim:~$ chmod u+x script2.sh
+    hashim@Hashim:~$ ls -l script2.sh
+    -rwxrw-r-- 1 hashim hashim 0 Nov  1 20:45 script2.sh
+    ```
+
+      * **📜 Code Explanation:** `u+x` adds the "execute" permission for the **u**ser (owner) only.
+
+### 🚀 Practical Example: Octal Mode (`644`, `444`)
+
+Octal mode is good for setting the *exact* permissions all at once.
+
+1.  **Create a file:**
+
+    ```bash
+    hashim@Hashim:~$ touch my_file.txt
+    ```
+
+2.  **Make it readable/writable for the owner and read-only for everyone else (`644`):**
+
+    ```bash
+    hashim@Hashim:~$ chmod 644 my_file.txt
+    hashim@Hashim:~$ ls -l my_file.txt
+    -rw-r--r-- 1 hashim hashim 0 Nov 1 17:32 my_file.txt
+    ```
+
+      * **📜 Code Explanation:**
+          * `6` (Owner): `4+2` = `rw-`
+          * `4` (Group): `4` = `r--`
+          * `4` (Others): `4` = `r--`
+
+3.  **Make the file read-only for *everyone* (`444`):**
+
+    ```bash
+    hashim@Hashim:~$ chmod 444 my_file.txt
+    hashim@Hashim:~$ ls -l my_file.txt
+    -r--r--r-- 1 hashim hashim 0 Nov 1 17:33 my_file.txt
+    ```
+
+      * **📜 Code Explanation:** Now, even you (the owner) cannot write to it.
+
+4.  **Try to write to the read-only file (it will fail):**
+
+    ```bash
+    hashim@Hashim:~$ echo "test" >> my_file.txt
+    bash: my_file.txt: Permission denied
+    ```
+
+### 🚀 Practical Example: Directory Permissions (`1777`, `000`)
+
+1.  **Create a new directory:**
+
+    ```bash
+    hashim@Hashim:~$ mkdir my_dir
+    ```
+
+2.  **Revoke all permissions for the directory (`000`):**
+
+    ```bash
+    hashim@Hashim:~$ chmod 000 my_dir
+    hashim@Hashim:~$ ls -ld my_dir
+    d--------- 2 hashim hashim 4096 Nov 1 17:34 my_dir
+    ```
+
+      * **📜 Code Explanation:** The `d---------` shows that no one (except the `root` user) can read, write, or even enter this directory.
+      * **Test it:**
+        ```bash
+        hashim@Hashim:~$ cd my_dir
+        bash: cd: my_dir: Permission denied
+        ```
+
+3.  **Provide "sticky bit" permissions (`1777`):**
+    This permission is special. It is often used on shared folders (like `/tmp`). It gives everyone read, write, and execute permissions (`777`), but the `1` (the "sticky bit") means that a user can only delete files that *they* own.
+
+    ```bash
+    hashim@Hashim:~$ chmod 1777 my_dir
+    hashim@Hashim:~$ ls -ld my_dir
+    drwxrwxrwt 2 hashim hashim 4096 Nov 1 17:34 my_dir
+    ```
+
+      * **📜 Code Explanation:** The permissions are now `rwxrwxrwt`. The `t` at the end signifies the "sticky bit" is active.
+
+### 🚀 Practical Example: The SUID Bit (`u+s`)
+
+The SUID (Set owner User ID) bit is an advanced permission. It **does not apply to shell scripts**, only to binary executables. When set, it allows an ordinary user to execute the program with the same privileges as the **owner** of the file (often `root`).
+
+1.  **Find a binary program (like `passwd`):**
+
+    ```bash
+    hashim@Hashim:~$ ls -l /usr/bin/passwd
+    -rwsr-xr-x 1 root root 63560 May 13 2024 /usr/bin/passwd
+    ```
+
+      * **📜 Code Explanation:** Notice the `s` in the owner's permissions (`rws`). This is the SUID bit. It allows you (a normal user) to run the `passwd` command, which needs to modify the protected `/etc/shadow` file (owned by `root`). You are temporarily running it *as* `root`.
+
+2.  **Set the SUID bit on a program (as an example):**
+
+    ```bash
+    # (You would need 'root' privileges to do this)
+    $ sudo chmod u+s /usr/bin/my_program
+    ```
+
+# 🚀 Practical Example: The SUID Bit (`u+s`)
+
+Here is a complete, practical example from scratch that demonstrates the power of the SUID bit.
+
+**Our Goal:** We will write a simple C program that tries to read the `/etc/shadow` file. This file contains protected password hashes and is **only readable by the `root` user**.
+
+We will see it fail, then we will set the SUID bit and watch it succeed.
+
+## 1\. Create the C Program
+
+First, create a new file named `read_shadow.c` using `nano`.
+
+```bash
+hashim@Hashim:~$ nano read_shadow.c
+```
+
+Inside the `nano` editor, paste the following C code:
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+/*
+  This program will attempt to open and read the first line
+  of the /etc/shadow file.
+*/
+int main() {
+    FILE *file_pointer;
+    char line[256];
+
+    printf("Attempting to open /etc/shadow...\n");
+
+    // Try to open the protected file for reading ("r")
+    file_pointer = fopen("/etc/shadow", "r");
+
+    // Check if the file pointer is NULL, which means fopen() failed
+    if (file_pointer == NULL) {
+        perror("Error opening file");
+        printf("\nREASON: We are running as a normal user. (This failure is expected)\n");
+        return 1;
+    }
+
+    // If we get here, fopen() was successful!
+    printf("\nSUCCESS: We have root-level permissions!\n");
+    printf("--- First line of /etc/shadow ---\n");
+
+    // Read and print the first line from the file
+    if (fgets(line, sizeof(line), file_pointer) != NULL) {
+        printf("%s", line);
+    }
+
+    printf("--- End of file snippet ---\n");
+
+    // Close the file and exit
+    fclose(file_pointer);
+    return 0;
+}
+```
+
+Save and exit `nano` (Ctrl+O, Enter, Ctrl+X).
+
+## 2\. Compile the Program
+
+Now, we will use `gcc` (the C compiler) to turn our source code into an executable program.
+
+```bash
+hashim@Hashim:~$ gcc read_shadow.c -o read_shadow
+```
+
+### 📜 Code Explanation
+
+  * `gcc`: This is the command for the GNU C Compiler.
+  * `read_shadow.c`: This is the input source file.
+  * `-o read_shadow`: The `-o` flag specifies the **o**utput filename. We are naming our final program `read_shadow`.
+
+## 3\. Test as a Normal User (Expected Failure)
+
+Let's check the permissions and try to run our new program.
+
+```bash
+# Check the owner: it's you (hashim)
+hashim@Hashim:~$ ls -l read_shadow
+-rwxrwxr-x 1 hashim hashim 16304 Nov  1 20:59 read_shadow
+
+# Now, run it
+hashim@Hashim:~$ ./read_shadow
+Attempting to open /etc/shadow...
+Error opening file: Permission denied
+
+REASON: We are running as a normal user. (This failure is expected)
+```
+
+As expected, the program fails. The operating system correctly blocked our program (running as user `hashim`) from reading the `root`-only file.
+
+## 4\. Change Owner and Set SUID (as `root`)
+
+Now, we will use `sudo` to become the superuser and modify the file's permissions.
+
+```bash
+# 1. Change the owner of the file to 'root'
+hashim@Hashim:~$ sudo chown root read_shadow
+
+# 2. Set the SUID bit
+hashim@Hashim:~$ sudo chmod u+s read_shadow
+```
+
+### 📜 Code Explanation
+
+  * `sudo chown root ...`: This command **ch**anges the **own**er of the file to `root`.
+  * `sudo chmod u+s ...`: This **ch**anges the **mod**e. It **adds (`+`)** the **S**UID bit for the **u**ser (owner) of the file.
+
+## 5\. Verify the New Permissions
+
+Let's look at the file's permissions *now*. This is the most important part.
+
+```bash
+hashim@Hashim:~$ ls -l read_shadow
+-rwsrwxr-x 1 root hashim 16304 Nov  1 20:59 read_shadow
+```
+
+Look closely at the output:
+
+  * **`root`**: The owner is now `root`.
+  * **`-rwsr-xr-x`**: The owner's execute permission (`x`) has been replaced with an **`s`**. This **`s`** confirms that the SUID bit is set.
+
+## 6\. Test as a Normal User (Success\!)
+
+Now for the final test. We are still the normal user `hashim`, but we are going to run the program that is *owned by `root`* and has the SUID bit.
+
+```bash
+hashim@Hashim:~$ ./read_shadow
+Attempting to open /etc/shadow...
+
+SUCCESS: We have root-level permissions!
+--- First line of /etc/shadow ---
+root:$y$j9T$THISISNOTAREALHASH...:/root:/bin/bash
+--- End of file snippet ---
+```
+
+It worked\!
+
+### 💡 Why Did It Work?
+
+  * When you (`hashim`) ran the program, the operating system saw the **SUID bit (`s`)**.
+  * It said, "This is a special program. Even though `hashim` is running it, I will grant it the privileges of its **owner** (`root`) *while it is running*."
+  * Your program's **Real User ID** was still `hashim`, but its **Effective User ID** became `root`.
+  * The `fopen()` function used the *Effective User ID* (`root`), which had permission to read `/etc/shadow`, and the operation succeeded.
+
+This is the power (and significant security risk) of the SUID bit.
+
+## 📇 Changing Owner, Permissions, and Groups
+
+### 🚀 Practical Example: `chown` and `chgrp`
+
+You must often use `sudo` to run these commands, as you cannot give away files you don't own, and you can only change groups to one you belong to.
+
+1.  **Create a file (it will be owned by you):**
+
+    ```bash
+    hashim@Hashim:~$ touch file.txt
+    hashim@Hashim:~$ ls -l file.txt
+    -rw-r--r-- 1 hashim hashim 0 Nov 1 17:40 file.txt
+    ```
+
+2.  **Change the owner (`chown`):**
+    *(This command would typically be run by `root` to assign a file to another user.)*
+
+    ```bash
+    hashim@Hashim:~$ sudo chown root file.txt
+    [sudo] password for hashim:
+    hashim@Hashim:~$ ls -l file.txt
+    -rw-r--r-- 1 root hashim 0 Nov 1 17:41 file.txt
+    ```
+
+      * **📜 Code Explanation:** The owner has been changed from `hashim` to `root`.
+
+3.  **Change the group (`chgrp`):**
+    *(Again, this may require `sudo`.)*
+
+    ```bash
+    hashim@Hashim:~$ sudo chgrp root file.txt
+    hashim@Hashim:~$ ls -l file.txt
+    -rw-r--r-- 1 root root 0 Nov 1 17:42 file.txt
+    ```
+
+      * **📜 Code Explanation:** The group has been changed from `hashim` to `root`.
+
+4.  **Using the `-R` (Recursive) Option:**
+    If you have a directory, you can change the owner/group of *everything inside it* using `-R`.
+
+    ```bash
+    hashim@Hashim:~$ mkdir my_project
+    hashim@Hashim:~$ touch my_project/file_A.txt
+    hashim@Hashim:~$ sudo chown -R hashim my_project
+    ```
+
+      * **📜 Code Explanation:** This command changes the owner to `hashim` for the `my_project` directory *and* for `file_A.txt` inside it.
+
+## 🎭 The `umask` and `ulimit` Commands
+
+### `umask` (User Mask)
+
+Whenever you create a file in Bash, the environment variable `umask` contains the **complement** (base-8) of the default permissions. It "masks" or removes permissions from the default.
+
+1.  **Check your `umask`:**
+
+    ```bash
+    hashim@Hashim:~$ umask
+    0022
+    ```
+
+      * **📜 Code Explanation:** The typical value is `0022`. We only care about the last three digits: `022`.
+
+2.  **Calculate the defaults:**
+
+      * System default for new **Directories**: `777` (rwxrwxrwx)
+      * System default for new **Files**: `666` (rw-rw-rw-)
+
+    Now, we subtract the `umask` (`022`):
+
+      * **New Directory**: `777` - `022` = **`755`** (`rwxr-xr-x`)
+      * **New File**: `666` - `022` = **`644`** (`rw-r--r--`)
+
+3.  **Test the default permissions:**
+
+    ```bash
+    # Create a new file
+    hashim@Hashim:~$ touch test_file_umask
+    hashim@Hashim:~$ ls -l test_file_umask
+    -rw-r--r-- 1 hashim hashim 0 Nov 1 17:45 test_file_umask
+
+    # Create a new directory
+    hashim@Hashim:~$ mkdir test_dir_umask
+    hashim@Hashim:~$ ls -ld test_dir_umask
+    drwxr-xr-x 2 hashim hashim 4096 Nov 1 17:45 test_dir_umask
+    ```
+
+      * **📜 Code Explanation:** As calculated, the new file is `644` (`rw-r--r--`) and the new directory is `755` (`rwxr-xr-x`).
+
+### `ulimit` (User Limit)
+
+The `ulimit` command specifies the maximum size of a file you can create, among other resource limits.
+
+1.  **Check the file size limit:**
+
+    ```bash
+    hashim@Hashim:~$ ulimit -f
+    unlimited
+    ```
+
+      * **📜 Code Explanation:** The `-f` flag checks for the maximum file size. In this case, it is `unlimited`.
+
+2.  **Check all limits:**
+
+    ```bash
+    hashim@Hashim:~$ ulimit -a
+    core file size          (blocks, -c) 0
+    data seg size           (kbytes, -d) unlimited
+    scheduling priority             (-e) 0
+    file size               (blocks, -f) unlimited
+    pending signals                 (-i) 62963
+    max locked memory       (kbytes, -l) 65536
+    max memory size         (kbytes, -m) unlimited
+    open files                      (-n) 1024
+    pipe size            (512 bytes, -p) 8
+    POSIX message queues     (bytes, -q) 819200
+    real-time priority              (-r) 0
+    stack size              (kbytes, -s) 8192
+    cpu time               (seconds, -t) unlimited
+    max user processes              (-u) 62963
+    virtual memory          (kbytes, -v) unlimited
+    file locks                      (-x) unlimited
+    ```
+
+      * **📜 Code Explanation:** The `-a` (all) flag shows all the resource limits currently applied to your shell session.
+
+---
