@@ -810,3 +810,278 @@ EEK12|WEEK14|WEEK15|WEEK17|WEEK18|WEEK19|WEEK21
   * `-s`: The **squeeze** flag is important here. It squeezes any *repeated* commas (e.g., `,,`) into a *single* pipe (`|`). This is why `1,BASO,,1.4` becomes `1|BASO||1.4|...`.
 
 ---
+
+# 🔎 The `find` Command
+
+The `find` command is one of the most powerful and essential utilities in Bash. Its purpose is to search for files and directories within a specified directory hierarchy based on a wide array of criteria you provide.
+
+The `find` command supports many options, including one for **printing** (displaying) the files it finds, and another for **executing** a command (like `rm`) on the files it finds.
+
+In addition, you can specify logical operators such as **`-a` (AND)** as well as **`-o` (OR)** to create complex search queries. You can also specify switches to find files based on when they were **created**, **accessed**, or **modified**.
+
+
+## 🚀 Practical Examples from Scratch
+
+To test the `find` command, let's first create a sample directory structure.
+
+```bash
+# 1. Create a sandbox area
+mkdir find_sandbox
+cd find_sandbox
+
+# 2. Create some files
+touch report.txt data.log
+touch old-file.txt
+
+# 3. Create a subdirectory with more files
+mkdir -p project/src
+touch project/main.sh
+touch project/README.md
+touch project/src/utils.sh
+
+# 4. Create a file with 'abc' in the name
+touch project/abc_special.log
+```
+
+Now we have a test area. Let's run the `find` commands.
+
+### Example 1: Find All Files (`-print`)
+
+This command displays all files and directories starting from the current location (`.`).
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -print
+.
+./report.txt
+./data.log
+./old-file.txt
+./project
+./project/main.sh
+./project/README.md
+./project/src
+./project/src/utils.sh
+./project/abc_special.log
+```
+
+  * **📜 Code Explanation:**
+      * `find`: The command.
+      * `.`: This is the **path** to start searching from. `.` means "the current directory."
+      * `-print`: This is the **action** to take. It explicitly prints the full path of every item found. (Note: On many systems, `-print` is the default action if no other action is specified).
+
+
+### Example 2: Filtering with `grep`
+
+You can pipe the full list of files from `find` to `grep` for simple filtering.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -print | grep "abc"
+./project/abc_special.log
+```
+
+  * **📜 Code Explanation:**
+      * `find . -print`: This command finds *all* 10 items.
+      * `| grep "abc"`: The full list is **piped** to `grep`, which then filters that list and only prints lines that contain the string "abc".
+
+#### A Better Way: Using `find -name`
+
+Piping to `grep` is inefficient. It's better to let `find` do the filtering itself using its own tests.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*abc*"
+./project/abc_special.log
+```
+
+  * **📜 Code Explanation:**
+      * `-name "*abc*"`: This is a **test** that tells `find` to only return items whose names match the glob pattern `*abc*` (an asterisk `*` means "any or zero characters"). This is much faster.
+
+
+### Example 3: Finding by Suffix (`.sh`)
+
+**Method 1 (Old Way):**
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -print | grep "sh$"
+./project/main.sh
+./project/src/utils.sh
+```
+
+  * **📜 Code Explanation:** This pipes the full list to `grep`, which uses the regular expression `sh$` to find lines that **end with** "sh".
+
+**Method 2 (Better Way):**
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*.sh"
+./project/main.sh
+./project/src/utils.sh
+```
+
+  * **📜 Code Explanation:** This uses `find`'s built-in `-name` test to find files matching the glob pattern `*.sh`.
+
+
+### Example 4: Searching by Depth
+
+You can limit how deep `find` will search into subdirectories.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -maxdepth 2 -print
+.
+./report.txt
+./data.log
+./old-file.txt
+./project
+./project/main.sh
+./project/README.md
+./project/src
+./project/abc_special.log
+```
+
+  * **📜 Code Explanation:**
+      * `-maxdepth 2`: This **option** tells `find` to not go past a certain depth.
+          * Depth 1: `.`
+          * Depth 2: `report.txt`, `data.log`, `project`, `src`, etc.
+      * The command found items *inside* `project` (like `main.sh`), but it did **not** go deeper to find `project/src/utils.sh`, because that would be at depth 3.
+
+
+### Example 5: Finding by Time (`-mtime`) and Executing (`-exec`)
+
+You can find files based on access, creation, or modification time (`atime`, `ctime`, `mtime`).
+
+Let's find all files modified in the last 2 days (`-2`) and run the `wc -l` (word count - lines) command on each one.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -mtime -2 -exec wc -l {} \;
+       0 ./report.txt
+       0 ./data.log
+       0 ./old-file.txt
+       0 ./project/main.sh
+       0 ./project/README.md
+       0 ./project/src/utils.sh
+       0 ./project/abc_special.log
+       0 .
+       0 ./project
+       0 ./project/src
+```
+
+  * **📜 Code Explanation:**
+      * `-mtime -2`: This is a **test** for files with a **m**odification **time** of *less than* (`-`) 2 days (i.e., modified within the last 48 hours). Since we just created all these files, they all match.
+      * `-exec wc -l {} \;`: This is the **action**.
+          * `-exec`: This flag tells `find` to **exec**ute the following command for every file it finds.
+          * `wc -l`: The command to run (count lines).
+          * `{}`: This is a special placeholder. `find` replaces it with the full path of the file it just found (e.g., `./report.txt`).
+          * `\;`: This marks the end of the `-exec` command. The backslash `\` is required to escape the semicolon so the shell doesn't interpret it.
+
+
+### Example 6: Removing Files with `find`
+
+You can use `-exec rm` to delete the files you find.
+
+**⚠️ WARNING: Be very careful with this command. It can permanently delete important data.**
+
+Let's remove all files ending in `.log`.
+
+**Step 1: The PREVIEW (Safe)**
+First, *always* run your `find` command with `-print` to review the list of files before deleting them.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*.log" -print
+./data.log
+./project/abc_special.log
+```
+
+**Step 2: The DELETION (Dangerous)**
+Once you have confirmed the list is correct, replace `-print` with the `-exec` action.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*.log" -exec rm {} \;
+```
+
+*(No output is shown, but the files are gone.)*
+
+**Step 3: Verify**
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*.log" -print
+(No output is shown)
+```
+
+#### A Better Way: Using `-delete`
+
+Most modern versions of `find` have a built-in `-delete` action, which is safer and more efficient than using `-exec rm`.
+
+```bash
+# This does the same thing as the command above
+find . -name "*.log" -delete
+```
+
+
+# 👕 The `tee` Command
+
+The `tee` command is named after a T-splitter in plumbing. It reads from standard input (`stdin`) and writes that input to **two** (or more) places at the same time:
+
+1.  To standard output (`stdout`) (usually your screen).
+2.  To a specified file.
+
+This is extremely useful for saving the output of a command to a file *while also seeing it on your screen*.
+
+  * `tee filename`: **Overwrites** the file with the new output.
+  * `tee -a filename`: **Appends** the new output to the end of the file.
+
+
+### 🚀 Practical Example 1: `tee` (Overwrite)
+
+Let's find all `.sh` files and save the list to `/tmp/blue` *while also* seeing the list on our screen.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*.sh" | tee /tmp/blue
+./project/main.sh
+./project/src/utils.sh
+```
+
+  * **📜 Code Explanation:**
+    *(Note: The user text mentions `xargs`, which is not in this command and appears to be an error in the text. The command is a simple `find | grep | tee`.)*
+
+    1.  `find . -name "*.sh"`: This command finds the two shell scripts. Its output is `.\/project\/main.sh\n.\/project\/src\/utils.sh`.
+    2.  `| tee /tmp/blue`: This output is piped to `tee`.
+    3.  `tee` performs two actions simultaneously:
+          * It prints the output to the screen (which you see).
+          * It **overwrites** the file `/tmp/blue` with that same output.
+
+  * **Verification:**
+
+    ```bash
+    hashim@Hashim:~/find_sandbox$ cat /tmp/blue
+    ./project/main.sh
+    ./project/src/utils.sh
+    ```
+
+
+### 🚀 Practical Example 2: `tee -a` (Append)
+
+Now, let's find a *different* set of files and **add them** to `/tmp/blue` without deleting the old content.
+
+```bash
+hashim@Hashim:~/find_sandbox$ find . -name "*.md" | tee -a /tmp/blue
+./project/README.md
+```
+
+  * **📜 Code Explanation:**
+
+    1.  `find . -name "*.md"`: This finds the `README.md` file.
+    2.  `| tee -a /tmp/blue`: This output is piped to `tee`.
+    3.  `-a`: This is the **append** flag.
+    4.  `tee` performs two actions:
+          * It prints the output to the screen (`./project/README.md`).
+          * It **appends** that output to the end of `/tmp/blue`.
+
+  * **Verification:**
+
+    ```bash
+    hashim@Hashim:~/find_sandbox$ cat /tmp/blue
+    ./project/main.sh
+    ./project/src/utils.sh
+    ./project/README.md
+    ```
+
+    *As you can see, the new file was added to the end, and the original `.sh` files were not overwritten.*
+
+---
