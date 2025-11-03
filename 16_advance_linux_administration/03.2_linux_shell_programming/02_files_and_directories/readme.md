@@ -2317,3 +2317,147 @@ mv: rename abcd to /tmp/abcd: Directory not empty
   * **📜 Code Explanation:** The command failed because it saw that `/tmp/abcd` already exists and is not empty, so it refused to overwrite it.
 
 ---
+
+# 💬 **Using Quote Characters**
+
+There are three main types of quote characters in Bash, and they are not interchangeable. Each serves a distinct purpose:
+
+  * **Single Quotes (`'`)**
+  * **Double Quotes (`"`)**
+  * **Backquotes (`` ` ``)**
+
+
+## 📜 Single Quotes (`'`)
+
+Single quotes are the most powerful type of quote. They preserve the **literal** value of every character inside them.
+
+  * The shell will **not** perform variable substitution.
+  * The shell will **not** interpret metacharacters (like `*`, `?`, or `$`).
+  * The shell will **not** perform command substitution.
+
+### 🚀 Practical Example from Scratch
+
+1.  **Set a variable and create some files:**
+
+    ```bash
+    # Set a variable
+    hashim@Hashim:~$ my_var="Hello World"
+
+    # Create files for a globbing test
+    hashim@Hashim:~$ touch a.txt b.txt c.txt
+    ```
+
+2.  **Run `echo` without quotes (for comparison):**
+
+    ```bash
+    hashim@Hashim:~$ echo $my_var and all these files: *
+    Hello World and all these files: a.txt b.txt c.txt
+    ```
+
+      * **📜 Code Explanation:** The shell performed **variable substitution** (changing `$my_var` to `Hello World`) and **globbing** (expanding `*` to `a.txt b.txt c.txt`).
+
+3.  **Now, run the same command with single quotes:**
+
+    ```bash
+    hashim@Hashim:~$ echo '$my_var and all these files: *'
+    $my_var and all these files: *
+    ```
+
+      * **📜 Code Explanation:** The single quotes prevented all substitutions. The shell treated every character literally, printing the dollar sign and the asterisk exactly as they were typed.
+
+The example `echo '$PATH'` from the text works the same way: it prints the literal string `$PATH` instead of the value of your `PATH` variable.
+
+## 💬 Double Quotes (`"`)
+
+Double quotes are less restrictive. They prevent word splitting and globbing but *still allow* variable substitution and command substitution.
+
+  * Characters are interpreted literally, **except for** `$`, `` ` ``, and `\` (backslash).
+  * The shell **will** perform variable substitution (e.g., `$my_var` becomes its value).
+  * The shell will **not** perform globbing (e.g., `*` remains a literal `*`).
+  * This is the most common type of quote, as it safely handles variables that may contain spaces.
+
+### 🚀 Practical Example from Scratch
+
+We will use the same variable and files from the previous example.
+
+1.  **Run `echo` with double quotes:**
+    ```bash
+    hashim@Hashim:~$ echo "$my_var and all these files: *"
+    Hello World and all these files: *
+    ```
+      * **📜 Code Explanation:**
+          * **`"$my_var"`**: Variable substitution **happened**. `$my_var` was replaced with `Hello World`.
+          * **`"*"`**: Globbing was **prevented**. The `*` was treated as a literal asterisk, not as a wildcard for `a.txt b.txt c.txt`.
+
+## \` (Backquotes)
+
+Backquotes are used for **command substitution**. This is an older syntax, but it's important to recognize.
+
+  * The shell executes whatever command is inside the backquotes *first*.
+  * The **standard output** of that command then replaces the entire backquoted section.
+  * This is often used to store the result of a command in a variable.
+
+### 💡 Modern Alternative: `$(...)`
+
+The modern, recommended syntax for command substitution is `$(...)`. It is cleaner and can be nested (e.g., `$(cmd1 $(cmd2))`).
+
+### 🚀 Practical Example from Scratch
+
+Let's use the example from the text: counting files in your home directory.
+
+1.  **First, let's run the inner command by itself:**
+    This command lists all files in your home directory (`ls ~`) and pipes (`|`) that list to `wc -l` (word count - lines) to count them.
+
+    ```bash
+    hashim@Hashim:~$ ls ~ | wc -l
+           22
+    ```
+
+      * **📜 Code Explanation:** For this example, let's assume you have 22 files and folders in your home directory. The output of this command is the number `22`.
+
+2.  **Now, use that command inside an `echo` with backquotes:**
+
+    ```bash
+    hashim@Hashim:~$ echo "My home directory contains `ls ~ | wc -l` files."
+    My home directory contains 22 files.
+    ```
+
+      * **📜 Code Explanation:**
+        1.  The shell saw the backquotes and first executed `ls ~ | wc -l`.
+        2.  That command produced the output `22`.
+        3.  The shell **substituted** `` `ls ~ | wc -l` `` with its output (`22`).
+        4.  The final command given to `echo` was `"My home directory contains 22 files."`.
+
+
+## \\ (Backslash)
+
+The backslash is the **escape character**. It is not a quote, but it serves a similar purpose for a *single character*.
+
+  * It makes the character immediately following it **literal**.
+  * It ignores any special metacharacter meaning for that single character.
+
+### 🚀 Practical Example from Scratch
+
+1.  **Escaping a `$` inside double quotes:**
+    Double quotes normally expand variables. What if you want to print the literal text `$my_var`?
+
+    ```bash
+    hashim@Hashim:~$ echo "The variable is: \$my_var"
+    The variable is: $my_var
+    ```
+
+      * **📜 Code Explanation:** The backslash `\` told the shell to treat the `$` as a literal character, not as the start of a variable.
+
+2.  **Escaping a `*` without quotes:**
+
+    ```bash
+    hashim@Hashim:~$ echo *
+    a.txt b.txt c.txt
+
+    hashim@Hashim:~$ echo \*
+    *
+    ```
+
+      * **📜 Code Explanation:** The `\*` told the shell to treat the `*` as a literal asterisk, not as a wildcard for globbing.
+
+---
