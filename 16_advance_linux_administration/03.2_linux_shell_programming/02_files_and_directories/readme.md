@@ -1977,3 +1977,343 @@ The `ulimit` command specifies the maximum size of a file you can create, among 
       * **📜 Code Explanation:** The `-a` (all) flag shows all the resource limits currently applied to your shell session.
 
 ---
+
+# 📁 **Working with Directories**
+
+A **directory** is a special type of file that stores filenames and related information. All files (whether they are ordinary files, special files, or other directories) are contained within directories.
+
+## 🌳 The Directory Tree
+
+Unix-based file systems have a **hierarchical structure** for organizing files and directories, often referred to as a **directory tree**.
+
+This tree has a single root node, represented by the **slash character (`/`)**. All other directories are contained below it. The position of any file or directory within this hierarchy is described by its **pathname**.
+
+Elements of a pathname are separated by a slash (`/`) character.
+
+## 🗺️ Absolute and Relative Pathnames
+
+A **pathname** is the unique "address" of a file or directory.
+
+  * **Absolute Path:** A pathname is **absolute** if it is described in relation to the root (`/`). Absolute pathnames **always begin with a `/`**. They work from any location.
+
+      * `/etc/passwd`
+      * `/users/oac/ml/class`
+      * `/dev/rdsk/Os5`
+
+  * **Relative Path:** A pathname is **relative** if it is described in relation to your **current working directory**. Relative pathnames begin with a directory name, `./` (current directory), or `../` (parent directory).
+
+      * `docs/report.txt` (if `docs` is a folder in your current location)
+      * `./docs/report.txt` (same as above)
+      * `../../Music` (two levels up, then into the `Music` folder)
+
+## 🧭 Navigating Directories
+
+### 🏠 Going to the Home Directory
+
+You can navigate to your personal home directory with any of these commands:
+
+  * `cd $HOME` (uses the `$HOME` environment variable)
+  * `cd ~` (uses the `~` tilde shortcut)
+  * `cd` (with no arguments, defaults to home)
+
+> **Note:** In Windows, the `cd` command by itself shows you the current directory; it does *not* navigate to the home directory.
+
+#### 🚀 Practical Example from Scratch
+
+Let's see all three methods in action.
+
+```bash
+# 1. Start by moving to a different directory
+hashim@Hashim:~$ cd /tmp
+hashim@Hashim:/tmp$ pwd
+/tmp
+
+# 2. Use 'cd $HOME' to go home
+hashim@Hashim:/tmp$ cd $HOME
+hashim@Hashim:~$ pwd
+/home/hashim
+
+# 3. Go back to /tmp, then use 'cd ~'
+hashim@Hashim:~$ cd /tmp
+hashim@Hashim:/tmp$ cd ~
+hashim@Hashim:~$ pwd
+/home/hashim
+
+# 4. Go back to /tmp, then use 'cd'
+hashim@Hashim:~$ cd /tmp
+hashim@Hashim:/tmp$ cd
+hashim@Hashim:~$ pwd
+/home/hashim
+```
+
+### 🧑‍💼 Going to Another User's Home
+
+The tilde (`~`) always indicates a home directory. If you want to go to *another* user’s home directory, you can use `cd ~username`.
+
+```bash
+# This command would navigate to the home directory of a user named 'jsmith'
+cd ~jsmith
+```
+
+### ⬅️ Going to the Previous Directory
+
+You can navigate back to the location you were in *before* you navigated to the current directory using `cd -`.
+
+#### 🚀 Practical Example from Scratch
+
+```bash
+# 1. Start in your home directory
+hashim@Hashim:~$ pwd
+/home/hashim
+
+# 2. Move to /etc
+hashim@Hashim:~$ cd /etc
+hashim@Hashim:/etc$ pwd
+/etc
+
+# 3. Use 'cd -' to go back (to /home/hashim)
+hashim@Hashim:/etc$ cd -
+/home/hashim
+hashim@Hashim:~$ pwd
+/home/hashim
+
+# 4. Use 'cd -' again to go back (to /etc)
+hashim@Hashim:~$ cd -
+/etc
+hashim@Hashim:/etc$ pwd
+/etc
+```
+
+## 📋 Listing and Finding Directories
+
+### `pwd` (Print Working Directory)
+
+To determine your current directory, use the `pwd` command.
+
+```bash
+$ pwd
+```
+
+The output will be something like this:
+
+```bash
+/Users/owner/Downloads
+```
+
+### `ls` (List Contents)
+
+Display the contents of a directory with the `ls` command.
+
+#### 🚀 Practical Example from Scratch
+
+```bash
+$ ls /usr/bin
+```
+
+A partial listing of the output from the preceding command is here:
+
+```bash
+fc
+fddist
+fdesetup
+fg
+fgrep
+file
+```
+
+All the built-in executables (commands) that are discussed in this book reside in the `/usr/bin` directory.
+
+## ➕ Creating Directories (`mkdir`)
+
+### Creating Single or Multiple Directories
+
+If you specify multiple directories on the command line, `mkdir` creates each of them.
+
+#### 🚀 Practical Example from Scratch
+
+This command creates the directories `docs` and `pub` as siblings under the current directory.
+
+```bash
+# 1. Create the directories
+hashim@Hashim:~$ mkdir docs pub
+
+# 2. List the contents to verify
+hashim@Hashim:~$ ls
+docs  pub
+```
+
+### Creating Nested Directories (`mkdir -p`)
+
+Compare the preceding command with the following command that creates the directory `test` and a sub-directory `data` inside it.
+
+The `-p` (parents) option forces the creation of missing intermediate directories (if any). If an intermediate directory does not exist and you *don't* use `-p`, `mkdir` will issue an error.
+
+#### 🚀 Practical Example from Scratch (The Error)
+
+Suppose that the intermediate sub-directory `accounting` does not exist in `/tmp`.
+
+```bash
+hashim@Hashim:~$ mkdir /tmp/accounting/test
+mkdir: Failed to make directory "/tmp/accounting/test";
+No such file or directory
+```
+
+  * **📜 Code Explanation:** The command failed because `/tmp/accounting` does not exist, so it cannot create `test` inside it.
+
+#### 🚀 Practical Example from Scratch (The Solution)
+
+By adding `-p`, we tell `mkdir` to create any parent directories it needs.
+
+```bash
+hashim@Hashim:~$ mkdir -p /tmp/accounting/test
+
+# Verify that it worked
+hashim@Hashim:~$ ls /tmp/accounting
+test
+```
+
+  * **📜 Code Explanation:** `mkdir` first created `/tmp/accounting` and then created `test` inside it.
+
+You can also use the `-p` option to create a deep sub-directory structure in your `$HOME` directory, as shown here:
+
+```bash
+mkdir -p $HOME/a/b/c/new-directory
+```
+
+  * **📜 Code Explanation:** This command creates the following subdirectories if any of them do not already exist:
+      * `$HOME/a`
+      * `$HOME/a/b`
+      * `$HOME/a/b/c`
+      * `$HOME/a/b/c/new-directory`
+
+## ➖ Removing Directories
+
+### `rmdir` (Remove *Empty* Directories)
+
+You can delete **empty** directories using the `rmdir` command.
+
+```bash
+rmdir dirname1
+```
+
+You can delete multiple empty directories at a time as follows:
+
+```bash
+rmdir dirname1 dirname2 dirname3
+```
+
+The `rmdir` command produces no output if it is successful.
+
+#### 🚀 Practical Example from Scratch (The Error)
+
+`rmdir` will fail if a directory is not empty.
+
+```bash
+# 1. Create a directory and put a file in it
+hashim@Hashim:~$ mkdir not_empty_dir
+hashim@Hashim:~$ touch not_empty_dir/file.txt
+
+# 2. Try to remove it with rmdir
+hashim@Hashim:~$ rmdir not_empty_dir
+rmdir: failed to remove 'not_empty_dir': Directory not empty
+```
+
+### `rm -r` (Remove *Non-Empty* Directories)
+
+If there are files in the `dirname1` directory, you must use `rm -r` (recursive).
+
+```bash
+# This command will delete the directory and ALL contents inside it
+rm -r dirname1
+```
+
+Alternatively, you can first remove the files in the sub-directory and then remove the directory itself:
+
+```bash
+# 1. Go into the directory
+cd dirname1
+
+# 2. Forcibly remove all files/folders inside
+rm -rf *
+
+# 3. Go back up to the parent directory
+cd ../
+
+# 4. Now that it's empty, remove it with rmdir
+rmdir dirname1
+```
+
+## 🚚 Moving and Renaming Directories (`mv`)
+
+The `mv` (move) command can be used to rename a directory, just like renaming a file.
+
+### Renaming a Directory
+
+The syntax for renaming a directory is the same as renaming a file:
+
+```bash
+mv olddir newdir
+```
+
+#### 🚀 Practical Example from Scratch
+
+```bash
+# 1. Create a directory
+hashim@Hashim:~$ mkdir dir_to_rename
+
+# 2. Rename it
+hashim@Hashim:~$ mv dir_to_rename new_dir_name
+
+# 3. Verify the change
+hashim@Hashim:~$ ls
+new_dir_name
+```
+
+### Moving a Directory
+
+You can also move a directory into another directory.
+
+#### 🚀 Practical Example from Scratch
+
+```bash
+# 1. Create a source and a destination
+hashim@Hashim:~$ mkdir source_folder
+hashim@Hashim:~$ mkdir destination_folder
+
+# 2. Move 'source_folder' *into* 'destination_folder'
+hashim@Hashim:~$ mv source_folder destination_folder
+
+# 3. Verify the move
+hashim@Hashim:~$ ls destination_folder
+source_folder
+```
+
+### The "noclobber" Safety Feature
+
+However, if the target directory *already exists* and *contains at least one file*, then the `mv` command will fail. Bash provides this "noclobber" (no-overwrite) feature for non-empty directories, which prevents you from accidentally merging or overwriting an existing directory.
+
+#### 🚀 Practical Example from Scratch (The Error)
+
+Let's use the example from the text.
+
+```bash
+# 1. Create a directory in /tmp and put a file in it
+hashim@Hashim:~$ mkdir /tmp/abcd
+hashim@Hashim:~$ touch /tmp/abcd/red
+
+# 2. Create a directory with the *same name* in our current location
+hashim@Hashim:~$ mkdir abcd
+
+# 3. Try to move our 'abcd' directory to '/tmp'
+hashim@Hashim:~$ mv abcd /tmp
+```
+
+Since the directory `/tmp/abcd` is not empty, you will see the following error message:
+
+```bash
+mv: rename abcd to /tmp/abcd: Directory not empty
+```
+
+  * **📜 Code Explanation:** The command failed because it saw that `/tmp/abcd` already exists and is not empty, so it refused to overwrite it.
+
+---
