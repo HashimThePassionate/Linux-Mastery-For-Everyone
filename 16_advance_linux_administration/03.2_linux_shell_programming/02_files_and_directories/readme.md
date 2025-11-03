@@ -2489,7 +2489,7 @@ You can control where the normal output (`stdout`) of a command goes.
     ```bash
     hashim@Hashim:~$ ls /usr/bin/python*
     /usr/bin/python3
-    /usr/bin/python3.11
+    /usr/bin/python3.13
     ```
 2.  **Redirect (Overwrite) with `>`:**
     ```bash
@@ -2500,7 +2500,7 @@ You can control where the normal output (`stdout`) of a command goes.
     ```bash
     hashim@Hashim:~$ cat python_list.txt
     /usr/bin/python3
-    /usr/bin/python3.11
+    /usr/bin/python3.13
     ```
 4.  **Run a new command with `>`:**
     ```bash
@@ -2675,5 +2675,171 @@ You can redirect error messages to `/dev/null` if you are certain they can be sa
 
       * `ls /temp`: This command ran and produced an error.
       * `2>/dev/null`: This instruction caught the error from `stderr` (stream 2) and sent it to `/dev/null`, where it was discarded. `stdout` (stream 1) was unaffected and would have printed to the screen if there had been any.
+
+---
+
+# 🌀 **Metacharacters and Character Classes**
+
+As you saw in section 1, Bash supports metacharacters as well as regular expressions. If you have worked with a scripting language such as Perl, or languages such as JavaScript and Java, you have undoubtedly encountered metacharacters.
+
+It is critical to understand that Bash uses metacharacters in **two different contexts**:
+
+1.  **Filename Expansion (Globbing):** Used directly by the shell to match filenames (e.g., with `ls`, `cp`, `rm`).
+2.  **Regular Expressions (Regex):** Used by programs *within* the shell (e.g., `grep`, `sed`, `awk`) to match patterns *inside* text.
+
+The characters below have different meanings depending on the context.
+
+## 🌎 Metacharacter Definitions
+
+Here is an expanded list of metacharacters and their meanings in both contexts.
+
+| Character | Globbing (e.g., `ls a?`) | Regular Expression (e.g., `grep 'a?'`) |
+| :--- | :--- | :--- |
+| **`?`** | Matches **exactly one** character. | Matches **zero or one** of the preceding character. |
+| **`*`** | Matches **zero or more** characters. | Matches **zero or more** of the *preceding* character. |
+| **`+`** | **Not a metacharacter.** Matches a literal `+`. | Matches **one or more** of the *preceding* character. |
+| **`^`** | **Not a metacharacter.** Matches a literal `^`. | Matches the **start of a line**. |
+| **`$`** | **Not a metacharacter.** Matches a literal `$`. | Matches the **end of a line**. |
+| **`.`** | **Not a metacharacter.** Matches a literal `.`. | Matches **any single character** (except newline). |
+
+The metacharacters listed above can be used in Bash with commands such as `ls` (which uses globbing) and `sed` (which uses regular expressions), in shell scripts, and in editors such as `vi`. Be aware that subtle differences exist in how metacharacters are interpreted.
+
+## 🔡 Digits and Characters (Character Classes)
+
+Character classes defined by square brackets (`[...]`) work in **both** globbing and regular expressions. They allow you to specify a set or range of characters to match.
+
+  * `[0-9]`
+
+      * Matches a single digit.
+
+  * `[0-9][0-9]`
+
+      * Matches 2 consecutive digits.
+
+  * `[a-z]`
+
+      * Matches a single lowercase letter.
+
+  * `[A-Z]`
+
+      * Matches a single uppercase letter.
+
+  * `[a-z][A-Z]`
+
+      * Matches a single lowercase letter that is followed by 1 uppercase letter.
+
+  * `[a-zA-Z]`
+
+      * Matches any uppercase or lowercase letter.
+
+  * `^[0-9]+$`
+
+      * This is a **Regular Expression** pattern, not a glob pattern.
+      * `^`: Asserts the start of the line.
+      * `[0-9]+`: Matches **one or more** digits.
+      * `$`: Asserts the end of the line.
+      * **Result**: This pattern matches a string that consists *solely* of digits.
+
+## 🗂️ Filenames and Metacharacters (Globbing in Practice)
+
+Before the shell passes arguments to an external command (like `ls`) or interprets a built-in command, it scans the command line for globbing characters (`*`, `?`, `[]`). It performs an operation known as filename **"globbing"** or **"filename expansion"** by replacing the pattern with all matching filenames.
+
+### 🚀 Practical Example: Globbing with `ls`
+
+Let's create a set of files from scratch to see how globbing works.
+
+**1. Create the files:**
+
+```bash
+hashim@Hashim:~$ touch file1 file2 file3 file04
+hashim@Hashim:~$ ls
+file04  file1  file2  file3
+```
+
+**2. The `*` (Asterisk) Metacharacter:**
+`*` matches zero or more characters. `file*` will match any file *starting* with `file`.
+
+```bash
+hashim@Hashim:~$ ls -l file*
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file04
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file1
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file2
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file3
+```
+
+  * **📜 Code Explanation:** The shell expanded `file*` to `file04 file1 file2 file3` before passing the list to `ls`.
+
+**3. The `?` (Question Mark) Metacharacter:**
+`?` matches exactly one character. `file?` will match `file` + one extra character.
+
+```bash
+hashim@Hashim:~$ ls -l file?
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file1
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file2
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file3
+```
+
+  * **📜 Code Explanation:** `file1`, `file2`, and `file3` all match the pattern (`file` + 1 char). The file `file04` does *not* match because it has *two* characters after `file`.
+
+**4. Using Multiple Metacharacters:**
+`file??` will match `file` + two extra characters.
+
+```bash
+hashim@Hashim:~$ ls -l file??
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file04
+```
+
+  * **📜 Code Explanation:** Only `file04` matches the pattern (`file` + 2 chars).
+
+**5. The `[...]` (Character Class) Metacharacter:**
+`file[2-3]` will match `file` + a character that is in the range of `2` to `3`.
+
+```bash
+hashim@Hashim:~$ ls -l file[2-3]
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file2
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file3
+```
+
+  * **📜 Code Explanation:** Only `file2` and `file3` match this specific range.
+
+**6. Combining Patterns:**
+Most commands let you specify multiple arguments. The shell will expand each one.
+
+```bash
+hashim@Hashim:~$ ls -l file0* file[1-3]
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file04
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file1
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file2
+-rw-r--r-- 1 hashim hashim 0 Nov 3 07:15 file3
+```
+
+  * **📜 Code Explanation:** The shell expanded this into two sets of files:
+      * `file0*` matched `file04`.
+      * `file[1-3]` matched `file1`, `file2`, and `file3`.
+        The `ls` command received all four filenames and listed them.
+
+### Special Cases
+
+#### No Match Found
+
+If a command has one or more arguments that include metacharacters and **none** of the arguments match any filenames, the shell passes the literal argument (with the metacharacter intact) to the program.
+
+```bash
+hashim@Hashim:~$ ls -l non_existent*
+ls: cannot access 'non_existent*': No such file or directory
+```
+
+  * **📜 Code Explanation:** The shell tried to find a file matching `non_existent*`. It found none. So, it passed the literal string `non_existent*` to `ls`. The `ls` command then failed, reporting that it cannot find a file with that literal name.
+
+#### The `~` (Tilde) Metacharacter
+
+Another metacharacter, the tilde (`~`), lets you easily refer to your home directory.
+
+```bash
+hashim@Hashim:~$ ls ~
+Desktop  Documents  Downloads  Music  Pictures  Videos ...
+```
+
+  * **📜 Code Explanation:** The shell expands `~` to the full path of your home directory (e.g., `/home/hashim`) before running the `ls` command.
 
 ---
