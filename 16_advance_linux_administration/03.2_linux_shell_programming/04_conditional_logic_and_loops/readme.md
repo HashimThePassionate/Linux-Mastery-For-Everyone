@@ -1056,3 +1056,257 @@ y is defined: def
 
 
 ---
+
+# 🔄 The `case/esac` Statement
+
+The `case/esac` statement is Bash's counterpart to the `switch` statement found in many other programming languages. It's a clean way to test a single variable against a variety of conditions.
+
+This statement is particularly powerful because the conditions can include metacharacters (wildcards). A common scenario involves testing user input, such as checking if a user entered a string that starts with an uppercase or lowercase "n" (for no) or "y" (for yes).
+
+The statement starts with `case $variable in` and ends with `esac` (which is just `case` backward).
+
+
+### 📜 Listing 4.4: `case1.sh`
+
+Listing 4.4 displays the content of `case1.sh`, which checks various conditions against a hardcoded variable.
+
+```bash
+#!/bin/bash
+# case1.sh
+
+x="abc"
+case $x in
+ a) echo "x is an a" ;;
+ c) echo "x is a c" ;;
+ a*) echo "x starts with a" ;;
+ *) echo "no matches occurred" ;;
+esac
+```
+
+#### ⚙️ Code Explanation
+
+Listing 4.4 starts by initializing the variable `x` with the value "abc". This is followed by the `case` keyword, which checks the value of `$x` against several patterns.
+
+  * `x="abc"`: Assigns the string "abc" to the variable `x`.
+  * `case $x in`: This begins the `case` statement, indicating that the value of `$x` ("abc") will be tested.
+  * `a) echo "x is an a" ;;`: This is the first pattern.
+      * `a)`: Checks if `$x` is *exactly* equal to "a". It is not.
+      * `;;`: This double semicolon acts like a `break` statement. If this pattern had matched, execution would stop here.
+  * `c) echo "x is a c" ;;`: This is the second pattern. It checks if `$x` is *exactly* equal to "c". It is not.
+  * `a*) echo "x starts with a" ;;`: This is the third pattern.
+      * `a*)`: This pattern uses a **metacharacter**. The `*` acts as a wildcard, matching "zero or more of any character."
+      * The pattern "a\*" therefore means "anything that starts with the letter `a`".
+      * The value "abc" matches this pattern.
+      * `echo "x starts with a"`: This line is executed.
+  * `*) echo "no matches occurred" ;;`: This is the fourth pattern.
+      * `*)`: The `*` by itself is the **default case**. It matches *anything*.
+      * This pattern is only executed if no other pattern above it matches. Since `a*` already matched, this line is skipped.
+  * `esac`: This keyword ends the `case` statement.
+
+#### 📤 Output
+
+When you launch the shell script in Listing 4.4, you will see the following output:
+
+```
+x starts with a
+```
+
+
+### 📜 Listing 4.5: `UserInfo.sh`
+
+Listing 4.5 shows you how to prompt users for an input string and then process that input using a `case/esac` statement.
+
+```bash
+#!/bin/bash
+# UserInfo.sh
+
+echo -n "Please enter your first name: "
+read fname
+echo -n "Please enter your last name: "
+read lname
+echo -n "Please enter your city: "
+read city
+fullname="$fname $lname"
+echo "$fullname lives in $city"
+case $city in
+ San*) echo "$fullname lives in California " ;;
+ Chicago) echo "$fullname lives in the Windy City " ;;
+ *) echo "$fname lives in la-la land " ;;
+esac
+```
+
+#### ⚙️ Code Explanation
+
+Listing 4.5 starts by prompting users for their first name, last name, and city, and then assigning those values to the variables `fname`, `lname`, and `city`, respectively.
+
+  * `echo -n "..."`: The `-n` flag tells `echo` **not** to print a newline character at the end. This keeps the cursor on the same line as the prompt, which is where the user will type.
+  * `read fname`: This command pauses the script and waits for the user to type something and press Enter. Whatever they type is stored in the `fname` variable.
+  * `(commands repeated for lname and city)`
+  * `fullname="$fname $lname"`: This line defines a new variable, `fullname`, by concatenating (joining) the values of `$fname` and `$lname` with a space in between.
+  * `echo "$fullname lives in $city"`: This prints a summary.
+  * `case $city in`: This begins the `case` statement, testing the value stored in the `$city` variable.
+  * `San*) ... ;;`: This pattern checks if the `$city` variable **starts with** "San" (e.g., "San Francisco", "San Diego").
+  * `Chicago) ... ;;`: This pattern checks if the `$city` variable is **exactly** "Chicago".
+  * `*) ... ;;`: This is the default "catch-all" option, which is true if both of the preceding conditions are false.
+
+#### 🚀 Practical Example (From Scratch)
+
+Let's make the script executable and run it twice to see different outputs.
+
+```bash
+hashim@Hashim:~$ chmod +x UserInfo.sh
+
+# --- First Run (matching the wildcard) ---
+hashim@Hashim:~$ ./UserInfo.sh
+Please enter your first name: Jane
+Please enter your last name: Doe
+Please enter your city: San Diego
+Jane Doe lives in San Diego
+Jane Doe lives in California 
+
+# --- Second Run (matching the default) ---
+hashim@Hashim:~$ ./UserInfo.sh
+Please enter your first name: John
+Please enter your last name: Smith
+Please enter your city: New York
+John Smith lives in New York
+John lives in la-la land 
+```
+
+
+### 📜 Listing 4.6: `StartChar.sh`
+
+Listing 4.6 displays the content of `StartChar.sh`, which checks the type of the first character of a user-provided string.
+
+```bash
+#!/bin/bash
+# StartChar.sh
+
+while (true)
+do
+ echo -n "Enter a string: "
+ read var
+ case ${var:0:1} in
+ [0-9]*) echo "$var starts with a digit" ;;
+ [A-Z]*) echo "$var starts with an uppercase letter" ;;
+ [a-z]*) echo "$var starts with a lowercase letter" ;;
+ *) echo "$var starts with another symbol" ;;
+ esac
+done
+```
+
+#### ⚙️ Code Explanation
+
+Listing 4.6 starts by prompting users for a string and then initializes the variable `var` with that input string.
+
+  * `while (true) do ... done`: This creates an **infinite loop**. The code inside this loop will repeat forever until you manually stop the script (e.g., by pressing `Ctrl+Z`).
+  * `echo -n "Enter a string: "`: Prompts the user for input.
+  * `read var`: Reads the user's input into the `var` variable.
+  * `case ${var:0:1} in`: This is the key part of the script.
+      * `${var:0:1}`: This is **Bash Substring Expansion**. It extracts a substring from the `$var` variable. The `0` is the starting position (the first character), and the `1` is the length (one character).
+      * This expression effectively gives the `case` statement *only the first character* of the string.
+  * `[0-9]*) ... ;;`: This pattern checks if the first character is a digit.
+      * `[0-9]`: This is a **character class** that matches any single digit from 0 through 9.
+      * `*`: The wildcard is included, so this pattern technically means "starts with a digit."
+  * `[A-Z]*) ... ;;`: This pattern checks if the first character is an uppercase letter (A through Z).
+  * `[a-z]*) ... ;;`: This pattern checks if the first character is a lowercase letter (a through z). (The typo "lowe" from the original text has been corrected).
+  * `*) ... ;;`: The default condition, which is executed if none of the preceding conditions (digit, uppercase, lowercase) is true.
+
+#### 🚀 Sample Interaction
+
+```
+hashim@Hashim:~$ ./StartChar.sh
+Enter a string: Hello
+Hello starts with an uppercase letter
+Enter a string: world
+world starts with a lowercase letter
+Enter a string: 99problems
+99problems starts with a digit
+Enter a string: !Stop
+!Stop starts with another symbol
+Enter a string: ^Z
+hashim@Hashim:~$ 
+```
+
+
+### 📜 Listing 4.7: `StartChar2.sh`
+
+Listing 4.7 displays the content of `StartChar2.sh`, which checks the type of the first *pair* of characters of a user-provided string.
+
+```bash
+#!/bin/bash
+# StartChar2.sh
+
+while (true)
+do
+ echo -n "Enter a string: "
+ read var
+ case ${var:0:2} in
+ [0-9][0-9]) echo "$var starts with two digits" ;;
+ [A-Z][A-Z]) echo "$var starts with two uppercase letters" ;;
+ [a-z][a-z]) echo "$var starts with two lowercase letters" ;;
+ *) echo "$var starts with another pattern" ;;
+ esac
+done
+```
+
+#### ⚙️ Code Explanation
+
+Listing 4.7 starts with a `while` loop whose contents are similar to Listing 4.6.
+
+  * `while (true)`: This creates an infinite loop. The script repeats indefinitely, and you can press `Ctrl+Z` to terminate its execution.
+  * `case ${var:0:2} in`: This is the main difference. It uses substring expansion to get the first **two** characters (`0` = start, `2` = length).
+  * `[0-9][0-9]) ... ;;`: This pattern checks for two consecutive digits (e.g., "12", "99").
+  * `[A-Z][A-Z]) ... ;;`: This pattern checks for two consecutive uppercase letters (e.g., "HE", "OK").
+  * `[a-z][a-z]) ... ;;`: This pattern checks for two consecutive lowercase letters (e.g., "he", "ok").
+  * `*) ... ;;`: This default pattern will match *any* other two-character combination (e.g., "a1", "1a", "A-", or even a string with only one character).
+
+#### 🚀 Sample Interaction
+
+```
+hashim@Hashim:~$ ./StartChar2.sh
+Enter a string: 12monkeys
+12monkeys starts with two digits
+Enter a string: 1hello
+1hello starts with another pattern
+Enter a string: GOteam
+GOteam starts with two uppercase letters
+Enter a string: myScript
+myScript starts with two lowercase letters
+Enter a string: ^Z
+hashim@Hashim:~$ 
+```
+
+
+### 📜 Listing 4.8: `StartChar3.sh`
+
+Listing 4.8 displays the content of `StartChar3.sh`, which checks the type of the first character using an alternative, more robust syntax.
+
+```bash
+#!/bin/bash
+# StartChar3.sh
+
+while (true)
+do
+ echo -n "Enter a string: "
+ read var
+ case ${var:0:1} in
+ [0-9]*) echo "$var starts with a digit" ;;
+ [[:upper:]]) echo "$var starts with an uppercase letter" ;;
+ [[:lower:]]) echo "$var starts with a lowercase letter" ;;
+ *) echo "$var starts with another symbol" ;;
+ esac
+done
+```
+
+#### ⚙️ Code Explanation
+
+Listing 4.8 also starts with a `while` loop that contains a `case/esac` statement. The conditions again test the first character (`${var:0:1}`).
+
+  * `[0-9]*) ... ;;`: This is the same digit check as in Listing 4.6.
+  * `[[:upper:]]) ... ;;`: This is the key difference. `[[:upper:]]` is a **POSIX character class**. It is generally preferred over `[A-Z]` because it is **locale-aware**. This means it will correctly identify uppercase letters in other languages (like `É` or `Ü`), not just the 26 letters of the English alphabet.
+  * `[[:lower:]]) ... ;;`: Similarly, `[[:lower:]]` is the POSIX class for lowercase letters and is also locale-aware.
+  * `*) ... ;;`: The default "catch-all" case.
+  * This code sample also repeats indefinitely, and you can press `Ctrl+Z` to terminate the execution of the shell script.
+
+---
