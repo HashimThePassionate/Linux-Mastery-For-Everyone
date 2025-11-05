@@ -775,3 +775,158 @@ current directory: /home/hashim
 ```
 
 ---
+
+# 📁 File Test Operators in Bash
+
+The Bash shell supports a wide range of operators designed to test various properties of files. These are essential for writing scripts that can safely check for files, directories, and permissions before attempting an operation.
+
+
+### 📋 Operator Reference
+
+Suppose that the variable `file` points to a non-empty text file that has read, write, and execute permissions. Here is a list of common file test operators:
+
+  * **`-b file`**: Checks if `file` is a block special file (e.g., `/dev/sda`).
+  * **`-c file`**: Checks if `file` is a character special file (e.g., `/dev/tty`).
+  * **`-d file`**: Checks if `file` is a directory.
+  * **`-e file`**: Checks if `file` exists.
+  * **`-f file`**: Checks if `file` is an ordinary (regular) file.
+  * **`-g file`**: Checks if `file` has its set group ID (SGID) bit set.
+  * **`-k file`**: Checks if `file` has its "sticky bit" set.
+  * **`-p file`**: Checks if `file` is a named pipe (FIFO).
+  * **`-t file`**: Checks if `file` descriptor is open and associated with a terminal.
+  * **`-u file`**: Checks if `file` has its set user id (SUID) bit set.
+  * **`-r file`**: Checks if `file` is readable.
+  * **`-w file`**: Checks if `file` is writeable.
+  * **`-x file`**: Checks if `file` is executable.
+  * **`-s file`**: Checks if `file` has a size greater than 0 (is non-empty).
+  * **`f1 -nt f2`**: Checks if file `f1` is **n**ewer **t**han file `f2`.
+  * **`f1 -ot f2`**: Checks if file `f1` is **o**lder **t**han file `f2`.
+
+
+### 💡 Example: Testing File Existence (`-e`)
+
+Here is a practical example of testing for the existence of a file using the `–e` option. We will check for a file that almost certainly exists on a Linux system.
+
+```bash
+hashim@Hashim:~$ fpath="/etc/passwd"
+hashim@Hashim:~$ if [ -e $fpath ]; then
+ echo "File exists";
+else
+ echo "Does not exist";
+fi
+```
+
+#### Code Explanation
+
+  * `fpath="/etc/passwd"`: This line assigns the string (the path) `/etc/passwd` to a variable named `fpath`.
+  * `if [ -e $fpath ]; then`: This line begins the conditional block.
+      * `[ ... ]`: This is the `test` command, which evaluates the expression inside it.
+      * `-e $fpath`: This is the operator. It checks if the file pointed to by the `$fpath` variable (i.e., `/etc/passwd`) **e**xists.
+  * `echo "File exists";`: This command is executed *only if* the test `[ -e $fpath ]` returns **true**.
+  * `else`: This keyword specifies what to do if the `if` test returns **false**.
+  * `echo "Does not exist";`: This command is executed *only if* the file `/etc/passwd` is not found.
+  * `fi`: This keyword marks the end of the `if...else` block.
+
+#### Expected Output
+
+```
+File exists
+```
+
+
+### 🔗 Compound Operators and File Operators
+
+You can combine Boolean operators and file-related operators using the `&&` ("AND") or `||` ("OR") operators. This allows for more complex and specific tests.
+
+The following example checks if a file **both exists AND is writable**.
+
+#### Practical Example (From Scratch)
+
+Let's first create a file at `/tmp/somedata` but make it *read-only* to see how the script handles this case.
+
+```bash
+hashim@Hashim:~$ fpath="/tmp/somedata"
+hashim@Hashim:~$ touch $fpath
+hashim@Hashim:~$ chmod -w $fpath
+hashim@Hashim:~$ ls -l $fpath
+-r--r--r-- 1 hashim hashim 0 Nov  5 09:05 /tmp/somedata
+```
+
+Now, we run the script to test this file:
+
+```bash
+hashim@Hashim:~$ if [ -e $fpath ] && [ -w $fpath ]
+then
+ echo "File $fpath exists and is writable"
+else
+ if [ ! -e $fpath ]
+ then
+echo "File $fpath does not exist "
+ else
+ echo "File $fpath exists but is not writable"
+ fi
+fi
+```
+
+#### Code Explanation
+
+  * `touch $fpath`: Creates an empty file at `/tmp/somedata`.
+  * `chmod -w $fpath`: Removes (`-`) the **w**rite permission from the file.
+  * `if [ -e $fpath ] && [ -w $fpath ]`: This is the primary conditional test.
+      * `[ -e $fpath ]`: Checks if `/tmp/somedata` exists. This is **true**.
+      * `&&`: The logical **AND** operator. It will only proceed to the next test if the first one was true.
+      * `[ -w $fpath ]`: Checks if `/tmp/somedata` is writable. This is **false** (because we ran `chmod -w`).
+      * Since the full condition (true AND false) is **false**, the `then` block is skipped.
+  * `else`: The code block after `else` is executed.
+  * `if [ ! -e $fpath ]`: A new, nested `if` statement begins.
+      * `!`: The logical **NOT** operator. It inverts the result of the test that follows.
+      * `[ -e $fpath ]`: Checks if the file exists. This is **true**.
+      * `[ ! -e $fpath ]`: The `!` inverts the result, making this expression **false**.
+  * `then ...`: This block is **skipped**.
+  * `else`: The `else` block of the *inner* `if` statement is executed.
+  * `echo "File $fpath exists but is not writable"`: This line is printed to the terminal.
+  * `fi`: Closes the inner `if...else` block.
+  * `fi`: Closes the outer `if...else` block.
+
+#### Expected Output
+
+```
+File /tmp/somedata exists but is not writable
+```
+
+
+### ⚠️ A Note on Compound Syntax
+
+The syntax for compound operators can be tricky and varies between file, string, and numeric tests.
+
+#### Incorrect Syntax
+
+Notice the use of the `&&` operator **between** two separate `[ ... ]` test commands in the example above. The following syntax is **incorrect** because the Bash shell will not interpret it correctly:
+
+```bash
+# This is NOT valid
+if [ -e $fpath -a -w $fpath ]
+```
+
+(Note: The original text contained a typo `–w`; the correct operator is `-w`. The original also used `-a`, which is a deprecated "AND" operator for `[ ]`. Using separate `[ ]` blocks with `&&` is the modern, preferred method.)
+
+#### String Operator Syntax
+
+Compound operators with **string** operators (using `[[ ... ]]`) also use the `&&` or `||` operators *between* the test blocks:
+
+```bash
+if [[ -n $str1 ]] && [[ -z $str2 ]] ;
+```
+
+#### Numeric Operator Syntax
+
+However, compound operators with **numeric** operators *can* use the `-a` (AND) or `-o` (OR) flags within a *single* `[ ... ]` block.
+
+```bash
+[ $a -lt 20 -a $b -gt 100 ]
+```
+
+  * This single test checks if `$a` is **l**ess **t**han 20 **AND** (`-a`) if `$b` is **g**reater **t**han 100.
+  * Even though this syntax is valid for numbers, many programmers still prefer the `[ $a -lt 20 ] && [ $b -gt 100 ]` syntax for better readability.
+
+---
