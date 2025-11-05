@@ -385,3 +385,233 @@ This is a Bash "keyword," not a command. It is safer, more powerful, and has a m
 
 
 ---
+
+# 💻 Working with Variables
+
+You have already seen some examples of variables in Bash. This section provides more information about how to assign values to variables. You will also see how to use conditional logic to test the values of variables.
+
+Always remember that **Bash variables are fundamentally typeless**. This means the shell makes no distinction between a number (like `123`) and a string (like `"abc"`).
+
+However, you will get an error message if you attempt to perform arithmetic operations on non-numeric values in Bash, which is not always the case in languages like JavaScript.
+
+
+
+## ✍️ Assigning Values to Variables
+
+This section contains simple examples of assigning values to variables.
+
+### 🚫 The "No Spaces" Rule
+
+Make sure that you do not insert any whitespace around the equals sign (`=`) during variable assignment.
+
+#### 🚀 Practical Example (Correct vs. Incorrect)
+
+  * **Correct (No spaces):**
+
+    ```bash
+    hashim@Hashim:~$ z="abc"
+    hashim@Hashim:~$ echo $z
+    abc
+    ```
+
+  * **Incorrect (With spaces):**
+
+    ```bash
+    hashim@Hashim:~$ z = "abc"
+    -bash: z: command not found
+    ```
+
+      * **📜 Code Explanation:** When you add spaces, the Bash shell interprets `z` as a *command* (which it tries to run) and `="abc"` as the arguments for that command. This is why you get `command not found`.
+
+### 🚫 No `$` on Assignment
+
+One more thing to keep in mind: the `$` symbol is only used when **reading** (accessing) a variable, not when **assigning** (writing) it.
+
+  * **Incorrect (Using `$`):**
+    ```bash
+    hashim@Hashim:~$ $y=3
+    -bash: =3: command not found
+    ```
+      * **📜 Code Explanation:** The shell first tries to expand `$y`. If `y` is empty, the command becomes `=3`, which is not a valid command.
+
+### 💬 Double (`"`) vs. Single (`'`) Quotes
+
+  * **Double Quotes (`""`):** These allow **variable expansion**. The shell will replace variable names (like `$x`) with their values.
+  * **Single Quotes (`''`):** These are **literal**. They prevent *all* expansion and treat every character (like `$`) as plain text.
+
+#### 🚀 Practical Example
+
+```bash
+hashim@Hashim:~$ x="abc"
+hashim@Hashim:~$ y="123"
+
+# 1. Variables are expanded in double quotes
+hashim@Hashim:~$ echo "x = $x and y = ${y}"
+x = abc and y = 123
+
+# 2. You can concatenate variables directly
+hashim@Hashim:~$ echo "xy = $x$y"
+xy = abc123
+
+# 3. Double quotes expand $x, but single quotes treat $x literally
+hashim@Hashim:~$ echo "double and single quotes: $x" '$x'
+double and single quotes: abc $x
+```
+
+  * **📜 Code Explanation:**
+      * In the first `echo`, `$x` and `${y}` were replaced by their values (`abc` and `123`). Using braces (`${y}`) is a more robust way to write a variable, especially when it is next to other text.
+      * In the third `echo`, the first `$x` (in double quotes) was expanded, but the second `$x` (in single quotes) was printed literally.
+
+
+
+## ⚙️ Listing 4.1: `variable-operations.sh`
+
+This script illustrates how to assign variables with different values and update them using "Parameter Expansion."
+
+### The Script
+
+```bash
+#!/bin/bash
+# variable-operations.sh
+
+#length of myvar:
+myvar=123456789101112
+echo ${#myvar}
+
+#print last 5 characters of myvar:
+echo ${myvar: -5}
+
+#10 if myvar was not assigned
+echo ${myvar:-10}
+
+#last 10 symbols of myvar
+echo ${myvar: -10}
+
+#substitute part of string with echo:
+echo ${myvar//123/999}
+
+#add integers a to b and assign to c:
+a=5
+b=7
+c=$((a+b))
+echo "a: $a b: $b c: $c"
+
+# other ways to calculate c:
+c=`expr $a + $b`
+echo "c: $c"
+c=`echo "$a+$b"|bc`
+echo "c: $c"
+```
+
+### Script Output
+
+When you launch the code in Listing 4.1, you will see the following output:
+
+```
+15
+01112
+123456789101112
+6789101112
+999456789101112
+a: 5 b: 7 c: 12
+c: 12
+c: 12
+```
+
+### 📜 Code Explanation
+
+1.  **`myvar=123456789101112`**
+    Assigns a long string of 15 digits to the variable `myvar`.
+
+2.  **`echo ${#myvar}`**
+
+      * **Output:** `15`
+      * **Explanation:** The `${#variable}` syntax returns the **character length** of the variable.
+
+3.  **`echo ${myvar: -5}`**
+
+      * **Output:** `01112`
+      * **Explanation:** This is **substring extraction**. The `${variable: -5}` syntax extracts the last 5 characters. (Note: The space after the colon is important to distinguish it from the syntax in the next step).
+
+4.  **`echo ${myvar:-10}`**
+
+      * **Output:** `123456789101112`
+      * **Explanation:** This syntax provides a **default value**. It means: "If `myvar` is unset or empty, print `10`. Otherwise, print the value of `myvar`." Since `myvar` *is* set, it prints the full value.
+
+5.  **`echo ${myvar: -10}`**
+
+      * **Output:** `6789101112`
+      * **Explanation:** This is another substring extraction, this time getting the last 10 characters.
+
+6.  **`echo ${myvar//123/999}`**
+
+      * **Output:** `999456789101112`
+      * **Explanation:** This is **search and replace**. The `${variable//find/replace}` syntax replaces all occurrences of "find" with "replace". In this case, it finds "123" at the beginning and replaces it with "999".
+
+7.  **`c=$((a+b))`**
+
+      * **Output:** (prints `a: 5 b: 7 c: 12`)
+      * **Explanation:** This is the **modern, built-in** method for performing arithmetic in Bash. The `$((...))` construct evaluates the expression inside.
+
+8.  **`c=\`expr $a + $b\`\`**
+
+      * **Output:** (prints `c: 12`)
+      * **Explanation:** This is the **old, external command** method. `expr` evaluates the expression. Note that `expr` requires spaces around the operators (e.g., `5 + 7`, not `5+7`).
+
+9.  **`c=\`echo "$a+$b" | bc\`\`**
+
+      * **Output:** (prints `c: 12`)
+      * **Explanation:** This is the most powerful method. It pipes the string "5+7" into the `bc` (Basic Calculator) command. `bc` is essential when you need to perform floating-point (decimal) math, as both `expr` and `$(())` only handle integers.
+
+
+
+## ⌨️ The `read` Command for User Input
+
+The `read` command pauses a script and waits for the user to type in data, which is then stored in a variable.
+
+The syntax `read -n number_of_chars myvar` reads a specific number of characters from the input into `myvar`.
+
+### 🚀 Practical Example 1: `-n` (Number of Characters)
+
+The following code snippet reads **two** characters from the command line and then continues *without* waiting for the Enter key.
+
+```bash
+hashim@Hashim:~$ echo "Press any two keys to continue..."
+Press any two keys to continue...
+hashim@Hashim:~$ read -n 2 var
+ab  <-- User types 'a' then 'b', and the script immediately continues
+hashim@Hashim:~$ echo "You entered: $var"
+You entered: ab
+```
+
+  * **📜 Code Explanation:** The `-n 2` flag was satisfied as soon as the user typed the second character (`b`), so the `read` command finished.
+
+### 🚀 Practical Example 2: `-s` (Silent / Secret)
+
+The following command reads a password in non-echoed mode. The user's typing is hidden.
+
+```bash
+hashim@Hashim:~$ echo "Please enter your password:"
+Please enter your password:
+hashim@Hashim:~$ read -s var
+      <-- User types their password, but nothing appears on screen. They press Enter.
+hashim@Hashim:~$ echo "Password stored!"
+Password stored!
+```
+
+  * **📜 Code Explanation:** The `-s` (silent) flag is crucial for securely handling passwords so they are not displayed on the screen.
+
+### 🚀 Practical Example 3: `-p` (Prompt)
+
+This code snippet displays a prompt on the same line that the user types on.
+
+```bash
+hashim@Hashim:~$ read -p "Enter your name: " var
+Enter your name: Hashim  <-- User types 'Hashim' and presses Enter
+hashim@Hashim:~$ echo "Hello, $var"
+Hello, Hashim
+```
+
+  * **📜 Code Explanation:** The `-p` (prompt) flag displays the string `"Enter your name: "` and then waits for the user's input on that very same line. This is much cleaner than using a separate `echo` command.
+
+---
