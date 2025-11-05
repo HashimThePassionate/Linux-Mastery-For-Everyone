@@ -1317,8 +1317,6 @@ When working with Bash, you often need to manipulate strings—specifically, to 
 
 Listing 4.9 displays the content of `substrings.sh` to illustrate several examples of this syntax.
 
------
-
 ### 📜 Listing 4.9: `substrings.sh`
 
 This script demonstrates how to find substrings of a given string.
@@ -1338,8 +1336,6 @@ echo ${x:(-4)}
 echo ${x: -4}
 ```
 
------
-
 ### 📤 Script Output
 
 Running the preceding script will produce this output:
@@ -1353,8 +1349,6 @@ abcdefghij
 ghij
 ghij
 ```
-
------
 
 ### ⚙️ Code Explanation (Line-by-Line)
 
@@ -1407,5 +1401,162 @@ However, the syntax is very sensitive and has a "gotcha" you must know.
       * **Explanation:** This is the *other* correct way to specify a negative offset. Adding a **space** between the colon (`:`) and the negative sign (`-`) distinguishes it from the `${var:-default}` syntax.
       * This expression also refers to the right-most 4 characters in the variable `x`.
       * **Result:** `ghij`
+
+---
+
+# ⚙️ Working with Loops
+
+The Bash shell provides powerful constructs for iteration. These tools allow you to repeat actions on a set of values, such as items in an array or a list of file names.
+
+Several loop constructs are available in Bash:
+
+  * `for` loop
+  * `while` loop
+  * `until` loop
+
+The following sections will illustrate how to use each of these constructs.
+
+## 🔄 Using a `for` Loop
+
+The Bash shell supports the **for loop**, which has a syntax that is slightly different from other programming languages like JavaScript or Java.
+
+### Example 1: Basic File Iteration
+
+The following code block demonstrates how to use a `for` loop to iterate through a set of files in the current directory.
+
+#### 🛠️ Setup (From Scratch)
+
+Before running the script, we need some files to work with. Let's create a few sample `.txt` files and one `.pdf` file.
+
+```bash
+# Create three text files
+touch report_final.txt
+touch user_list.txt
+touch notes.txt
+
+# Create one PDF file (which the loop should ignore)
+touch manual.pdf
+```
+
+#### 📜 Script
+
+This script will find all files ending in `.txt` and print their names.
+
+```bash
+#!/bin/bash
+
+# This loop finds all files ending in .txt
+# The `ls *txt` command is executed first.
+# The loop then iterates over the output of that command.
+
+for f in `ls *txt`
+do
+ echo "file: $f"
+done
+```
+
+#### 🔍 Code Explanation
+
+  * `for f in `ls *txt: This line initiates the loop.
+      * `ls *txt`: This command lists all files in the current directory that end with the `.txt` extension.
+      * **(Backticks)**: These are used for **command substitution**. The shell first executes the `ls *txt` command. The output (e.g., `notes.txt report_final.txt user_list.txt`) becomes the list of items the loop will iterate over.
+      * `for f in ...`: For each item in that generated list, the shell assigns the item (e.g., `notes.txt`) to the variable `f` and executes the loop body.
+  * `do`: This keyword marks the beginning of the block of commands that will be executed in each iteration.
+  * `echo "file: $f"`: This command prints the literal string "file: " followed by the value currently stored in the `$f` variable (the filename for the current iteration).
+  * `done`: This keyword marks the end of the loop's body.
+
+#### 🖥️ Output
+
+When you execute the script in the directory containing the setup files, the output will be:
+
+```plaintext
+file: notes.txt
+file: report_final.txt
+file: user_list.txt
+```
+
+> **Note:** The output of this `for` loop depends on the files with the suffix `txt` that are in the directory. If there are no such files, the `ls *txt` command might return an error or empty string (depending on shell configuration), and the `for` loop will do nothing.
+
+### Example 2: Renaming Files (Listing 4.10: renamefiles.sh2)
+
+This listing provides a practical example of how to iterate through files and rename them by changing their suffix.
+
+#### 🛠️ Setup (From Scratch)
+
+Let's create some script files (ending in `.sh`) that we intend to rename to `.txt`.
+
+```bash
+# Create three shell script files
+touch deploy_app.sh
+touch backup_db.sh
+touch check_disk.sh
+
+# Create one text file (which the loop will ignore)
+touch readme.txt
+```
+
+#### 📜 Script (renamefiles.sh2)
+
+```bash
+#!/bin/bash
+
+# Define the new suffix we want to use
+newsuffix="txt"
+
+# Loop through all files ending in .sh
+for f in `ls *sh`
+do
+ # Extract the base name (part before the dot)
+ base=`echo $f | cut -d"." -f1`
+ 
+ # Extract the suffix (part after the dot)
+ suffix=`echo $f | cut -d"." -f2`
+ 
+ # Create the new filename by combining the base name and new suffix
+ newfile="${base}.${newsuffix}"
+ 
+ # Print the old and new names
+ echo "file: $f new: $newfile"
+ 
+ # You can uncomment one of the following lines
+ # to actually perform the file operation.
+ 
+ # either 'cp' or 'mv' the file
+ # mv $f $newfile
+ # cp $f $newfile
+done
+```
+
+#### 🔍 Code Explanation (Line-by-Line)
+
+  * `newsuffix="txt"`: This line initializes a variable named `newsuffix` and assigns it the string value `txt`.
+  * `for f in \`ls \*sh\`` : This loop finds and iterates through all files in the current directory ending with the  `.sh`suffix. In each iteration, the variable`f`will hold one filename (e.g.,`deploy\_app.sh\`).
+  * `do`: Signals the beginning of the loop's body.
+  * `base=\`echo $f | cut -d"." -f1\`` : This line assigns the "base" part of the filename to the  `base\` variable.
+      * `echo $f`: Prints the current filename (e.g., `deploy_app.sh`).
+      * `|` (Pipe): Sends the output of the `echo` command as the input to the `cut` command.
+      * `cut -d"." -f1`: This is the `cut` utility.
+          * `-d"."`: Sets the **d**elimiter (the separator) to a period (`.`).
+          * `-f1`: Selects **f**ield number 1 (the part *before* the first delimiter).
+      * The result (e.g., `deploy_app`) is assigned to the `base` variable.
+  * `suffix=\`echo $f | cut -d"." -f2\`\`: This line is similar to the previous one, but it extracts the suffix.
+      * `-f2`: Selects **f**ield number 2 (the part *after* the first delimiter).
+      * The result (e.g., `sh`) is assigned to the `suffix` variable. (Note: This variable is not actually used in the rest of this script, but it shows how to isolate the original extension).
+  * `newfile="${base}.${newsuffix}"`: This line constructs the new filename.
+      * It concatenates (joins) the value of `$base` (`deploy_app`), a literal period (`.`), and the value of `$newsuffix` (`txt`).
+      * The final string (e.g., `deploy_app.txt`) is assigned to the `newfile` variable.
+  * `echo "file: $f new: $newfile"`: This command displays the value of the original filename (`$f`) and the newly constructed filename (`$newfile`).
+  * `#mv $f $newfile`: This is a **commented-out** command. If you remove the `#`, the `mv` (move) command would **rename** the original file to the new name.
+  * `#cp $f $newfile`: This is also a comment. If you remove the `#`, the `cp` (copy) command would create a **new file** with the new name, leaving the original file intact.
+
+#### 🖥️ Output
+
+Running the script as-is (without uncommenting `mv` or `cp`) only prints what it *would* do:
+
+```plaintext
+file: backup_db.sh new: backup_db.txt
+file: check_disk.sh new: check_disk.txt
+file: deploy_app.sh new: deploy_app.txt
+```
 
 ---
