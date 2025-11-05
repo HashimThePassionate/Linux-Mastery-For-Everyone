@@ -1310,3 +1310,102 @@ Listing 4.8 also starts with a `while` loop that contains a `case/esac` statemen
   * This code sample also repeats indefinitely, and you can press `Ctrl+Z` to terminate the execution of the shell script.
 
 ---
+
+# ✂️ Working with Strings in Shell Scripts
+
+When working with Bash, you often need to manipulate strings—specifically, to extract parts of them. Bash provides a powerful "curly brackets" syntax (`{...}`) for this purpose, which is known as **Substring Expansion**.
+
+Listing 4.9 displays the content of `substrings.sh` to illustrate several examples of this syntax.
+
+-----
+
+### 📜 Listing 4.9: `substrings.sh`
+
+This script demonstrates how to find substrings of a given string.
+
+```bash
+#!/bin/bash
+# substrings.sh
+
+x="abcdefghij"
+
+echo ${x:0}
+echo ${x:1}
+echo ${x:5}
+echo ${x:7:3}
+echo ${x:-4}
+echo ${x:(-4)}
+echo ${x: -4}
+```
+
+-----
+
+### 📤 Script Output
+
+Running the preceding script will produce this output:
+
+```
+abcdefghij
+bcdefghij
+fghij
+hij
+abcdefghij
+ghij
+ghij
+```
+
+-----
+
+### ⚙️ Code Explanation (Line-by-Line)
+
+Listing 4.9 first initializes the variable `x` with the string "abcdefghij". Let's break down each `echo` statement to understand the syntax `${variable:offset:length}`.
+
+  * `echo ${x:0}`
+
+      * **Syntax:** `${variable:offset}`
+      * **Explanation:** This extracts a substring from `$x` starting at index `0` (the very beginning) and continuing to the end of the string.
+      * **Result:** `abcdefghij`
+
+  * `echo ${x:1}`
+
+      * **Syntax:** `${variable:offset}`
+      * **Explanation:** This extracts a substring starting at index `1` (the second character, 'b') and continuing to the end.
+      * **Result:** `bcdefghij`
+
+  * `echo ${x:5}`
+
+      * **Syntax:** `${variable:offset}`
+      * **Explanation:** This extracts a substring starting at index `5` (the sixth character, 'f') and continuing to the end.
+      * **Result:** `fghij`
+
+  * `echo ${x:7:3}`
+
+      * **Syntax:** `${variable:offset:length}`
+      * **Explanation:** This is the first example with a specified length. It starts at index `7` (the eighth character, 'h') and extracts a substring that is `3` characters long.
+      * **Result:** `hij`
+
+### ⚠️ A Note on Negative Offsets
+
+The next portion of Listing 4.9 contains three `echo` statements that specify negative values for the offset. A negative offset means the index position is calculated from the **right** (the end of the string) instead of the left.
+
+However, the syntax is very sensitive and has a "gotcha" you must know.
+
+  * `echo ${x:-4}`
+
+      * **Explanation:** This **does not** work as intended. Bash interprets `${variable:-word}` as a different kind of expansion: "if `$variable` is unset or null, use the default value `word`."
+      * Because our variable `$x` *is* set, Bash just returns the entire string. The "missing whitespace" after the colon (`:`) is the problem.
+      * **Result:** `abcdefghij`
+
+  * `echo ${x:(-4)}`
+
+      * **Explanation:** This is one correct way to specify a negative offset. By wrapping the negative number in parentheses, you are telling Bash to treat it as a calculation (an arithmetic expression) and not as the "default value" syntax.
+      * It starts `4` characters from the right ('g') and extracts to the end.
+      * **Result:** `ghij`
+
+  * `echo ${x: -4}`
+
+      * **Explanation:** This is the *other* correct way to specify a negative offset. Adding a **space** between the colon (`:`) and the negative sign (`-`) distinguishes it from the `${var:-default}` syntax.
+      * This expression also refers to the right-most 4 characters in the variable `x`.
+      * **Result:** `ghij`
+
+---
