@@ -615,3 +615,163 @@ Hello, Hashim
   * **📜 Code Explanation:** The `-p` (prompt) flag displays the string `"Enter your name: "` and then waits for the user's input on that very same line. This is much cleaner than using a separate `echo` command.
 
 ---
+
+# 🤖 Boolean and String Operators in Bash
+
+Bash provides various operators for testing string variables and for combining these tests using Boolean logic.
+
+### 📋 Basic String Tests
+
+Let's suppose we have two variables, `x` and `y`, with the following values:
+
+```bash
+hashim@Hashim:~$ x="abc"
+hashim@Hashim:~$ y="efg"
+```
+
+Here are the results of basic test operators:
+
+  * `[ $x = $y ]`: This expression is **false** because the values "abc" and "efg" are not equal.
+  * `[ $x != $y ]`: This expression is **true** because the values "abc" and "efg" are not equal.
+  * `[ -z $x ]`: This expression is **false** because the variable `$x` contains "abc", which has a non-zero length.
+  * `[ -n $x ]`: This expression is **true** because the variable `$x` contains "abc", which has a non-zero length.
+
+You can combine these operators to create compound statements, similar to numeric comparisons.
+
+
+### ⚠️ Important Distinctions
+
+Keep in mind the difference between string and numeric operators:
+
+  * **`==`**: Use this operator for **string** comparisons.
+  * **`-eq`**: Use this operator for **numeric** tests and comparisons.
+
+### 📏 String Length Operators
+
+You can explicitly determine if a string has a non-zero length:
+
+  * **`-n s1`**: Returns **true** if the string `s1` has a **non-zero** length.
+  * **`-z s1`**: Returns **true** if the string `s1` has a **zero** length.
+
+
+### ✨ Best Practice: Double Brackets
+
+When you perform string comparisons, it is highly recommended to use **double square brackets** (`[[ ... ]]`). Using single brackets (`[ ... ]`) can sometimes lead to unexpected errors.
+
+### 🧬 String Comparison Reference
+
+Here are the common string comparison operators used with `[[ ... ]]`:
+
+  * **`[[ $str1 = $str2 ]]`**: Returns **true** when `str1` is equal to `str2`.
+  * **`[[ $str1 == $str2 ]]`**: An alternative method to check for string equality.
+  * **`[[ $str1 != $str2 ]]`**: Returns **true** when `str1` and `str2` do not match.
+  * **`[[ $str1 > $str2 ]]`**: Returns **true** when `str1` is alphabetically **greater** than `str2`.
+  * **`[[ $str1 < $str2 ]]`**: Returns **true** when `str1` is alphabetically **lesser** than `str2`.
+  * **`[[ -z $str1 ]]`**: Returns **true** if `str1` holds an empty string.
+  * **`[[ -n $str1 ]]`**: Returns **true** if `str1` holds a non-empty string.
+
+
+### 🔗 Compound Operators and String Operators
+
+You can combine multiple string-related conditions using logical operators like `&&` (AND) and `||` (OR).
+
+Here is the general syntax:
+
+```bash
+if [[ -n $str1 ]] && [[ -z $str2 ]] ;
+then
+ commands;
+fi
+```
+
+#### 💡 Example: Compound `if` Statement
+
+Consider the following script:
+
+```bash
+hashim@Hashim:~$ str1="Not empty "
+hashim@Hashim:~$ str2=""
+
+hashim@Hashim:~$ if [[ -n $str1 ]] && [[ -z $str2 ]];
+then
+ echo "str1 is non-empty and str2 is empty string."
+fi
+```
+
+##### Code Explanation
+
+  * `str1="Not empty "`: Assigns a non-empty string to the variable `str1`.
+  * `str2=""`: Assigns an empty string to the variable `str2`.
+  * `if [[ -n $str1 ]] && [[ -z $str2 ]];`: This is the conditional check.
+      * `[[ -n $str1 ]]`: Checks if `str1` is non-empty. This is **true**.
+      * `&&`: The logical AND operator. It requires both sides to be true.
+      * `[[ -z $str2 ]]`: Checks if `str2` is empty. This is **true**.
+      * Since both conditions are true, the `then` block is executed.
+  * `echo "str1 is non-empty and str2 is empty string."`: Prints the specified message to the console.
+
+##### Output
+
+```
+str1 is non-empty and str2 is empty string.
+```
+
+
+### ⛓️ Compound Expressions as Command Chains
+
+You will often see Bash scripts (especially installation scripts) that use compound expressions to perform multiple operations.
+
+The **`&&` (AND)** operator is frequently used to "connect" multiple commands that must be executed sequentially (from left to right).
+
+  * Each command in the sequence is executed **only if all preceding commands** in the sequence have executed successfully (i.e., returned an exit status of 0).
+  * If the current command in the sequence **fails** (does not execute successfully), the remaining commands to the right of the failed command **will not be executed**.
+
+#### 🚀 Practical Example: Command Chaining
+
+Consider the following script. Before running it, try to predict the output\!
+
+```bash
+hashim@Hashim:~$ OLDDIR=`pwd`
+hashim@Hashim:~$ cd /tmp
+hashim@Hashim:~$ CURRDIR=`pwd`
+hashim@Hashim:~$ echo "current directory: $CURRDIR"
+hashim@Hashim:~$ mydir="/tmp/abc/def"
+hashim@Hashim:~$ mkdir -p $mydir && cd $mydir && echo "now inside $mydir"
+hashim@Hashim:~$ newdir=`pwd`
+hashim@Hashim:~$ echo "new directory: $newdir"
+hashim@Hashim:~$ echo "new directory: `pwd`"
+hashim@Hashim:~$ cd $OLDDIR
+hashim@Hashim:~$ echo "current directory: `pwd`"
+```
+
+##### Code Explanation (Line-by-Line)
+
+  * `OLDDIR=`pwd\`\`: Stores the current working directory (e.g., `/home/hashim`) in the variable \`OLDDIR\`.
+  * `cd /tmp`: Changes the directory to `/tmp`.
+  * `CURRDIR=`pwd\`\`: Stores the new current directory (`/tmp`) in the variable \`CURRDIR\`.
+  * `echo "current directory: $CURRDIR"`: Prints the value of `CURRDIR`.
+  * `mydir="/tmp/abc/def"`: Assigns the string "/tmp/abc/def" to the variable `mydir`.
+  * `mkdir -p $mydir && cd $mydir && echo "now inside $mydir"`: This is the command chain.
+    1.  `mkdir -p $mydir`: Creates the directory `/tmp/abc/def`. The `-p` flag ensures that parent directories (`abc`) are created if they don't exist. This command succeeds.
+    2.  `&&`: Since the first command succeeded, the next command is executed.
+    3.  `cd $mydir`: Changes the current directory to `/tmp/abc/def`. This command succeeds.
+    4.  `&&`: Since the second command succeeded, the final command is executed.
+    5.  `echo "now inside $mydir"`: Prints the message "now inside /tmp/abc/def".
+  * `newdir=`pwd\`\`: Stores the current directory (`/tmp/abc/def`) in the variable \`newdir\`.
+  * `echo "new directory: $newdir"`: Prints the value of `newdir`.
+  * ` echo "new directory:  `pwd`"`: Prints the current directory again, demonstrating the same value.
+  * `cd $OLDDIR`: Changes the directory back to the originally saved directory (e.g., `/home/hashim`).
+  * ` echo "current directory:  `pwd`"`: Prints the final directory to confirm the return.
+
+##### Predicted Output
+
+(Assuming your starting directory was `/home/hashim`)
+
+```
+current directory: /tmp
+now inside /tmp/abc/def
+new directory: /tmp/abc/def
+new directory: /tmp/abc/def
+current directory: /home/hashim
+```
+
+---
