@@ -930,3 +930,129 @@ However, compound operators with **numeric** operators *can* use the `-a` (AND) 
   * Even though this syntax is valid for numbers, many programmers still prefer the `[ $a -lt 20 ] && [ $b -gt 100 ]` syntax for better readability.
 
 ---
+
+# 🧠 Conditional Logic with `if/else/fi` Statements
+
+Bash supports conditional logic, allowing your scripts to make decisions. The syntax is a bit different from other programming languages, most notably using `then` and `fi` (which is just `if` spelled backward... clever, right?).
+
+
+### 💡 Basic `if/else` Example
+
+The following example shows how to use a basic `if/else/fi` statement. We will initialize a variable `x` with the value 25. The script will then check if `x` is less than 30 and print a different message depending on the result.
+
+#### Practical Example
+
+```bash
+hashim@Hashim:~$ x=25
+hashim@Hashim:~$ if [ $x -lt 30 ]
+then
+ echo "x is less than 30"
+else
+ echo "x is at least 30"
+fi
+```
+
+#### ⚙️ Code Explanation (Line-by-Line)
+
+  * `x=25`: Assigns the numeric value `25` to the variable `x`.
+  * `if [ $x -lt 30 ]`: This is the conditional test.
+      * `[ ... ]`: This is the `test` command.
+      * `$x`: The variable's value (`25`) is substituted here.
+      * `-lt`: This is a **numeric** comparison operator meaning "**l**ess **t**han".
+      * The test becomes `[ 25 -lt 30 ]`, which evaluates to **true**.
+  * `then`: Since the test was true, the code block after `then` is executed.
+  * `echo "x is less than 30"`: Prints this message to the console.
+  * `else`: This block is skipped because the `if` test was true.
+  * `echo "x is at least 30"`: This line is *not* executed.
+  * `fi`: This keyword marks the end of the `if` statement.
+
+#### 📤 Output
+
+```
+x is less than 30
+```
+
+
+### 📜 Listing 4.2: `testvars.sh` (Checking Defined Variable)
+
+This script, `testvars.sh`, checks if a variable `x` is defined (specifically, if it has a non-zero length).
+
+```bash
+#!/bin/bash
+# testvars.sh
+
+x="abc"
+if [ -n "$x" ]
+then
+ echo "x is defined: $x"
+else
+ echo "x is not defined"
+fi
+```
+
+#### ⚙️ Code Explanation (Line-by-Line)
+
+Listing 4.2 initializes the variable `x` with the value "abc", and then uses the `if/else/fi` construct to determine whether `x` is initialized.
+
+  * `x="abc"`: Assigns the string value "abc" to the variable `x`.
+  * `if [ -n "$x" ]`: This is the conditional test.
+      * `-n`: This is a **string** test operator that checks if the string has a **n**on-zero length.
+      * `"$x"`: The quotes are important. They ensure the script works correctly even if the variable contains spaces or is empty. The variable `$x` ("abc") is substituted here.
+      * The test becomes `[ -n "abc" ]`, which is **true** because "abc" has a length of 3.
+  * `then`: Since the test was true, this block is executed.
+  * `echo "x is defined: $x"`: Prints the message, replacing `$x` with its value.
+  * `else`: This block is skipped.
+  * `echo "x is not defined"`: This line is *not* executed.
+  * `fi`: Marks the end of the `if` statement. (Note: The original text's `f` was corrected to `fi`).
+
+#### 📤 Output
+
+Launch the shell script in Listing 4.2, and you will see the following output:
+
+```
+X is defined: abc
+```
+
+
+### 📜 Listing 4.3: `testvars2.sh` (Checking Undefined Variable)
+
+This script, `testvars2.sh`, checks if the variable `y` is undefined (or, more accurately, if it's an empty string).
+
+```bash
+#!/bin/bash
+# testvars2.sh
+
+if [ -z "$y" ]
+then
+ y="def"
+ echo "y is defined: $y"
+else
+ echo "y is defined: $y"
+fi
+```
+
+#### ⚙️ Code Explanation (Line-by-Line)
+
+Listing 4.3 first checks whether the variable `y` is defined.
+
+  * `if [ -z "$y" ]`: This is the conditional test.
+      * `$y`: Since `y` has not been defined yet, Bash substitutes an empty string (`""`).
+      * `-z`: This is a **string** test operator that checks if the string has a **z**ero length.
+      * The test becomes `[ -z "" ]`, which evaluates to **true**.
+  * `then`: Since the test was true, the `then` block is executed.
+  * `y="def"`: The variable `y` is assigned the string value "def".
+  * `echo "y is defined: $y"`: This command is executed. It prints the message, replacing `$y` with its *new* value ("def").
+  * `else`: This block is skipped.
+  * `echo "y is defined: $y"`: This line is *not* executed.
+  * `fi`: Marks the end of the `if` statement.
+
+#### 📤 Output
+
+Launch the shell script in Listing 4.3 and you will see the following output:
+
+```
+y is defined: def
+```
+
+
+---
