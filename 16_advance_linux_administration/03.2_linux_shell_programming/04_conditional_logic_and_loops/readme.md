@@ -1560,3 +1560,170 @@ file: deploy_app.sh new: deploy_app.txt
 ```
 
 ---
+
+# 📁 Checking Files in a Directory
+
+This code sample features a `for` loop designed to examine and report various properties of the files located within the current directory.
+
+## 📜 Listing 4.11: `checkdir.sh` (Modern Version)
+
+This script, `checkdir.sh`, is built to count the number of directories, executable files, readable files, and ASCII files in the current directory. This version uses modern, preferred Bash syntax.
+
+```bash
+#!/bin/bash
+# initialize 'counter' variables
+TOTAL_FILES=0
+ASCII_FILES=0
+NONASCII_FILES=0
+READABLE_FILES=0
+EXEC_FILES=0
+DIRECTORIES=0
+
+# Use $(ls) for modern command substitution
+for f in $(ls)
+do
+ # Use modern arithmetic ((...))
+ ((TOTAL_FILES++))
+ 
+ if [ -d "$f" ]
+ then
+  ((DIRECTORIES++))
+ fi
+ 
+ if [ -x "$f" ]
+ then
+  ((EXEC_FILES++))
+ fi
+ 
+ if [ -r "$f" ]
+ then
+  ((READABLE_FILES++))
+ fi
+ 
+ # Store command output in variables
+ readable=$(file "$f")
+ ascii=$(echo "$readable" | grep ASCII)
+ 
+ if [ "$ascii" != "" ]
+ then
+  ((ASCII_FILES++))
+ else
+  #echo "readable: $readable"
+  ((NONASCII_FILES++))
+ fi
+done
+
+# results:
+echo "TOTAL_FILES: $TOTAL_FILES"
+echo "DIRECTORIES: $DIRECTORIES"
+echo "EXEC_FILES: $EXEC_FILES"
+echo "ASCII_FILES: $ASCII_FILES"
+echo "NON-ASCII_FILES: $NONASCII_FILES"
+```
+
+
+### 👨‍💻 Code Explanation
+
+Here is a detailed breakdown of the **modern** script:
+
+  * `#!/bin/bash`: This is the "shebang." It tells the system to execute this script using the Bash shell.
+  * `# initialize 'counter' variables`: A comment indicating the purpose of the following lines.
+  * `TOTAL_FILES=0` ... `DIRECTORIES=0`: These lines initialize six variables as counters, setting them all to `0`.
+  * `for f in $(ls)`: This line starts a `for` loop.
+      * `$(ls)`: This is **modern command substitution**. It executes the `ls` command and returns the list of files and directories. It is preferred over the old backticks `` `ls` ``.
+      * The loop then iterates one by one through each item (`f`) returned by `ls`.
+  * `do`: Marks the beginning of the code block that will execute for each file.
+  * `((TOTAL_FILES++))`: This is **modern Bash arithmetic**. It's a cleaner and more efficient way to increment the `TOTAL_FILES` counter by one. It replaces the old `expr` command.
+  * `if [ -d "$f" ]`: This is a conditional test.
+      * `[ -d "$f" ]` checks if the current item (`$f`) is a directory. (Quoting `"$f"` is good practice to handle filenames with spaces).
+  * `((DIRECTORIES++))`: If the test is true (the file is a directory), this line increments the `DIRECTORIES` counter.
+  * `if [ -x "$f" ]`: This test checks if the current file (`$f`) is executable.
+  * `((EXEC_FILES++))`: If true, the `EXEC_FILES` counter is incremented.
+  * `if [ -r "$f" ]`: This test checks if the current file (`$f`) is readable.
+  * `((READABLE_FILES++))`: If true, the `READABLE_FILES` counter is incremented.
+  * `readable=$(file "$f")`: This line executes the `file` command on the current item. The `file` command analyzes a file and reports its type (e.g., "ASCII text"). The output text is stored in the `readable` variable.
+  * `ascii=$(echo "$readable" | grep ASCII)`: This line processes the output from the previous step.
+      * `echo "$readable"` prints the content of the `readable` variable.
+      * `|` (pipe) sends that output as input to the `grep` command.
+      * `grep ASCII` searches the input for the literal string "ASCII".
+      * If "ASCII" is found, `grep` outputs that line, which is then stored in the `ascii` variable. If not, the `ascii` variable will be empty.
+  * `if [ "$ascii" != "" ]`: This test checks if the `ascii` variable is **not** empty.
+  * `((ASCII_FILES++))`: If the variable is not empty (meaning "ASCII" was found), the `ASCII_FILES` counter is incremented.
+  * `else`: If the `if` test was false (meaning "ASCII" was not found).
+  * `((NONASCII_FILES++))`: The `NONASCII_FILES` counter is incremented.
+  * `done`: Marks the end of the `for` loop. The script will return to the `for` line to process the next file until all files are done.
+  * `# results:`: A comment indicating the final output section.
+  * `echo "TOTAL_FILES: $TOTAL_FILES"` ... `echo "NON-ASCII_FILES: $NONASCII_FILES"`: These lines print the final values of all the counters to the console.
+
+
+### 📊 Script Analysis
+
+Listing 4.11 first initializes several count-related variables. This is followed by a `for` loop that iterates through all the files present in the current directory.
+
+The body of this loop contains multiple conditional code blocks. These blocks are used to determine specific properties of the current file being processed:
+
+  * Is the file a directory?
+  * Is the file executable?
+  * Is the file readable?
+  * Is the file an ASCII file?
+
+The last portion of Listing 4.11 is responsible for displaying the final values of these count-related variables after the loop has finished processing all files.
+
+
+### 🚀 How to Create and Run This Script
+
+Here’s how you can create and execute the `checkdir.sh` script on your system.
+
+**1. Create the Script File using `nano`**
+
+Open your terminal and type the following command. This will create and open a new file named `checkdir.sh` in the `nano` text editor:
+
+```bash
+nano checkdir.sh
+```
+
+**2. Paste the Code**
+
+Copy the entire **modern** shell script code from **Listing 4.11** (above) and paste it into the `nano` editor window.
+
+To save and exit `nano`:
+
+  * Press **`Ctrl + O`** (Write Out) and then press **`Enter`** to save the file.
+  * Press **`Ctrl + X`** to exit `nano`.
+
+**3. Make the Script Executable**
+
+By default, the new file does not have permission to be executed. You must grant this permission using the `chmod` command:
+
+```bash
+chmod +x checkdir.sh
+```
+
+  * `chmod`: The command to "change mode" (permissions).
+  * `+x`: This part **adds** the **executable** permission.
+  * `checkdir.sh`: The file you are applying the permission to.
+
+**4. Run the Script**
+
+Now you can run the script. Make sure you are in the same directory where you saved the file. Type the following in your terminal:
+
+```bash
+./checkdir.sh
+```
+
+  * `./`: This tells the shell to look for the script in the **current directory**.
+
+
+### 🖥️ Example Output
+
+When you run the script, it will analyze the files in its *current directory*. Your output will look something like this. The exact numbers will change depending on what files and directories you have in that location.
+
+```bash
+TOTAL_FILES: 33
+DIRECTORIES: 1
+EXEC_FILES: 26
+ASCII_FILES: 29
+NON-ASCII_FILES: 4
+```
+
+---
