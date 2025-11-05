@@ -1727,3 +1727,189 @@ NON-ASCII_FILES: 4
 ```
 
 ---
+
+Here is the text converted into a professional Markdown file, complete with detailed explanations and output as requested.
+
+
+# ➿ Working with Nested Loops
+
+This section is mainly for fun and demonstrates how to use a nested loop to display a "triangular" output. This code sample uses a Bash array with a pair of values to create the pattern.
+
+(Note: Arrays in Bash are a larger topic, discussed in detail in the final section of this chapter.)
+
+## 📜 Listing 4.12: `nestedloops.sh`
+
+This script illustrates how to display an alternating set of symbols in a triangular fashion, first growing and then shrinking.
+
+```bash
+#!/bin/bash
+
+outermax=10
+symbols[0]="#"
+symbols[1]="@"
+
+# First loop: The "growing" triangle
+for (( i=1; i<${outermax}; i++ ));
+do
+ for (( j=1; j<${i}; j++ ));
+ do
+  # Print the symbol
+  printf "%-2s" ${symbols[($i+$j)%2]}
+ done
+ # At the end of the inner loop, print a new line
+ printf "\n"
+done
+
+# Second loop: The "shrinking" triangle
+for (( i=1; i<${outermax}; i++ ));
+do
+ for (( j=${i}+1; j<${outermax}; j++ ));
+ do
+  # Print the symbol
+  printf "%-2s" ${symbols[($i+$j)%2]}
+ done
+ # At the end of the inner loop, print a new line
+ printf "\n"
+done
+```
+
+
+### 👨‍💻 Code Explanation
+
+This script initializes some variables and then uses two main `for` loops, each containing a nested (inner) loop.
+
+  * `#!/bin/bash`: The shebang, telling the system to use the Bash shell.
+  * `outermax=10`: Initializes a variable that controls the maximum "width" or number of rows for the triangles.
+  * `symbols[0]="#"`: Initializes the first element (at index 0) of an array named `symbols`.
+  * `symbols[1]="@"`: Initializes the second element (at index 1) of the `symbols` array.
+
+#### The First Loop (Growing Triangle)
+
+  * `for (( i=1; i<${outermax}; i++ ))`: This is the **outer loop**, controlled by the variable `i`. It will run 9 times (for `i` = 1, 2, 3... 9).
+  * `for (( j=1; j<${i}; j++ ))`: This is the **inner loop**, controlled by `j`. Critically, its end point depends on the *current value of `i`*.
+      * When `i` is 1, `j` runs from 1 to 0 (it doesn't run).
+      * When `i` is 2, `j` runs for `j=1`.
+      * When `i` is 3, `j` runs for `j=1` and `j=2`.
+      * This is what makes the triangle "grow" wider with each line.
+  * `printf "\n"`: After the inner loop finishes (a full row is printed), this command prints a newline character, moving the cursor to the next line.
+
+#### The Second Loop (Shrinking Triangle)
+
+  * `for (( i=1; i<${outermax}; i++ ))`: The **outer loop**, identical to the first, `i` runs from 1 to 9.
+  * `for (( j=${i}+1; j<${outermax}; j++ ))`: The **inner loop**. The logic here is reversed. `j` starts *one value higher* than `i` and runs up to `outermax` (10).
+      * When `i` is 1, `j` runs from 2 to 9 (8 symbols).
+      * When `i` is 2, `j` runs from 3 to 9 (7 symbols).
+      * ...
+      * When `i` is 9, `j` runs from 10 to 9 (it doesn't run).
+      * This is what makes the triangle "shrink" with each line.
+
+
+### 🔣 How the Alternating Symbol Works
+
+The key to the script is this line:
+
+```bash
+printf "%-2s" ${symbols[($i+$j)%2]}
+```
+
+Let's break it down from the inside out:
+
+1.  **`($i+$j)%2`**: This is the core logic.
+
+      * `$i+$j`: The sum of the outer and inner loop counters.
+      * `%2`: This is the **modulo operator**. It finds the remainder after dividing by 2.
+      * If `$i+$j` is an **even** number, the result is **`0`**.
+      * If `$i+$j` is an **odd** number, the result is **`1`**.
+
+2.  **`${symbols[... ]}`**: This part accesses the `symbols` array.
+
+      * When the result of the modulo is `0`, it becomes `symbols[0]`, which is **`#`**.
+      * When the result of the modulo is `1`, it becomes `symbols[1]`, which is **`@`**.
+
+3.  **`printf "%-2s"`**: This is a formatting command.
+
+      * `%s` means "print a string" (our symbol).
+      * `-2` means "make the total width 2 characters, and left-justify (the `-` sign)".
+      * This ensures each symbol takes up two spaces (e.g., "` @  `"), keeping the columns perfectly aligned.
+
+
+### 📈 Generalizing the Script
+
+You can easily generalize this code. If your `symbols` array contains `arrlength` elements, you would simply change the modulo operator.
+
+For example, if you had 3 symbols (`arrlength=3`):
+`symbols[0]="#"`
+`symbols[1]="@"`
+`symbols[2]="%"`
+
+You would replace the print snippet with the following:
+
+```bash
+printf "%-2s" ${symbols[($i+$j)% $arrlength]}
+```
+
+In this case, `printf "%-2s" ${symbols[($i+$j)%3]}`.
+
+
+### 🚀 How to Create and Run This Script
+
+You can create and execute the `nestedloops.sh` script on your system.
+
+**1. Create the Script File**
+
+Open your terminal and use a text editor like `nano` to create the file:
+
+```bash
+nano nestedloops.sh
+```
+
+**2. Paste the Code**
+
+Copy the entire script from **Listing 4.12** and paste it into the `nano` editor.
+
+To save and exit `nano`:
+
+  * Press **`Ctrl + O`** (Write Out) and then press **`Enter`**.
+  * Press **`Ctrl + X`** to exit.
+
+**3. Make the Script Executable**
+
+You must give the script permission to run using the `chmod` command:
+
+```bash
+chmod +x nestedloops.sh
+```
+
+**4. Run the Script**
+
+Execute the script by typing its name:
+
+```bash
+./nestedloops.sh
+```
+
+
+### 🖥️ Expected Output
+
+When you launch the code, you will see the following triangular output printed to your console:
+
+```bash
+@ 
+# @ 
+@ # @ 
+# @ # @ 
+@ # @ # @ 
+# @ # @ # @ 
+@ # @ # @ # @ 
+# @ # @ # @ # @ 
+@ # @ # @ # @ # 
+@ # @ # @ # @ 
+@ # @ # @ # 
+@ # @ # @ 
+@ # @ # 
+@ # @ 
+@ # 
+@ 
+```
+
+---
