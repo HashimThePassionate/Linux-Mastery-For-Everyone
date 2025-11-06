@@ -2191,3 +2191,136 @@ This output is generated as follows:
 4.  **"abc"**: 1 word (odd). Converted to `abc`.
 
 ---
+
+# 🚦 **Combining While, Case, and If/Elif/Else Statements**
+
+This section demonstrates how to build a robust script by combining the `while`, `case/esac`, and `if/elif/else/fi` statements. This combination is perfect for creating interactive menus or validation loops.
+
+## 📜 Listing 4.16: `yesno.sh`
+
+This script illustrates how to repeatedly prompt a user for input until a valid response ("Y" or "N") is received.
+
+```bash
+#!/bin/bash
+while(true)
+do
+ # -n flag removes the trailing newline
+ echo -n "Proceed with backup (Y/y/N/n): "
+ 
+ # Read user input and store it in the 'response' variable
+ read response
+ 
+ # Evaluate the user's response
+ case $response in
+  n*|N*) proceed="false" ;;
+  y*|Y*) proceed="true" ;;
+  *) proceed="unknown" ;;
+ esac
+ 
+ # Act based on the 'proceed' variable
+ if [[ "$proceed" = "true" ]]
+ then
+  echo "proceeding with backup"
+  break # Exit the while loop
+ elif [[ "$proceed" = "false" ]]
+ then
+  echo "canceling backup"
+  break # Exit the while loop
+ else
+  echo "Invalid response"
+  # Loop repeats
+ fi
+done
+```
+
+
+### 👨‍💻 Code Explanation
+
+This script is a powerful validation loop. Let's break it down.
+
+  * `#!/bin/bash`: The shebang, telling the system to use the Bash shell.
+  * `while(true)`: This starts an **infinite loop**. The code inside will repeat forever *until* a `break` command is hit.
+  * `echo -n "Proceed with..."`: This prompts the user for input.
+      * The `-n` flag is important: it tells `echo` **not** to print a newline character, so the user's cursor stays on the same line as the prompt.
+  * `read response`: This command pauses the script and waits for the user to type something and press `Enter`. Whatever they type is stored in the `response` variable.
+  * `case $response in ... esac`: This is a `case` statement, which is a cleaner way to handle multiple `if` conditions on a single variable. It checks the value of `$response`:
+      * `n*|N*)`: This pattern checks if `$response` starts with (`*`) "n" **or** (`|`) "N". If it matches (e.g., "n", "no", "N", "Never"), it executes the command.
+      * `proceed="false" ;;`: It sets the `proceed` variable to the string "false". The `;;` marks the end of this case.
+      * `y*|Y*) proceed="true" ;;`: Similarly, this checks for "y" or "Y" and sets the `proceed` variable to "true".
+      * `*)`: This is the "wildcard" or "default" case. It matches *anything else* (like "abc", "q", or just pressing Enter).
+      * `proceed="unknown" ;;`: It sets the `proceed` variable to "unknown".
+  * `if [[ "$proceed" = "true" ]] ... fi`: This `if` block checks the value of the `proceed` variable that we just set.
+      * `if [[ "$proceed" = "true" ]]`: If the user entered 'y', this is true.
+          * `echo "proceeding with backup"`: Prints a success message.
+          * `break`: **This is key.** It terminates the `while(true)` loop, and the script ends.
+      * `elif [[ "$proceed" = "false" ]]`: If the user entered 'n', this is true.
+          * `echo "canceling backup"`: Prints a cancellation message.
+          * `break`: This also terminates the `while` loop, and the script ends.
+      * `else`: If `proceed` is not "true" or "false", it must be "unknown".
+          * `echo "Invalid response"`: It prints an error.
+          * The `if` block ends. The `while` loop has *not* been broken, so it repeats from the top, asking the user the question again.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the Script File**
+
+Use `nano` (or your favorite text editor) to create the file:
+
+```bash
+nano yesno.sh
+```
+
+**2. Paste the Code**
+
+Copy the code from **Listing 4.16** and paste it into the `nano` editor.
+
+Save and exit:
+
+  * Press **`Ctrl + O`** and then **`Enter`** to save.
+  * Press **`Ctrl + X`** to exit.
+
+**3. Make the Script Executable**
+
+You must give the script permission to be executed:
+
+```bash
+chmod +x yesno.sh
+```
+
+**4. Run the Script**
+
+Execute the script from your terminal:
+
+```bash
+./yesno.sh
+```
+
+
+### 🖥️ Example Output
+
+When you run the script, it will repeatedly ask you for input until you give a valid 'y' or 'n' answer.
+
+Here is an example session:
+
+```bash
+$ ./yesno.sh
+Proceed with backup (Y/y/N/n): abc
+Invalid response
+Proceed with backup (Y/y/N/n): 
+Invalid response
+Proceed with backup (Y/y/N/n): Y
+proceeding with backup
+$
+```
+
+And here is an example of canceling:
+
+```bash
+$ ./yesno.sh
+Proceed with backup (Y/y/N/n): no
+canceling backup
+$
+```
+
+---
