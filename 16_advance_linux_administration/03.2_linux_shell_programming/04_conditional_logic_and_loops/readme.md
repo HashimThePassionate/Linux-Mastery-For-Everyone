@@ -1913,3 +1913,281 @@ When you launch the code, you will see the following triangular output printed t
 ```
 
 ---
+
+# 🔄 **Using a While Loop**
+
+A `while` loop is a fundamental control structure that continues to execute a block of code *as long as* a specified condition remains true. Let's explore two examples.
+
+## 📜 Listing 4.13: `while1.sh` (Modern Version)
+
+This script illustrates a basic `while` loop that iterates through a set of numbers. It uses a `break` statement to exit what would otherwise be an infinite loop. This version uses modern Bash arithmetic.
+
+```bash
+#!/bin/bash
+x=0
+((x++)) # Modern way to increment x
+echo "new x: $x"
+
+while (true)
+do
+ echo "x = $x"
+ ((x++)) # Modern way to increment x
+ 
+ if [ $x -gt 4 ]
+ then
+  break
+ fi
+done
+```
+
+
+### 👨‍💻 Code Explanation
+
+This script first initializes the variable `x` to 0.
+
+  * `x=0`: Assigns the integer `0` to the variable `x`.
+  * `((x++))`: This is **modern Bash arithmetic**. It's the clean and efficient way to increment the value of `x` by 1.
+  * `echo "new x: $x"`: This prints the new value of `x` (which is 1) to the console.
+
+The next portion is the `while` loop.
+
+  * `while (true)`: This starts an **infinite loop** by design, as the condition `true` never changes.
+  * `do`: Marks the beginning of the code block to be executed with each loop iteration.
+  * `echo "x = $x"`: Inside the loop, this prints the *current* value of `x`.
+  * `((x++))`: Just like before, this increments `x` by 1.
+  * `if [ $x -gt 4 ]`: This is the escape hatch. It's a conditional test:
+      * `[ ... ]` is the `test` command.
+      * `$x -gt 4` checks if the value of `x` is **g**reater **t**han 4.
+  * `then break fi`: If the test is true (i.e., `x` becomes 5), the `break` command is executed, immediately terminating the `while` loop.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the Script File using `nano`**
+
+Open your terminal and type:
+
+```bash
+nano while1.sh
+```
+
+**2. Paste the Code**
+
+Copy the code from **Listing 4.13** and paste it into the `nano` editor.
+
+To save and exit `nano`:
+
+  * Press **`Ctrl + O`** (Write Out) and then press **`Enter`** to save.
+  * Press **`Ctrl + X`** to exit.
+
+**3. Make the Script Executable**
+
+Give the script permission to run:
+
+```bash
+chmod +x while1.sh
+```
+
+**4. Run the Script**
+
+Execute the script from your terminal:
+
+```bash
+./while1.sh
+```
+
+
+### 🖥️ Expected Output
+
+When you run the script, you will immediately see the following output printed to your console.
+
+```bash
+new x: 1
+x = 1
+x = 2
+x = 3
+x = 4
+```
+
+Here is a play-by-play of the execution:
+
+1.  **Before Loop:** `x` is set to 0, then 1. The script prints `new x: 1`.
+2.  **Loop 1:** `while (true)` is true.
+      * Prints `x = 1`.
+      * `x` becomes 2.
+      * Is 2 \> 4? No.
+3.  **Loop 2:** `while (true)` is true.
+      * Prints `x = 2`.
+      * `x` becomes 3.
+      * Is 3 \> 4? No.
+4.  **Loop 3:** `while (true)` is true.
+      * Prints `x = 3`.
+      * `x` becomes 4.
+      * Is 4 \> 4? No.
+5.  **Loop 4:** `while (true)` is true.
+      * Prints `x = 4`.
+      * `x` becomes 5.
+      * Is 5 \> 4? Yes.
+6.  **`break`** is executed. The loop terminates.
+7.  The script ends.
+
+
+
+## 📜 Listing 4.14: `upperlowercase.sh` (Modern Version)
+
+This second example shows a more practical `while` loop. It iterates through a text file, line by line, and converts the lines to uppercase or lowercase based on whether they have an even or odd number of words.
+
+```bash
+#!/bin/bash
+infile="wordfile.txt"
+outfile="converted.txt"
+
+rm -f $outfile 2>/dev/null
+
+while read line
+do
+ # word count of current line
+ wordcount=$(echo "$line" | wc -w)
+ 
+ # get remainder
+ ((modvalue = wordcount % 2))
+ 
+ if [ $modvalue = 0 ]
+ then
+  # even: convert to uppercase
+  echo "$line" | tr '[a-z]' '[A-Z]' >> $outfile
+ else
+  # odd: convert to lowercase
+  echo "$line" | tr '[A-Z]' '[a-z]' >> $outfile
+ fi
+done < $infile
+```
+
+## 📜 Listing 4.15: `wordfile.txt`
+
+This is the **input file** required for `upperlowercase.sh` to work.
+
+```
+abc def
+def
+abc ghi
+abc
+```
+
+
+### 👨‍💻 Code Explanation
+
+This script processes one file to create another.
+
+  * `infile="wordfile.txt"`: Sets a variable for the input filename.
+  * `outfile="converted.txt"`: Sets a variable for the output filename.
+  * `rm -f $outfile 2>/dev/null`: This is a cleanup command.
+      * `rm -f $outfile`: Forcibly (`-f`) removes the output file if it already exists. This ensures the script starts fresh every time.
+      * `2>/dev/null`: This **error redirection** sends any error messages (like "file not found") to `/dev/null` (the "void"), so you don't see them.
+  * `while read line`: This is the core of the script.
+      * `read line` reads one line of standard input and stores its content in the variable `line`.
+      * The loop continues as long as `read` can successfully read a line.
+  * `done < $infile`: This is the other half of the loop.
+      * `< $infile` is **input redirection**. It tells the `while` loop to get its input *from* the file `wordfile.txt`.
+
+#### Inside the Loop
+
+For each line read from the file:
+
+1.  `wordcount=$(echo "$line" | wc -w)`: This calculates the number of words.
+
+      * `$(...)` is **modern command substitution**.
+      * `echo "$line"` prints the current line (e.g., "abc def").
+      * `|` (pipe) sends that output as input to the `wc -w` command.
+      * `wc -w`: The **w**ord **c**ount command.
+      * The final number (e.g., 2) is stored in the `wordcount` variable.
+
+2.  `((modvalue = wordcount % 2))`: This checks if the word count is even or odd using **modern arithmetic**.
+
+      * `%` is the **modulo** operator (finds the remainder).
+      * If `wordcount` is even, `modvalue` will be `0`.
+      * If `wordcount` is odd, `modvalue` will be `1`.
+
+3.  `if [ $modvalue = 0 ]`: If the `modvalue` is `0` (even)...
+
+4.  **If Even:**
+
+      * `echo "$line" | tr '[a-z]' '[A-Z]' >> $outfile`
+      * `tr '[a-z]' '[A-Z]'`: The **tr**anslate command converts the line to uppercase.
+      * `>> $outfile`: This **appends** the uppercase line to the output file.
+
+5.  **If Odd (`else`):**
+
+      * `echo "$line" | tr '[A-Z]' '[a-z]' >> $outfile`
+      * `tr '[A-Z]' '[a-z]'`: This converts the line to lowercase.
+      * `>> $outfile`: The lowercase line is appended to the output file.
+
+
+### 🚀 How to Create and Run This Script
+
+This process has two files. You must create the input file first.
+
+**1. Create the Input File (`wordfile.txt`)**
+
+Use `nano` to create the input file:
+
+```bash
+nano wordfile.txt
+```
+
+Paste the content from **Listing 4.15** into `nano`. Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+**2. Create the Shell Script (`upperlowercase.sh`)**
+
+Next, create the script file:
+
+```bash
+nano upperlowercase.sh
+```
+
+Paste the code from **Listing 4.14** into `nano`. Save and exit.
+
+**3. Make the Script Executable**
+
+Give *only the script file* executable permission. (The `.txt` file doesn't need it).
+
+```bash
+chmod +x upperlowercase.sh
+```
+
+**4. Run the Script**
+
+Now, run the script from your terminal:
+
+```bash
+./upperlowercase.sh
+```
+
+
+### 🖥️ Run & Output
+
+When you run the script, it will produce **no output** in the terminal. This is normal\! It sent all its output to the `converted.txt` file.
+
+To see the result, use the `cat` command to print the contents of the new file:
+
+```bash
+cat converted.txt
+```
+
+You will then see the following output:
+
+```
+ABC DEF
+def
+ABC GHI
+abc
+```
+
+This output is generated as follows:
+
+1.  **"abc def"**: 2 words (even). Converted to `ABC DEF`.
+2.  **"def"**: 1 word (odd). Converted to `def`.
+3.  **"abc ghi"**: 2 words (even). Converted to `ABC GHI`.
+4.  **"abc"**: 1 word (odd). Converted to `abc`.
+
+---
