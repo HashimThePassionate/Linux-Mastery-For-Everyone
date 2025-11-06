@@ -2924,3 +2924,621 @@ $
 ```
 
 ---
+
+# 📦 **Arrays in Bash**
+
+Arrays are available in most (if not all) programming languages, and they are also available in Bash.
+
+It's worth noting some terminology:
+
+  * A one-dimensional array is known as a **vector** in mathematics.
+  * A two-dimensional array is called a **matrix**.
+
+However, in the world of shell scripts, you will almost always just see the word "array."
+
+## 📜 Listing 4.19: `Array1.sh`
+
+This script illustrates the most basic way to define an array and access its individual elements.
+
+```bash
+#!/bin/bash
+# initialize the names array
+names[0]="john"
+names[1]="nancy"
+names[2]="jane"
+names[3]="steve"
+names[4]="bob"
+
+# display the first and second entries
+echo "First Index: ${names[0]}"
+echo "Second Index: ${names[1]}"
+```
+
+
+### 👨‍💻 Code Explanation
+
+This script defines an array called `names` and initializes it with five strings.
+
+  * `names[0]="john"`: This line assigns the string "john" to the *first position* (index `0`) of the `names` array. Bash arrays are **zero-indexed**, meaning they start counting from 0, not 1.
+  * `${names[0]}`: This is how you read a value from an array. The `${...}` curly braces are important for clarity and to prevent errors, especially when next to other text. This command reads the value at index `0`, which is "john".
+  * `${names[1]}`: This reads the value at index `1`, which is "nancy".
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the File**
+
+```bash
+nano Array1.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 4.19** above and paste it into the `nano` editor. Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+**3. Make it Executable**
+
+```bash
+chmod +x Array1.sh
+```
+
+**4. Run the Script**
+
+```bash
+./Array1.sh
+```
+
+
+### 🖥️ Expected Output
+
+The output from Listing 4.19 is here:
+
+```bash
+First Index: john
+Second Index: nancy
+```
+
+
+## 🌐 Accessing All Array Items
+
+If you need to access *all* the items in an array at once (for example, to loop through them), you can use either of the following code snippets.
+
+  * `${array_name[*]}`: Expands to all items as a single string.
+  * `${array_name[@]}`: Expands to all items as separate, individual items.
+
+> **Pro-tip:** Always use `"${array_name[@]}"` (with the quotes\!) when looping. This correctly handles items that have spaces in them.
+
+
+## 📜 Listing 4.20: `loadarray.sh`
+
+This script initializes an array from a string of numbers and then prints its contents, demonstrating a common trap when adding numbers in Bash.
+
+*(Note: We have updated the code to use backticks `` `...` ``, as described in the text, to make it runnable.)*
+
+```bash
+#!/bin/bash
+numbers="1 2 3 4 5 6 7 8 9 10"
+
+# Note: The backticks ` ` execute the command.
+# The ( ... ) capture the space-separated output into an array.
+array1=( `echo "$numbers"` )
+
+total1=0
+total2=0
+
+for num in "${array1[@]}"
+do
+ #echo "array item: $num"
+ 
+ # This performs STRING concatenation
+ total1+=$num
+ 
+ # 'let' forces ARITHMETIC evaluation
+ let total2+=$num
+done
+
+echo "Total1: $total1"
+echo "Total2: $total2"
+```
+
+
+### 👨‍💻 Code Explanation
+
+  * `numbers="..._"`: This defines a single string variable.
+  * ` array1=(  `echo "$numbers"`  ) `: This is the tricky part.
+    1.  `` `echo "$numbers"` ``: The backticks execute the `echo` command, which prints the string `1 2 3 4 5 6 7 8 9 10`.
+    2.  `array1=( ... )`: The outer parentheses capture this output. Because the output is separated by spaces, Bash splits it on those spaces and creates an array with 10 elements: `("1", "2", "3", ... "10")`.
+  * `total1=0` / `total2=0`: Initializes two "counter" variables.
+  * `for num in "${array1[@]}"`: This loops through every item in `array1`.
+  * `total1+=$num`: **This is the trap\!** By default, Bash treats `+` as *string concatenation* (joining strings) unless told otherwise. It joins "0" + "1" + "2" + "3"...
+  * `let total2+=$num`: The `let` keyword explicitly tells Bash to perform an *arithmetic* operation. This correctly *adds* the numbers: 0 + 1 + 2 + 3...
+
+As you can see from the output, `total1` is the result of appending all the elements into a single string, whereas `total2` is the correct numeric sum.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the File**
+
+```bash
+nano loadarray.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 4.20** into the editor. Save and exit.
+
+**3. Make it Executable**
+
+```bash
+chmod +x loadarray.sh
+```
+
+**4. Run the Script**
+
+```bash
+./loadarray.sh
+```
+
+
+### 🖥️ Expected Output
+
+Launch the shell script in Listing 4.20. The output is as follows:
+
+```bash
+Total1: 012345678910
+Total2: 55
+```
+
+
+## 📜 Listing 4.21: `update-array.sh`
+
+This script shows you some common operations you can perform on an array *after* it has been initialized, like reading specific elements, deleting elements, and adding new ones.
+
+```bash
+#!/bin/bash
+array=("I" "love" "deep" "dish" "pizza")
+
+#the first array element:
+echo "First Element: ${array[0]}"
+
+#all array elements:
+echo "All Elements: ${array[@]}"
+
+#all array indexes:
+echo "All Indexes: ${!array[@]}"
+
+#Remove array element at index 3:
+unset array[3]
+
+#add new array element with index 1234:
+array[1234]="in Chicago"
+
+#all array elements:
+echo "After Changes: ${array[@]}"
+
+#all array indexes after changes:
+echo "Indexes After Changes: ${!array[@]}"
+```
+
+*(Note: I added two extra `echo` statements to the original script to make the changes clearer in the output.)*
+
+
+### 👨‍💻 Code Explanation
+
+  * `array=(...)`: This is a more direct way to initialize a whole array at once.
+  * `${array[0]}`: Accesses the first element (at index 0), which is "I".
+  * `${array[@]}`: Accesses all elements in the array.
+  * `${!array[@]}`: This is a special one\! The `!` accesses the **indexes** (or "keys") of the array, not the values.
+  * `unset array[3]`: This command **deletes** the element at index 3 (which was "dish"). The array now has a "hole" in it.
+  * `array[1234]="in Chicago"`: This adds a new element. Bash arrays can be **sparse**, meaning you can have indexes 0, 1, 2, and 1234 with nothing in between.
+  * `echo ${array[@]}` (After Changes): Notice "dish" is gone.
+  * `echo ${!array[@]}` (After Changes): Notice the indexes are now `0 1 2 4 1234`. The index `3` is gone.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the File**
+
+```bash
+nano update-array.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 4.21** into the editor. Save and exit.
+
+**3. Make it Executable**
+
+```bash
+chmod +x update-array.sh
+```
+
+**4. Run the Script**
+
+```bash
+./update-array.sh
+```
+
+
+### 🖥️ Expected Output
+
+Launch the code in Listing 4.21, and you will see the following output (our modified version is slightly more descriptive):
+
+```bash
+First Element: I
+All Elements: I love deep dish pizza
+All Indexes: 0 1 2 3 4
+After Changes: I love deep pizza in Chicago
+Indexes After Changes: 0 1 2 4 1234
+```
+
+
+## 🧠 Working with Arrays: Key Concepts
+
+Arrays enable you to "group together" related data elements as rows, and then each row contains logically related data values. As a simple example, the following array could define three fields for a customer (obviously not a complete set of fields):
+
+```bash
+cust[0] = name
+cust[1] = Address
+cust[2] = phone number
+```
+
+Customer records can be saved in a text file that can be read later by a shell script. If you are unfamiliar with text files, common types include:
+
+  * **CSV (Comma-Separated Values):** `value1,value2,value3`
+  * **TSV (Tab-Separated Values):** `value1  value2  value3`
+  * **Other Delimiters:** Files can use any delimiter, like a colon (`:`) or a pipe (`|`).
+
+The character that separates these values is called the **IFS (Internal Field Separator)**. This is a special Bash variable that controls how the shell splits strings.
+
+This section contains several scripts that illustrate more useful features of arrays in Bash. The syntax is different enough from other programming languages that it is worthwhile to see several examples.
+
+
+## 📜 Listing 4.22: `fruits-array1.sh`
+
+This script illustrates two different ways to create an array and some advanced operations you can perform, like slicing and substrings.
+
+```bash
+#!/bin/bash
+# method #1: One by one
+fruits[0]="apple"
+fruits[1]="banana"
+fruits[2]="cherry"
+fruits[3]="orange"
+fruits[4]="pear"
+echo "first fruit: ${fruits[0]}"
+
+# method #2: Declare all at once
+declare -a fruits2=(apple banana cherry orange pear)
+echo "first fruit: ${fruits2[0]}"
+
+# range of elements:
+echo "last two: ${fruits[@]:3:2}"
+
+# substring of element:
+echo "substring: ${fruits[1]:0:3}"
+
+arrlength=${#fruits[@]}
+echo "length: ${#fruits[@]}"
+```
+
+
+### 👨‍💻 Code Explanation
+
+  * **Method 1:** This is the same method from `Array1.sh`, assigning elements one by one.
+  * **Method 2:** `declare -a fruits2=(...)` is a more modern, explicit way to **d**eclare an **a**rray. The `(...)` syntax initializes it with a space-separated list of values.
+  * **Range (Slicing):** `${fruits[@]:3:2}`
+      * `[@]` means "from all elements..."
+      * `:3` means "...starting at index 3" ("orange").
+      * `:2` means "...take 2 elements."
+      * Result: "orange" and "pear".
+  * **Substring:** `${fruits[1]:0:3}`
+      * `[1]` means "on the element at index 1" ("banana").
+      * `:0` means "...starting at character 0" (the 'b').
+      * `:3` means "...take 3 characters."
+      * Result: "ban".
+  * **Length:** `${#fruits[@]}`
+      * The `#` in front of the array name returns its **length**, or the total number of elements it contains.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the File**
+
+```bash
+nano fruits-array1.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 4.22** into the editor. Save and exit.
+
+**3. Make it Executable**
+
+```bash
+chmod +x fruits-array1.sh
+```
+
+**4. Run the Script**
+
+```bash
+./fruits-array1.sh
+```
+
+
+### 🖥️ Expected Output
+
+Launch the code in Listing 4.22, and you will see the following output:
+
+```bash
+first fruit: apple
+first fruit: apple
+last two: orange pear
+substring: ban
+length: 5
+```
+
+
+## 📜 Listing 4.23 & 4.24: `array-from-file.sh`
+
+This example demonstrates how to load an array from a file and how the **$IFS** variable drastically changes the result.
+
+First, you must create the input file.
+
+#### LISTING 4.23: `names.txt`
+
+```
+Jane Smith
+John Jones
+Dave Edwards
+```
+
+
+#### LISTING 4.24: `array-from-file.sh`
+
+```bash
+#!/bin/bash
+names="names.txt"
+
+echo "--- First loop (Default IFS) ---"
+contents1=( `cat "$names"` )
+for w in "${contents1[@]}"
+do
+ echo "$w"
+done
+
+# Set Internal Field Separator to empty
+# The *intent* is to split only on newlines
+# (The modern, correct way is IFS=$'\n')
+IFS="" 
+
+names="names.txt"
+echo
+echo "--- Second loop (Modified IFS) ---"
+contents1=( `cat "$names"` )
+for w in "${contents1[@]}"
+do
+ echo "$w"
+done
+```
+
+*(Note: I've added `echo` headers to make the output clearer.)*
+
+
+### 👨‍💻 Code Explanation
+
+  * ` contents1=(  `cat "$names"`  ) `: This command does two things:
+
+    1.  `` `cat "$names"` `` reads the *entire content* of `names.txt`.
+    2.  The `(...)` tries to turn that content into an array. It splits the content based on the **$IFS** variable.
+
+  * **First Loop:** By default, `$IFS` contains spaces, tabs, and newlines. Therefore, "Jane Smith" is split into "Jane" and "Smith". The array `contents1` becomes `("Jane", "Smith", "John", "Jones", "Dave", "Edwards")`. The loop prints each word on its own line.
+
+  * `IFS=""`: This line changes the Internal Field Separator. The *intent* described in the text is to make the newline character the *only* separator. (While `IFS=$'\n'` is the more robust way to do this, we are using the code as written).
+
+  * **Second Loop:** The ` contents1=(  `cat "$names"` )` command is run again. Because `$IFS`has been changed to no longer include spaces, the shell *only* splits on the newlines. This time, "Jane Smith" is treated as a *single* element. The array`contents1`becomes`("Jane Smith", "John Jones", "Dave Edwards")\`. The loop now prints each *line*.
+
+
+### 🚀 How to Create and Run This Script
+
+This requires **two** files.
+
+**1. Create the Data File (`names.txt`)**
+
+```bash
+nano names.txt
+```
+
+Paste the content from **Listing 4.23**. Save and exit.
+
+**2. Create the Script File (`array-from-file.sh`)**
+
+```bash
+nano array-from-file.sh
+```
+
+Paste the code from **Listing 4.24**. Save and exit.
+
+**3. Make the Script Executable**
+
+```bash
+chmod +x array-from-file.sh
+```
+
+**4. Run the Script**
+
+```bash
+./array-from-file.sh
+```
+
+
+### 🖥️ Expected Output
+
+Launch the code in Listing 4.24, and you will see the following output:
+
+```bash
+--- First loop (Default IFS) ---
+Jane
+Smith
+John
+Jones
+Dave
+Edwards
+
+--- Second loop (Modified IFS) ---
+Jane Smith
+John Jones
+Dave Edwards
+```
+
+
+## 📜 Listing 4.25: `array-function.sh`
+
+This script illustrates how to pass an entire array to a user-defined function.
+
+```bash
+#!/bin/bash
+
+# This is a user-defined function
+items() {
+ # "$@" represents all arguments passed to the function
+ for line in "${@}"
+ do
+  printf "%s\n" "${line}"
+ done
+}
+
+# Define an array
+arr=( 123 -abc 'my data' )
+
+# Call the function, passing all array elements as arguments
+items "${arr[@]}"
+```
+
+*(Note: The original text also included a "compact version" comment, which I've removed from the main code block for clarity, but the function is the same.)*
+
+
+### 👨‍💻 Code Explanation
+
+  * `items() { ... }`: This defines a function named `items`.
+  * `for line in "${@}"`: This is the key. `"${@}"` is a special variable that expands to *all arguments passed to the function*, with each argument correctly quoted.
+  * `arr=( ... )`: An array `arr` is defined with three elements: "123", "-abc", and "my data".
+  * `items "${arr[@]}"`: This is how you pass an array.
+      * `"${arr[@]}"` expands the `arr` array into separate, quoted arguments: `"123"`, `"-abc"`, `"my data"`.
+      * The `items` function receives these three strings as its arguments (`$1`, `$2`, `$3`).
+      * The function's internal loop then iterates through `"${@}"` (all its arguments) and prints them one by one.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the File**
+
+```bash
+nano array-function.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 4.25** into the editor. Save and exit.
+
+**3. Make it Executable**
+
+```bash
+chmod +x array-function.sh
+```
+
+**4. Run the Script**
+
+```bash
+./array-function.sh
+```
+
+
+### 🖥️ Expected Output
+
+The output is shown here:
+
+```bash
+123
+-abc
+my data
+```
+
+
+## 📜 Listing 4.26: `array-loops1.sh`
+
+This script illustrates how to get the length of an array and then use a classic, C-style `for` loop to iterate through it by its index number.
+
+```bash
+#!/bin/bash
+fruits[0]="apple"
+fruits[1]="banana"
+fruits[2]="cherry"
+fruits[3]="orange"
+fruits[4]="pear"
+
+# array length:
+arrlength=${#fruits[@]}
+echo "length: ${#fruits[@]}"
+
+# print each element via a loop:
+for (( i=1; i<${arrlength}+1; i++ ));
+do
+ # Note: We use $i-1 because the loop starts at 1
+ # while the array index starts at 0
+ echo "element $i of ${arrlength} : ${fruits[$i-1]}"
+done
+```
+
+
+### 👨‍💻 Code Explanation
+
+  * `arrlength=${#fruits[@]}`: As seen before, this gets the total number of elements (5) and stores it in a variable called `arrlength`.
+  * `for (( i=1; i<${arrlength}+1; i++ ))`: This is a C-style `for` loop.
+      * `i=1`: It initializes a counter `i` at 1.
+      * `i<${arrlength}+1`: It continues the loop as long as `i` is less than the length+1 (i.e., less than 6). It will run for `i = 1, 2, 3, 4, 5`.
+      * `i++`: It increments `i` by one after each loop.
+  * `echo ... ${fruits[$i-1]}`: This line prints the element.
+      * Because our loop counter `i` runs from 1 to 5, but our array indexes run from 0 to 4, we must use `$i-1` to access the correct element.
+      * Loop 1: `i` is 1. Access `fruits[1-1]` -\> `fruits[0]` ("apple").
+      * Loop 2: `i` is 2. Access `fruits[2-1]` -\> `fruits[1]` ("banana").
+      * ...and so on.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the File**
+
+```bash
+nano array-loops1.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 4.26** into the editor. Save and exit.
+
+**3. Make it Executable**
+
+```bash
+chmod +x array-loops1.sh
+```
+
+**4. Run the Script**
+
+```bash
+./array-loops1.sh
+```
+
+
+### 🖥️ Expected Output
+
+Launch the code in Listing 4.26, and you will see the following output:
+
+```bash
+length: 5
+element 1 of 5 : apple
+element 2 of 5 : banana
+element 3 of 5 : cherry
+element 4 of 5 : orange
+element 5 of 5 : pear
+```
+
+
+That covers all the array listings\! You've learned how to create, read, update, delete, slice, and loop through arrays in just about every way Bash allows.
+
+---
