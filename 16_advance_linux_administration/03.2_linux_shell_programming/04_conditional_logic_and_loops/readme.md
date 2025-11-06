@@ -2701,6 +2701,226 @@ hello a
 hello b
 hello c
 ```
+---
 
+# 🗂️ **Creating a Simple Menu from Shell Commands**
+
+This guide demonstrates how to build an interactive menu by combining a `while` loop, a `case` statement, and a user-defined function.
+
+## 📜 Listing 4.18: `AppendRow.sh`
+
+This script, `AppendRow.sh`, provides a menu-driven interface to update a set of users stored in a text file.
+
+```bash
+#!/bin/bash
+DataFile="users.txt"
+
+addUser()
+{
+ echo -n "First Name: "
+ read fname
+ echo -n "Last Name: "
+ read lname
+ 
+ if [ -n $fname -a -n $lname ]
+ then
+  # append new line to the file
+  echo "$fname $lname" >> $DataFile
+ else
+  echo "Please enter non-empty values"
+ fi
+}
+
+while (true)
+do
+ echo ""
+ echo "List of Users"
+ echo "============="
+ cat $DataFile 2>/dev/null
+ echo ----"
+ echo "Enter 'a' to add a new user"
+ echo "Enter 'd' to delete all users"
+ echo "Enter 'x' to exit this menu"
+ echo ----"
+ echo
+ read answer
+ 
+ case $answer in
+  a|A) addUser ;;
+  d|D) rm -f $DataFile 2>/dev/null ;;
+  x|X) break ;;
+ esac
+done
+```
+
+
+### 👨‍💻 Code Explanation
+
+Listing 4.18 starts by initializing a variable and defining a function. It then enters an infinite loop to display the menu.
+
+#### Initialization
+
+  * `DataFile="users.txt"`: This line initializes a variable named `DataFile` and assigns it the value `users.txt`. This variable is used throughout the script to reference the user data file, making it easy to change the filename in one place.
+
+#### The `addUser()` Function
+
+This code block defines a custom function that will be executed when the user wants to add a new name.
+
+  * `echo -n "First Name: "`: This prompts the user for a first name. The `-n` flag tells `echo` **not** to add a newline, so the user's cursor stays on the same line as the prompt.
+  * `read fname`: This command pauses the script and waits for the user to type a value. Whatever they type is stored in the `fname` variable.
+  * `read lname`: This does the same for the `lname` (last name) variable.
+  * `if [ -n $fname -a -n $lname ]`: This is the core logic.
+      * `[ -n $fname ]`: This test checks if the `$fname` variable is **n**on-empty.
+      * `-a`: This is a logical **AND** operator.
+      * `[ -n $lname ]`: This test checks if the `$lname` variable is also **n**on-empty.
+      * The entire `if` statement reads: "If the first name is not empty AND the last name is not empty..."
+  * `echo "$fname $lname" >> $DataFile`: If the test is true, this command executes.
+      * `echo "$fname $lname"`: Prints the first and last name, separated by a space.
+      * `>> $DataFile`: This is the **append operator**. It redirects the output and adds it as a new line to the *end* of the file specified in `$DataFile` (i.e., `users.txt`), without deleting the file's previous contents.
+  * `else`: If either `fname` or `lname` was empty, this block runs.
+  * `echo "Please enter non-empty values"`: An appropriate message is displayed to the user.
+
+#### The Main `while (true)` Loop
+
+This is an infinite loop that keeps the menu running until the user explicitly chooses to exit.
+
+  * `echo "List of Users"`: This section displays the menu.
+  * `cat $DataFile 2>/dev/null`: This is a clever command.
+      * `cat $DataFile`: This attempts to print the contents of `users.txt` to the screen.
+      * `2>/dev/null`: This is **error redirection**. If the `users.txt` file does not exist (e.g., on the first run, or after deleting it), `cat` would normally print an ugly error. This command redirects "Standard Error" (file descriptor `2`) to `/dev/null` (a "black hole" that discards all input), effectively hiding the error and failing silently.
+  * `echo "..."`: These lines print the menu options (a, d, x).
+  * `read answer`: This pauses the script and waits for the user to enter their choice, which is stored in the `answer` variable.
+
+#### The `case` Statement (Menu Logic)
+
+This block checks the value of `$answer` and performs the correct action.
+
+  * `case $answer in`: The start of the case block.
+  * `a|A) addUser ;;`: This pattern matches if the user entered `a` **or** (`|`) `A`.
+      * `addUser`: It calls the function we defined earlier.
+      * `;;`: Marks the end of this option.
+  * `d|D) rm -f $DataFile 2>/dev/null ;;`: This matches `d` or `D`.
+      * `rm -f $DataFile`: This command forcibly (`-f`) **r**e**m**oves (deletes) the `users.txt` file. The `2>/dev/null` is used again to hide any "file not found" errors if the user tries to delete an already-deleted file.
+  * `x|X) break ;;`: This matches `x` or `X`.
+      * `break`: This command immediately terminates the `while (true)` loop. Since there is no code after the loop, the shell script ends.
+  * `esac`: Ends the `case` statement.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the Script File**
+
+Use `nano` to create the file:
+
+```bash
+nano AppendRow.sh
+```
+
+**2. Paste the Code**
+
+Copy the entire script from **Listing 4.18** and paste it into the `nano` editor.
+
+Save and exit:
+
+  * Press **`Ctrl + O`** and then **`Enter`** to save.
+  * Press **`Ctrl + X`** to exit.
+
+**3. Make the Script Executable**
+
+You must give the script permission to run:
+
+```bash
+chmod +x AppendRow.sh
+```
+
+**4. Run the Script**
+
+Execute the script from your terminal:
+
+```bash
+./AppendRow.sh
+```
+
+
+### 🖥️ Example Session
+
+Here is a sample invocation showing how the script works from the very beginning.
+
+**(First run, file is empty)**
+
+```bash
+$ ./AppendRow.sh
+
+List of Users
+=============----
+Enter 'a' to add a new user
+Enter 'd' to delete all users
+Enter 'x' to exit this menu----
+
+a
+First Name: abc
+Last Name: def
+
+List of Users
+=============
+abc def----
+Enter 'a' to add a new user
+Enter 'd' to delete all users
+Enter 'x' to exit this menu----
+
+a
+First Name: 123
+Last Name: 456
+
+List of Users
+=============
+abc def
+123 456----
+Enter 'a' to add a new user
+Enter 'd' to delete all users
+Enter 'x' to exit this menu----
+
+a
+First Name: 888
+Last Name: 777
+
+List of Users
+=============
+abc def
+123 456
+888 777----
+Enter 'a' to add a new user
+Enter 'd' to delete all users
+Enter 'x' to exit this menu----
+```
+
+**(This matches the "sample invocation" state from the text. Let's test the other options.)**
+
+```bash
+a
+First Name: test
+Last Name: 
+Please enter non-empty values
+
+List of Users
+=============
+abc def
+123 456
+888 777----
+Enter 'a' to add a new user
+Enter 'd' to delete all users
+Enter 'x' to exit this menu----
+
+d
+
+List of Users
+=============----
+Enter 'a' to add a new user
+Enter 'd' to delete all users
+Enter 'x' to exit this menu----
+
+x
+$ 
+```
 
 ---
