@@ -1,9 +1,224 @@
 # 🧠 **Conditional Logic & Loops**
 
+<details>
+<summary>📑 <strong>Table of Contents</strong></summary>
+
+- [🧠 **Conditional Logic \& Loops**](#-conditional-logic--loops)
+  - [⚙️ 1. Arithmetic Operations \& Variables](#️-1-arithmetic-operations--variables)
+  - [🧩 2. Testing Variables, Files \& Directories](#-2-testing-variables-files--directories)
+    - [🔍 Common Test Operators](#-common-test-operators)
+  - [🧠 3. Conditional Logic \& Loops](#-3-conditional-logic--loops)
+    - [🧩 Conditional Statements](#-conditional-statements)
+    - [🔁 Loop Structures](#-loop-structures)
+  - [🧮 4. Working with Arrays](#-4-working-with-arrays)
+- [🧮 The `expr` Command](#-the-expr-command)
+    - [🚀 Practical Example: Basic Arithmetic](#-practical-example-basic-arithmetic)
+    - [🚀 Practical Example: Finding String Length](#-practical-example-finding-string-length)
+      - [📜 Code Explanation](#-code-explanation)
+      - [💡 Modern (and Better) Way](#-modern-and-better-way)
+  - [➕ Arithmetic Operators (with `expr`)](#-arithmetic-operators-with-expr)
+    - [🚀 Practical Example: Arithmetic Script](#-practical-example-arithmetic-script)
+      - [📜 Code Explanation](#-code-explanation-1)
+  - [⚖️ Boolean and Numeric Operators](#️-boolean-and-numeric-operators)
+    - [Numeric Operators (`-eq`, `-ne`, `-gt`, `-lt`, `-ge`, `-le`)](#numeric-operators--eq--ne--gt--lt--ge--le)
+    - [String Operators (`==`, `!=`)](#string-operators--)
+    - [🚀 Practical Example: `if` Statements](#-practical-example-if-statements)
+  - [🧩 Compound Logical Operators (`-a`, `-o`, `!`)](#-compound-logical-operators--a--o-)
+    - [🚀 Practical Example: Compound `if`](#-practical-example-compound-if)
+  - [💡 A Note on `[ ... ]` and the `test` Command](#-a-note-on----and-the-test-command)
+    - [💡 Pro-Tip: The Modern `[[ ... ]]`](#-pro-tip-the-modern---)
+- [💻 Working with Variables](#-working-with-variables)
+  - [✍️ Assigning Values to Variables](#️-assigning-values-to-variables)
+    - [🚫 The "No Spaces" Rule](#-the-no-spaces-rule)
+      - [🚀 Practical Example (Correct vs. Incorrect)](#-practical-example-correct-vs-incorrect)
+    - [🚫 No `$` on Assignment](#-no--on-assignment)
+    - [💬 Double (`"`) vs. Single (`'`) Quotes](#-double--vs-single--quotes)
+      - [🚀 Practical Example](#-practical-example)
+  - [⚙️ Listing 4.1: `variable-operations.sh`](#️-listing-41-variable-operationssh)
+    - [The Script](#the-script)
+    - [Script Output](#script-output)
+    - [📜 Code Explanation](#-code-explanation-2)
+  - [⌨️ The `read` Command for User Input](#️-the-read-command-for-user-input)
+    - [🚀 Practical Example 1: `-n` (Number of Characters)](#-practical-example-1--n-number-of-characters)
+    - [🚀 Practical Example 2: `-s` (Silent / Secret)](#-practical-example-2--s-silent--secret)
+    - [🚀 Practical Example 3: `-p` (Prompt)](#-practical-example-3--p-prompt)
+- [🤖 Boolean and String Operators in Bash](#-boolean-and-string-operators-in-bash)
+    - [📋 Basic String Tests](#-basic-string-tests)
+    - [⚠️ Important Distinctions](#️-important-distinctions)
+    - [📏 String Length Operators](#-string-length-operators)
+    - [✨ Best Practice: Double Brackets](#-best-practice-double-brackets)
+    - [🧬 String Comparison Reference](#-string-comparison-reference)
+    - [🔗 Compound Operators and String Operators](#-compound-operators-and-string-operators)
+      - [💡 Example: Compound `if` Statement](#-example-compound-if-statement)
+        - [Code Explanation](#code-explanation)
+        - [Output](#output)
+    - [⛓️ Compound Expressions as Command Chains](#️-compound-expressions-as-command-chains)
+      - [🚀 Practical Example: Command Chaining](#-practical-example-command-chaining)
+        - [Code Explanation (Line-by-Line)](#code-explanation-line-by-line)
+        - [Predicted Output](#predicted-output)
+- [📁 File Test Operators in Bash](#-file-test-operators-in-bash)
+    - [📋 Operator Reference](#-operator-reference)
+    - [💡 Example: Testing File Existence (`-e`)](#-example-testing-file-existence--e)
+      - [Code Explanation](#code-explanation-1)
+      - [Expected Output](#expected-output)
+    - [🔗 Compound Operators and File Operators](#-compound-operators-and-file-operators)
+      - [Practical Example (From Scratch)](#practical-example-from-scratch)
+      - [Code Explanation](#code-explanation-2)
+      - [Expected Output](#expected-output-1)
+    - [⚠️ A Note on Compound Syntax](#️-a-note-on-compound-syntax)
+      - [Incorrect Syntax](#incorrect-syntax)
+      - [String Operator Syntax](#string-operator-syntax)
+      - [Numeric Operator Syntax](#numeric-operator-syntax)
+- [🧠 Conditional Logic with `if/else/fi` Statements](#-conditional-logic-with-ifelsefi-statements)
+    - [💡 Basic `if/else` Example](#-basic-ifelse-example)
+      - [Practical Example](#practical-example)
+      - [⚙️ Code Explanation (Line-by-Line)](#️-code-explanation-line-by-line)
+      - [📤 Output](#-output)
+    - [📜 Listing 4.2: `testvars.sh` (Checking Defined Variable)](#-listing-42-testvarssh-checking-defined-variable)
+      - [⚙️ Code Explanation (Line-by-Line)](#️-code-explanation-line-by-line-1)
+      - [📤 Output](#-output-1)
+    - [📜 Listing 4.3: `testvars2.sh` (Checking Undefined Variable)](#-listing-43-testvars2sh-checking-undefined-variable)
+      - [⚙️ Code Explanation (Line-by-Line)](#️-code-explanation-line-by-line-2)
+      - [📤 Output](#-output-2)
+- [🔄 The `case/esac` Statement](#-the-caseesac-statement)
+    - [📜 Listing 4.4: `case1.sh`](#-listing-44-case1sh)
+      - [⚙️ Code Explanation](#️-code-explanation)
+      - [📤 Output](#-output-3)
+    - [📜 Listing 4.5: `UserInfo.sh`](#-listing-45-userinfosh)
+      - [⚙️ Code Explanation](#️-code-explanation-1)
+      - [🚀 Practical Example (From Scratch)](#-practical-example-from-scratch)
+    - [📜 Listing 4.6: `StartChar.sh`](#-listing-46-startcharsh)
+      - [⚙️ Code Explanation](#️-code-explanation-2)
+      - [🚀 Sample Interaction](#-sample-interaction)
+    - [📜 Listing 4.7: `StartChar2.sh`](#-listing-47-startchar2sh)
+      - [⚙️ Code Explanation](#️-code-explanation-3)
+      - [🚀 Sample Interaction](#-sample-interaction-1)
+    - [📜 Listing 4.8: `StartChar3.sh`](#-listing-48-startchar3sh)
+      - [⚙️ Code Explanation](#️-code-explanation-4)
+- [✂️ Working with Strings in Shell Scripts](#️-working-with-strings-in-shell-scripts)
+    - [📜 Listing 4.9: `substrings.sh`](#-listing-49-substringssh)
+    - [📤 Script Output](#-script-output)
+    - [⚙️ Code Explanation (Line-by-Line)](#️-code-explanation-line-by-line-3)
+    - [⚠️ A Note on Negative Offsets](#️-a-note-on-negative-offsets)
+- [⚙️ Working with Loops](#️-working-with-loops)
+  - [🔄 Using a `for` Loop](#-using-a-for-loop)
+    - [Example 1: Basic File Iteration](#example-1-basic-file-iteration)
+      - [🛠️ Setup (From Scratch)](#️-setup-from-scratch)
+      - [📜 Script](#-script)
+      - [🔍 Code Explanation](#-code-explanation-3)
+      - [🖥️ Output](#️-output)
+    - [Example 2: Renaming Files (Listing 4.10: renamefiles.sh2)](#example-2-renaming-files-listing-410-renamefilessh2)
+      - [🛠️ Setup (From Scratch)](#️-setup-from-scratch-1)
+      - [📜 Script (renamefiles.sh2)](#-script-renamefilessh2)
+      - [🔍 Code Explanation (Line-by-Line)](#-code-explanation-line-by-line)
+      - [🖥️ Output](#️-output-1)
+- [📁 Checking Files in a Directory](#-checking-files-in-a-directory)
+  - [📜 Listing 4.11: `checkdir.sh` (Modern Version)](#-listing-411-checkdirsh-modern-version)
+    - [👨‍💻 Code Explanation](#-code-explanation-4)
+    - [📊 Script Analysis](#-script-analysis)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script)
+    - [🖥️ Example Output](#️-example-output)
+- [➿ Working with Nested Loops](#-working-with-nested-loops)
+  - [📜 Listing 4.12: `nestedloops.sh`](#-listing-412-nestedloopssh)
+    - [👨‍💻 Code Explanation](#-code-explanation-5)
+      - [The First Loop (Growing Triangle)](#the-first-loop-growing-triangle)
+      - [The Second Loop (Shrinking Triangle)](#the-second-loop-shrinking-triangle)
+    - [🔣 How the Alternating Symbol Works](#-how-the-alternating-symbol-works)
+    - [📈 Generalizing the Script](#-generalizing-the-script)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-1)
+    - [🖥️ Expected Output](#️-expected-output)
+- [🔄 **Using a While Loop**](#-using-a-while-loop)
+  - [📜 Listing 4.13: `while1.sh` (Modern Version)](#-listing-413-while1sh-modern-version)
+    - [👨‍💻 Code Explanation](#-code-explanation-6)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-2)
+    - [🖥️ Expected Output](#️-expected-output-1)
+  - [📜 Listing 4.14: `upperlowercase.sh` (Modern Version)](#-listing-414-upperlowercasesh-modern-version)
+  - [📜 Listing 4.15: `wordfile.txt`](#-listing-415-wordfiletxt)
+    - [👨‍💻 Code Explanation](#-code-explanation-7)
+      - [Inside the Loop](#inside-the-loop)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-3)
+    - [🖥️ Run \& Output](#️-run--output)
+- [🚦 **Combining While, Case, and If/Elif/Else Statements**](#-combining-while-case-and-ifelifelse-statements)
+  - [📜 Listing 4.16: `yesno.sh`](#-listing-416-yesnosh)
+    - [👨‍💻 Code Explanation](#-code-explanation-8)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-4)
+    - [🖥️ Example Output](#️-example-output-1)
+- [⏳ **Using an Until Loop**](#-using-an-until-loop)
+    - [Basic Syntax](#basic-syntax)
+  - [📜 Listing 4.17: `until1.sh` (Modern Version)](#-listing-417-until1sh-modern-version)
+    - [👨‍💻 Code Explanation](#-code-explanation-9)
+      - [Script Analysis](#script-analysis)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-5)
+    - [🖥️ Expected Output](#️-expected-output-2)
+- [🛠️ **User-Defined Functions in Bash**](#️-user-defined-functions-in-bash)
+  - [📝 Basic Syntax](#-basic-syntax)
+    - [1. A Simple "Hello" Function](#1-a-simple-hello-function)
+      - [📜 Script: `simple_hello.sh`](#-script-simple_hellosh)
+      - [🚀 How to Run](#-how-to-run)
+      - [🖥️ Output](#️-output-2)
+    - [2. Making Functions Useful with Parameters](#2-making-functions-useful-with-parameters)
+      - [📜 Script: `hello_param.sh`](#-script-hello_paramsh)
+      - [🚀 How to Run](#-how-to-run-1)
+      - [🖥️ Output](#️-output-3)
+    - [3. Adding Logic with `if`](#3-adding-logic-with-if)
+      - [📜 Script: `hello_check.sh`](#-script-hello_checksh)
+      - [🚀 How to Run](#-how-to-run-2)
+      - [🖥️ Output](#️-output-4)
+    - [4. Processing All Parameters with `while` and `shift`](#4-processing-all-parameters-with-while-and-shift)
+      - [📜 Script: `hello_all.sh`](#-script-hello_allsh)
+      - [🚀 How to Run](#-how-to-run-3)
+      - [🖥️ Output](#️-output-5)
+- [🗂️ **Creating a Simple Menu from Shell Commands**](#️-creating-a-simple-menu-from-shell-commands)
+  - [📜 Listing 4.18: `AppendRow.sh`](#-listing-418-appendrowsh)
+    - [👨‍💻 Code Explanation](#-code-explanation-10)
+      - [Initialization](#initialization)
+      - [The `addUser()` Function](#the-adduser-function)
+      - [The Main `while (true)` Loop](#the-main-while-true-loop)
+      - [The `case` Statement (Menu Logic)](#the-case-statement-menu-logic)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-6)
+    - [🖥️ Example Session](#️-example-session)
+- [📦 **Arrays in Bash**](#-arrays-in-bash)
+  - [📜 Listing 4.19: `Array1.sh`](#-listing-419-array1sh)
+    - [👨‍💻 Code Explanation](#-code-explanation-11)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-7)
+    - [🖥️ Expected Output](#️-expected-output-3)
+  - [🌐 Accessing All Array Items](#-accessing-all-array-items)
+  - [📜 Listing 4.20: `loadarray.sh`](#-listing-420-loadarraysh)
+    - [👨‍💻 Code Explanation](#-code-explanation-12)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-8)
+    - [🖥️ Expected Output](#️-expected-output-4)
+  - [📜 Listing 4.21: `update-array.sh`](#-listing-421-update-arraysh)
+    - [👨‍💻 Code Explanation](#-code-explanation-13)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-9)
+    - [🖥️ Expected Output](#️-expected-output-5)
+  - [🧠 Working with Arrays: Key Concepts](#-working-with-arrays-key-concepts)
+  - [📜 Listing 4.22: `fruits-array1.sh`](#-listing-422-fruits-array1sh)
+    - [👨‍💻 Code Explanation](#-code-explanation-14)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-10)
+    - [🖥️ Expected Output](#️-expected-output-6)
+  - [📜 Listing 4.23 \& 4.24: `array-from-file.sh`](#-listing-423--424-array-from-filesh)
+      - [LISTING 4.23: `names.txt`](#listing-423-namestxt)
+      - [LISTING 4.24: `array-from-file.sh`](#listing-424-array-from-filesh)
+    - [👨‍💻 Code Explanation](#-code-explanation-15)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-11)
+    - [🖥️ Expected Output](#️-expected-output-7)
+  - [📜 Listing 4.25: `array-function.sh`](#-listing-425-array-functionsh)
+    - [👨‍💻 Code Explanation](#-code-explanation-16)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-12)
+    - [🖥️ Expected Output](#️-expected-output-8)
+  - [📜 Listing 4.26: `array-loops1.sh`](#-listing-426-array-loops1sh)
+    - [👨‍💻 Code Explanation](#-code-explanation-17)
+    - [🚀 How to Create and Run This Script](#-how-to-create-and-run-this-script-13)
+    - [🖥️ Expected Output](#️-expected-output-9)
+
+</details>
+
+---
+
 This section introduces you to **operators**, **conditional logic**, and **loops** in **Bash scripting**.
 You’ll learn how to handle **numeric data**, **string variables**, and **control flow** to make your scripts smarter and more efficient.
 
-## ⚙️ **1. Arithmetic Operations & Variables**
+## ⚙️ 1. Arithmetic Operations & Variables
 
 In this section, you’ll learn:
 
@@ -14,14 +229,14 @@ In this section, you’ll learn:
 
 > 💡 The `expr` command is commonly used to perform arithmetic tasks such as **addition**, **subtraction**, **multiplication**, and **division** on numeric values.
 
-## 🧩 **2. Testing Variables, Files & Directories**
+## 🧩 2. Testing Variables, Files & Directories
 
 You’ll explore how to use the **`test` command** to evaluate:
 
 * 🔢 Variable comparisons
 * 📁 File and directory properties
 
-### 🔍 **Common Test Operators**
+### 🔍 Common Test Operators
 
 | 🧠 **Type**            | 📝 **Description**      | 💡 **Examples**                              |
 |-- |--- |---- |
@@ -30,16 +245,16 @@ You’ll explore how to use the **`test` command** to evaluate:
 | **File Tests**         | Check file properties   | `-f` (file), `-d` (directory), `-e` (exists) |
 | **Boolean (Logical)**  | Combine or negate tests | `-a` (AND), `-o` (OR), `!` (NOT)             |
 
-## 🧠 **3. Conditional Logic & Loops**
+## 🧠 3. Conditional Logic & Loops
 
 This part covers **decision-making** and **repetition** in Bash scripts.
 
-### 🧩 **Conditional Statements**
+### 🧩 Conditional Statements
 
 * `if / else / fi` – Perform actions based on conditions
 * `case / esac` – Multi-branch decision structure (like a switch statement)
 
-### 🔁 **Loop Structures**
+### 🔁 Loop Structures
 
 * `for` loops – Iterate through a list of values
 * **Nested for** loops – Loop inside another loop
@@ -48,7 +263,7 @@ This part covers **decision-making** and **repetition** in Bash scripts.
 
 You’ll also learn to **define and call custom functions** to make your code reusable and organized.
 
-## 🧮 **4. Working with Arrays**
+## 🧮 4. Working with Arrays
 
 Bash supports **arrays**, allowing you to store multiple values in a single variable.
 
