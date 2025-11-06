@@ -2446,3 +2446,261 @@ Here is a step-by-step trace of the loop's execution:
 8.  **End.**
   
 ---
+
+# 🛠️ **User-Defined Functions in Bash**
+
+The Bash shell provides many built-in commands, but its real power comes from letting you define your own functions. This means you can create custom, reusable blocks of code specific to your needs.
+
+You can define these functions directly in your terminal for a quick test, or (more commonly) place them inside a shell script to be used over and over.
+
+## 📝 Basic Syntax
+
+There are two simple rules to define a function in a shell script.
+
+  * **Rule 1:** Function blocks can begin with the function name followed by parentheses `()`.
+  * **Rule 2:** The code block *must* be enclosed in curly braces `{ ... }`.
+
+> **Note:** You may also see the keyword `function` used, like `function Hello()`. The version without `function` (e.g., `Hello()`) is more common and what we'll use here.
+
+### 1\. A Simple "Hello" Function
+
+This is the most basic example. We define a function and then call it by its name.
+
+#### 📜 Script: `simple_hello.sh`
+
+```bash
+#!/bin/bash
+
+# 1. Define the function
+# This block of code is now "owned" by the name "Hello"
+Hello()
+{
+ echo "Hello from a function"
+}
+
+# 2. Call the function
+# The script jumps up to the function, runs its code,
+# and then returns here to continue.
+Hello
+```
+
+#### 🚀 How to Run
+
+1.  **Create the file:**
+
+    ```bash
+    nano simple_hello.sh
+    ```
+
+2.  **Paste the code** from the block above. Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+3.  **Make it executable:**
+
+    ```bash
+    chmod +x simple_hello.sh
+    ```
+
+4.  **Execute the script:**
+
+    ```bash
+    ./simple_hello.sh
+    ```
+
+#### 🖥️ Output
+
+The output is exactly what you expect:
+
+```bash
+Hello from a function
+```
+
+### 2\. Making Functions Useful with Parameters
+
+A function that does the same thing every time isn't very flexible. We can make it more useful by passing it **arguments**, also known as **parameters**.
+
+Inside a function, you can access these parameters using special variables:
+
+  * `$1` = The first argument passed to the function.
+  * `$2` = The second argument.
+  * `...and so on.`
+
+#### 📜 Script: `hello_param.sh`
+
+```bash
+#!/bin/bash
+
+Hello()
+{
+ # $1 is a placeholder for the first argument
+ # passed when the function is called.
+ echo "Hello $1 how are you"
+}
+
+# Call the function and pass "Bob" as the first argument.
+# "Bob" will become $1 inside the function.
+Hello "Bob"
+```
+
+#### 🚀 How to Run
+
+1.  **Create the file:**
+
+    ```bash
+    nano hello_param.sh
+    ```
+
+2.  **Paste the code** above. Save and exit.
+
+3.  **Make it executable:**
+
+    ```bash
+    chmod +x hello_param.sh
+    ```
+
+4.  **Execute the script:**
+
+    ```bash
+    ./hello_param.sh
+    ```
+
+#### 🖥️ Output
+
+The `$1` variable was successfully replaced by "Bob":
+
+```bash
+Hello Bob how are you
+```
+
+### 3\. Adding Logic with `if`
+
+You can use conditional logic (like `if` statements) inside your functions to make them "smarter." This example checks if the user actually provided a parameter.
+
+#### 📜 Script: `hello_check.sh`
+
+```bash
+#!/bin/bash
+
+Hello()
+{
+ # Check if the string $1 is "not equal" (!=) to an empty string ("")
+ if [ "$1" != "" ]
+ then
+  # If it's NOT empty, print the name
+  echo "Hello $1"
+ else
+  # If it IS empty, print an error
+  echo "Please specify a name"
+ fi
+}
+
+# Let's test both conditions:
+
+echo "--- Calling with a name: ---"
+Hello "Alice"
+
+echo "" # Adds a blank line for readability
+
+echo "--- Calling without a name: ---"
+Hello
+```
+
+#### 🚀 How to Run
+
+1.  **Create the file:**
+
+    ```bash
+    nano hello_check.sh
+    ```
+
+2.  **Paste the code** above. Save and exit.
+
+3.  **Make it executable:**
+
+    ```bash
+    chmod +x hello_check.sh
+    ```
+
+4.  **Execute the script:**
+
+    ```bash
+    ./hello_check.sh
+    ```
+
+#### 🖥️ Output
+
+You can see the function's `if/else` logic working perfectly in both calls:
+
+```bash
+--- Calling with a name: ---
+Hello Alice
+
+--- Calling without a name: ---
+Please specify a name
+```
+
+### 4\. Processing All Parameters with `while` and `shift`
+
+What if you want to pass *many* arguments, not just one? You can use a `while` loop to process them all, one by one, using a special command called `shift`.
+
+#### 📜 Script: `hello_all.sh`
+
+```bash
+#!/bin/bash
+
+Hello()
+{
+ # This loop continues as long as $1 is not empty.
+ while [ "$1" != "" ]
+ do
+  echo "hello $1"
+  
+  # This is the magic! 'shift' does two things:
+  # 1. It deletes the current $1.
+  # 2. It "shifts" all other parameters down.
+  #    $2 becomes the new $1.
+  #    $3 becomes the new $2.
+  #    ...and so on.
+  #
+  # The loop then repeats, checking the NEW $1.
+  shift
+ done
+}
+
+# Call the function with three arguments: "a", "b", and "c"
+Hello a b c
+```
+
+#### 🚀 How to Run
+
+1.  **Create the file:**
+
+    ```bash
+    nano hello_all.sh
+    ```
+
+2.  **Paste the code** above. Save and exit.
+
+3.  **Make it executable:**
+
+    ```bash
+    chmod +x hello_all.sh
+    ```
+
+4.  **Execute the script:**
+
+    ```bash
+    ./hello_all.sh
+    ```
+
+#### 🖥️ Output
+
+The `while` loop iterated three times, "shifting" the parameters each time until none were left.
+
+```bash
+hello a
+hello b
+hello c
+```
+
+
+---
