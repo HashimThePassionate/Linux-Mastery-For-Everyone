@@ -2324,3 +2324,125 @@ $
 ```
 
 ---
+
+# ⏳ **Using an Until Loop**
+
+The `until` command allows you to execute a series of commands as long as a specific condition tests **false**. Once the condition becomes **true**, the loop stops.
+
+It's the perfect loop for when you're "waiting" for something to happen.
+
+### Basic Syntax
+
+```bash
+until command
+do
+ commands
+done
+```
+
+
+## 📜 Listing 4.17: `until1.sh` (Modern Version)
+
+This script illustrates how to use an `until` loop to iterate through a set of numbers. We've updated this version to use modern Bash arithmetic, which is much cleaner than the old `expr` command.
+
+```bash
+#!/bin/bash
+x=0
+
+until [ "$x" = "5" ]
+do
+ ((x++)) # Modern, clean way to increment x by 1
+ echo "x: $x"
+done
+```
+
+
+### 👨‍💻 Code Explanation
+
+Let's break down exactly what this script is doing.
+
+  * `#!/bin/bash`: The shebang. It tells the system this is a Bash script.
+  * `x=0`: We initialize a variable named `x` with the value `0`.
+  * `until [ "$x" = "5" ]`: This is the loop's control.
+      * `until`: This command starts the loop.
+      * `[ "$x" = "5" ]`: This is the **condition**. The loop will execute *as long as this condition is FALSE*.
+  * `do`: Marks the beginning of the code block to run.
+  * `((x++))`: This is **modern Bash arithmetic**. It's a clean and efficient way to take the current value of `x` and add 1 to it.
+  * `echo "x: $x"`: This prints the *new*, incremented value of `x` to the console.
+  * `done`: Marks the end of the loop. The script will now jump back up to the `until` line and re-check the condition.
+
+#### Script Analysis
+
+Listing 4.17 initializes the variable `x` with the value 0 and then enters the `until` loop. The body of the loop first increments `x` and then prints its new value. This cycle repeats *until* `x` finally equals 5. At that point, the condition `[ "$x" = "5" ]` becomes **true**, and the loop terminates execution.
+
+
+### 🚀 How to Create and Run This Script
+
+**1. Create the Script File**
+
+Use `nano` to create and open a new file named `until1.sh`:
+
+```bash
+nano until1.sh
+```
+
+**2. Paste the Code**
+
+Copy the **modern version** of the code from **Listing 4.17** above and paste it directly into the `nano` editor.
+
+To save and exit `nano`:
+
+  * Press **`Ctrl + O`** (Write Out) and then press **`Enter`** to save.
+  * Press **`Ctrl + X`** to exit.
+
+**3. Make the Script Executable**
+
+You need to give the file permission to run:
+
+```bash
+chmod +x until1.sh
+```
+
+**4. Run the Script**
+
+Execute the script from your terminal:
+
+```bash
+./until1.sh
+```
+
+
+### 🖥️ Expected Output
+
+When you run the script, you will see the following output printed to your console.
+
+```bash
+x: 1
+x: 2
+x: 3
+x: 4
+x: 5
+```
+
+Here is a step-by-step trace of the loop's execution:
+
+1.  **Start:** `x` is `0`.
+2.  **Check 1:** Is `x` (0) equal to 5? **No** (Condition is **false**). So, run the loop.
+      * `x` becomes 1.
+      * Print: `x: 1`
+3.  **Check 2:** Is `x` (1) equal to 5? **No** (Condition is **false**). So, run the loop.
+      * `x` becomes 2.
+      * Print: `x: 2`
+4.  **Check 3:** Is `x` (2) equal to 5? **No** (Condition is **false**). So, run the loop.
+      * `x` becomes 3.
+      * Print: `x: 3`
+5.  **Check 4:** Is `x` (3) equal to 5? **No** (Condition is **false**). So, run the loop.
+      * `x` becomes 4.
+      * Print: `x: 4`
+6.  **Check 5:** Is `x` (4) equal to 5? **No** (Condition is **false**). So, run the loop.
+      * `x` becomes 5.
+      * Print: `x: 5`
+7.  **Check 6:** Is `x` (5) equal to 5? **Yes** (Condition is **true**). Stop the loop.
+8.  **End.**
+  
+---
