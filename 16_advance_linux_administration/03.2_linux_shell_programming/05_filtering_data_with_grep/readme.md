@@ -397,3 +397,569 @@ grep '^\.\*\.$' lines.txt
 ```
 
 ---
+
+# 🔧 Useful Options for the `grep` Command
+
+There are many types of pattern-matching possibilities with the `grep` command. This section contains an eclectic mix of such commands to handle common scenarios.
+
+## 📁 Initial Setup: Creating the Example Files
+
+To follow these examples, you must first create a set of test files. The text assumes a directory with two `.sh` files, two `.txt` files, and two `.doc` files.
+
+Here is how to create them from scratch.
+
+**1. Create `abc1.txt`**
+This file will contain "abc" on one line.
+
+```bash
+nano abc1.txt
+```
+
+Paste this line into the file, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`):
+
+```
+this file has abc
+```
+
+**2. Create `ABC2.txt`**
+This file will contain "ABC" on two lines.
+
+```bash
+nano ABC2.txt
+```
+
+Paste these lines into the file, then save and exit:
+
+```
+ABC at start or ABC in middle or end in ABC
+ABCD DABC
+```
+
+**3. Create `abc3.sh`**
+This file will contain "abc" on three lines. We also add a line that *won't* match for a later example.
+
+```bash
+nano abc3.sh
+```
+
+Paste these lines into the file, then save and exit:
+
+```
+abc at start
+ends with -abc
+the abc is in the middle
+this line won't match
+```
+
+**4. Create `ABC4.sh`**
+This file will contain "ABC" on four lines, plus a blank line for a later example.
+
+```bash
+nano ABC4.sh
+```
+
+Paste these lines into the file, then save and exit:
+
+```
+ABC at start
+ends with ABC
+the ABC is in the middle
+# ABC in a comment
+
+```
+
+**5. Create Simulated `.doc` Files**
+`grep` can find plain text inside binary files (like `.doc` or `.pdf`), even if it's surrounded by formatting "gibberish." We can simulate this.
+
+Create `abc.doc`:
+
+```bash
+nano abc.doc
+```
+
+Paste this line and save:
+
+```
+^@!JUNK-abc-MOREJUNK$#
+```
+
+Create `ABC.doc`:
+
+```bash
+nano ABC.doc
+```
+
+Paste this line and save:
+
+```
+^@!JUNK-ABC-MOREJUNK$#
+```
+
+**6. Verify Your Files**
+If you list your files, your directory should now match the one from the examples.
+
+```bash
+ls *
+```
+
+**Output:**
+
+```
+ABC.doc   ABC2.txt  ABC4.sh   abc.doc   abc1.txt  abc3.sh
+```
+
+## 🛠️ Exploring `grep` Options
+
+Now that your files are ready, let's explore the options.
+
+### 1\. Basic Search (Default)
+
+This searches for occurrences of the string "abc" in all files in the current directory that have `.sh` as a suffix.
+
+```bash
+grep abc *sh
+```
+
+**Output:**
+
+```
+abc3.sh:abc at start
+abc3.sh:ends with -abc
+abc3.sh:the abc is in the middle
+```
+
+### 2\. Count Matches (-c)
+
+The `-c` option **c**ounts the number of *lines* that contain a match, not the total number of matches. Note that even though `ABC4.sh` has no matches (for lowercase "abc"), it still returns a count of zero.
+
+```bash
+grep -c abc *sh
+```
+
+**Output:**
+
+```
+ABC4.sh:0
+abc3.sh:3
+```
+
+### 3\. Match Special Characters (-e)
+
+The `-e` option lets you specify a pattern. This is essential if your pattern starts with a hyphen (`-`), which `grep` would normally interpret as an argument.
+
+```bash
+grep -e "-abc" *sh
+```
+
+**Output:**
+
+```
+abc3.sh:ends with -abc
+```
+
+### 4\. Match Multiple Patterns (also -e)
+
+The `-e` option also lets you match multiple patterns at once. This acts as a logical **OR**.
+
+```bash
+grep -e "-abc" -e "comment" *sh
+```
+
+**Output:**
+
+```
+ABC4.sh:# ABC in a comment
+abc3.sh:ends with -abc
+```
+
+### 5\. Case-Insensitive Match (-i)
+
+The `-i` option performs a case-**i**nsensitive match, finding "abc", "ABC", "Abc", etc.
+
+```bash
+grep -i abc *sh
+```
+
+**Output:**
+
+```
+ABC4.sh:ABC at start
+ABC4.sh:ends with ABC
+ABC4.sh:the ABC is in the middle
+ABC4.sh:# ABC in a comment
+abc3.sh:abc at start
+abc3.sh:ends with -abc
+abc3.sh:the abc is in the middle
+```
+
+### 6\. Invert Match (-v)
+
+The `-v` option "in**v**erts" the matching string. The output consists of only the lines that *do not* contain the specified string. (Note: "ABC" lines are shown because we did not use `-i`).
+
+```bash
+grep -v abc *sh
+```
+
+**Output:**
+
+```
+ABC4.sh:ABC at start
+ABC4.sh:ends with ABC
+ABC4.sh:the ABC is in the middle
+ABC4.sh:# ABC in a comment
+ABC4.sh:
+abc3.sh:this line won't match
+```
+
+### 7\. Case-Insensitive Invert Match (-iv)
+
+You can combine flags. `-iv` displays lines that do not contain the string, using a case-**i**nsensitive match.
+
+```bash
+grep -iv abc *sh
+```
+
+**Output:**
+
+```
+ABC4.sh:
+abc3.sh:this line won't match
+```
+
+### 8\. List Matching Filenames (-l)
+
+The `-l` option **l**ists only the *filenames* that contain a successful match. It stops searching a file as soon as it finds one match.
+
+Note that this matches the *contents* of files, not the filenames. The `abc.doc` file matches because the text "abc" is visible to `grep`, even though it's surrounded by formatting gibberish. This also works for XML, HTML, and .csv files.
+
+```bash
+grep -l abc *
+```
+
+**Output:**
+
+```
+abc.doc
+abc1.txt
+abc3.sh
+```
+
+### 9\. Case-Insensitive List (-il)
+
+This combines `-i` and `-l` to display the filenames that contain a specified string, using a case-insensitive match. This is very useful for checking file types like Word documents.
+
+```bash
+grep -il abc *doc
+```
+
+**Output:**
+
+```
+ABC.doc
+abc.doc
+```
+
+### 10\. Show Line Numbers (-n)
+
+The `-n` option prefixes each matching line with its line **n**umber.
+
+```bash
+grep -n abc *sh
+```
+
+**Output:**
+
+```
+abc3.sh:1:abc at start
+abc3.sh:2:ends with -abc
+abc3.sh:3:the abc is in the middle
+```
+
+### 11\. Suppress Filenames (-h)
+
+The `-h` option **h**ides the display of the filename for a successful match. This is useful when you are searching multiple files but want the output to look like you only searched one.
+
+```bash
+grep -h abc *sh
+```
+
+**Output:**
+
+```
+abc at start
+ends with -abc
+the abc is in the middle
+```
+
+## 📁 Setup Part 2: The `columns4.txt` File
+
+For the next series of examples, we will use a new file, `columns4.txt`.
+
+**Create `columns4.txt`:**
+
+```bash
+nano columns4.txt
+```
+
+Paste this content (from **Listing 5.2**) into the file and save it:
+
+```
+123 ONE TWO
+456 three four
+ONE TWO THREE FOUR
+five 123 six
+one two three
+four five
+```
+
+### 12\. Show Only the Match (-o)
+
+The `-o` option shows **o**nly the part of the line that actually matched the pattern, not the entire line.
+
+```bash
+grep -o one columns4.txt
+```
+
+**Output:**
+
+```
+one
+```
+
+### 13\. Show Match Position (-b)
+
+The `-b` option, when combined with `-o`, shows the **b**yte-offset (character position) of the matched string, starting from the beginning of the file.
+
+```bash
+grep -o -b one columns4.txt
+```
+
+**Output:**
+
+```
+58:one
+```
+
+  * **Explanation:** This means the 'o' in "one" is the 59th character in the file (since the offset starts at 0).
+
+### 14\. Recursive Search (-r)
+
+The `-r` option performs a **r**ecursive search, looking for the pattern in all files in the current directory *and all of its subdirectories*.
+
+The following command searches every file in the `/etc` directory and all its subdirectories.
+
+```bash
+grep -r abc /etc
+```
+
+*(Output is not shown as it will be different for every system.)*
+
+### 15\. Whole Word Match (-w)
+
+By default, `grep` matches substrings. "ABC" will match "ABCD". The `-w` option forces `grep` to match **w**hole **w**ords only.
+
+**First, the problem (standard `grep`):**
+
+```bash
+grep ABC *txt
+```
+
+**Output:**
+
+```
+ABC2.txt:ABC at start or ABC in middle or end in ABC
+ABC2.txt:ABCD DABC
+```
+
+**Now, the solution (with `-w`):**
+The line containing "ABCD" is now excluded.
+
+```bash
+grep -w ABC *txt
+```
+
+**Output:**
+
+```
+ABC2.txt:ABC at start or ABC in middle or end in ABC
+```
+
+### 16\. Colorized Output (`--color`)
+
+The `--color` switch displays the matching string in color, making it much easier to see.
+
+```bash
+grep --color abc *sh
+```
+
+**Output (text-only representation):**
+
+```
+abc3.sh:abc at start
+abc3.sh:ends with -abc
+abc3.sh:the abc is in the middle
+```
+
+## 🧠 Using Metacharacters with `grep`
+
+You can use regular expressions to find more complex patterns.
+
+### Finding Two Words on the Same Line (`.*`)
+
+You can use the metacharacters `.*` to find the occurrences of two words separated by *any number of intermediate characters* (`.` means "any character," and `*` means "zero or more of them").
+
+This command finds all lines that contain "one" and "three" *in that order*.
+
+```bash
+grep "one.*three" columns4.txt
+```
+
+**Output:**
+
+```
+one two three
+```
+
+### Inverting the Result (`-v`)
+
+You can "invert" the preceding result by using the `-v` switch. This finds all lines that *do not* contain "one" followed by "three".
+
+```bash
+grep -v "one.*three" columns4.txt
+```
+
+**Output:**
+
+```
+123 ONE TWO
+456 three four
+ONE TWO THREE FOUR
+five 123 six
+four five
+```
+
+### Case-Insensitive Regex (`-i`)
+
+This finds all lines that contain "one" and "three" (in that order), regardless of case.
+
+```bash
+grep -i "one.*three" columns4.txt
+```
+
+**Output:**
+
+```
+ONE TWO THREE FOUR
+one two three
+```
+
+### Inverting the Case-Insensitive Result (`-iv`)
+
+This finds all lines that *do not* contain "one" followed by "three", regardless of case.
+
+```bash
+grep -iv "one.*three" columns4.txt
+```
+
+**Output:**
+
+```
+123 ONE TWO
+456 three four
+five 123 six
+four five
+```
+
+### Searching for OR (`\|`)
+
+Sometimes you need to search for one string *or* another. You can do this by "escaping" the pipe character (`|`). This command finds all files that contain the string "start" OR the string "end".
+
+```bash
+grep -l 'start\|end' *
+```
+
+**Output:**
+
+```
+ABC2.txt
+ABC4.sh
+abc3.sh
+```
+
+## 🔠 Character Classes and the `grep` Command
+
+This section contains simple one-line commands that combine `grep` with character classes. These are standard regex patterns for common character types.
+
+### `[[:alpha:]]` (Matches any alphabetic letter)
+
+```bash
+echo "abc" | grep '[[:alpha:]]'
+```
+
+**Output:** `abc`
+
+```bash
+echo "123" | grep '[[:alpha:]]'
+```
+
+**Output:** *(returns nothing, no match)*
+
+```bash
+echo "abc123" | grep '[[:alpha:]]'
+```
+
+**Output:** `abc123` *(The line matches because it contains alphabetic characters)*
+
+### `[:alnum:]` (Matches any alphanumeric character: letter or number)
+
+```bash
+echo "abc" | grep '[:alnum:]'
+```
+
+**Output:** `abc`
+
+```bash
+echo "123" | grep '[:alnum:]'
+```
+
+**Output:** `123` *(The line matches because it contains alphanumeric characters)*
+
+```bash
+echo "abc123" | grep '[:alnum:]'
+```
+
+**Output:** `abc123`
+
+### `[0-9]` (Matches any digit)
+
+```bash
+echo "abc" | grep '[0-9]'
+```
+
+**Output:** *(returns nothing, no match)*
+
+```bash
+echo "123" | grep '[0-9]'
+```
+
+**Output:** `123`
+
+```bash
+echo "abc123" | grep '[0-9]'
+```
+
+**Output:** `abc123`
+
+### Combining Character Classes with `-w` (Whole Word)
+
+This is a great example of how options combine. Does the line `abc123` contain a "whole word" that is *only* a digit?
+
+```bash
+echo "abc123" | grep -w '[0-9]'
+```
+
+**Output:** *(returns nothing, no match)*
+
+  * **Explanation:** The line `abc123` *contains* digits, so it matches `grep '[0-9]'`. However, the *only* "word" on that line is `abc123`. Since this word is not composed *only* of digits, it fails the `-w` (whole word) test.
+
+---
