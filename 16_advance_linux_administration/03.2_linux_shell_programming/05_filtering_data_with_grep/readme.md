@@ -963,3 +963,322 @@ echo "abc123" | grep -w '[0-9]'
   * **Explanation:** The line `abc123` *contains* digits, so it matches `grep '[0-9]'`. However, the *only* "word" on that line is `abc123`. Since this word is not composed *only* of digits, it fails the `-w` (whole word) test.
 
 ---
+
+# 🧮 Working with the `-c` (Count) Option in `grep`
+
+Consider a scenario in which a directory (such as a log directory) has files created by an outside program. Your task is to write a shell script that determines which (if any) of the files contain *exactly two* occurrences of a string.
+
+After finding those files, you might perform additional processing (e.g., email these specific log files to a sysadmin for investigation). One solution involves the `-c` (count) option for `grep`, followed by additional `grep` commands to filter those counts.
+
+## 📁 Setup: Create the Example Files
+
+First, let's create the data files this section assumes.
+
+**1. Create `hello1.txt`**
+This file will contain one match.
+
+```bash
+nano hello1.txt
+```
+
+Paste this line into the file, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`):
+
+```
+hello world1
+```
+
+**2. Create `hello2.txt`**
+This file will contain two matches.
+
+```bash
+nano hello2.txt
+```
+
+Paste these lines into the file, then save and exit:
+
+```
+hello world2
+hello world2 second time
+```
+
+**3. Create `hello3.txt`**
+This file will contain three matches.
+
+```bash
+nano hello3.txt
+```
+
+Paste these lines into the file, then save and exit:
+
+```
+hello world3
+hello world3 two
+hello world3 three
+```
+
+
+### 1\. The Basic Count (`-c`)
+
+Let's start by just counting the occurrences of "hello" in all `.txt` files.
+
+  * `2>/dev/null` is used to keep warnings and errors (like "directory not found" if `*txt` matches nothing) from cluttering up the output.
+
+<!-- end list -->
+
+```bash
+grep -c hello hello*txt 2>/dev/null
+```
+
+**Output:**
+
+```
+hello1.txt:1
+hello2.txt:2
+hello3.txt:3
+```
+
+For comparison, if you used the `-l` (list filenames) option, you'd get this:
+
+```bash
+grep -l hello hello*txt 2>/dev/null
+```
+
+**Output:**
+
+```
+hello1.txt
+hello2.txt
+hello3.txt
+```
+
+The `-l` option is not useful here because it doesn't tell us *how many* matches a file has, only that it has at least one.
+
+### 2\. Finding Files with *Exactly* Two Matches
+
+Now, let's pipe the output of our first command into a *second* `grep` to find only the lines that end with `:2`.
+
+```bash
+grep -c hello hello*txt 2>/dev/null | grep ":2$"
+```
+
+**Output:**
+
+```
+hello2.txt:2
+```
+
+> **Why use `":2$"` instead of just `"2$"`?**
+>
+> We use the colon (`:`) in our pattern to be precise.
+>
+>   * `grep ":2$"` matches lines that end *exactly* with `:2`.
+>   * If we only used `grep "2$"` (without the colon), we would *also* match files with 12, 32, or 142 matches (since their output would be `:12`, `:32`, `:142`, which also "end with 2").
+>
+> The `$` is a regex **metacharacter** that "anchors" the search to the **end of the line**.
+
+### 3\. Finding Files with "Two or More" Matches
+
+What if we wanted to find files with "two or more" matches (as in the "2 or more errors in a log" scenario)?
+
+This is where things get clever. Instead of a complex regex to match `:2`, `:3`, `:4`, etc., it's much easier to **invert** the search (`-v`) and **exclude** counts of `0` or `1`.
+
+```bash
+grep -c hello hello*txt 2>/dev/null | grep -v ':[0-1]$'
+```
+
+**Output:**
+
+```
+hello2.txt:2
+hello3.txt:3
+```
+
+  * **Breakdown:**
+      * `grep -c ...`: Generates the list of files and their counts (`hello1.txt:1`, `hello2.txt:2`, etc.).
+      * `|`: Pipes that list to the next command.
+      * `grep -v ':[0-1]$'`: This filters the list.
+          * `-v`: Inverts the match. It keeps only the lines that *do not* match.
+          * `'...'`: The pattern to avoid.
+          * `:[0-1]`: Matches a literal colon followed by *either* a 0 or a 1.
+          * `$`: Anchors it to the end of the line.
+      * **Result:** This command says, "Show me all lines *except* for those ending in `:0` or `:1`."
+
+### 4\. Cleaning the Output with `cut`
+
+In a real-world application, you would want to strip off everything after the colon to return *only* the filenames. We can use the `cut` command for this.
+
+```bash
+grep -c hello hello*txt 2>/dev/null | grep -v ':[0-1]$' | cut -d":" -f1
+```
+
+**Output:**
+
+```
+hello2.txt
+hello3.txt
+```
+
+  * **Final Pipeline Breakdown:**
+    1.  `grep -c`: Counts the lines (`hello2.txt:2`, `hello3.txt:3`).
+    2.  `grep -v`: Filters the counts, keeping only 2 or more.
+    3.  `cut -d":" -f1`: This is the new part.
+          * `-d":"`: Sets the **d**elimiter to a colon (`:`).
+          * `-f1`: Selects **f**ield number **1** (the part *before* the delimiter).
+
+
+# 🎯 Matching a Range of Lines
+
+In Section 1, you saw how to use `head` and `tail` to display a range of lines. Now, let's combine that with `grep` to search for a string *within* that specific range.
+
+## 📁 Setup: Create the `longfile.txt`
+
+Let's create a file to test with.
+
+```bash
+nano longfile.txt
+```
+
+Paste this content into the file, then save and exit:
+
+```
+line 1
+line 2
+line 3
+line 4
+line 5
+line 6
+and each line
+contains
+one or
+more words
+and if you
+use the cat
+command the
+file contents
+scroll
+line 16
+line 17
+line 18
+line 19
+line 20
+```
+
+### 1\. Isolating the Line Range
+
+This command displays lines 7 through 15 of `longfile.txt`.
+
+```bash
+cat -n longfile.txt | head -15 | tail -9
+```
+
+  * **Breakdown:**
+    1.  `cat -n longfile.txt`: **Cat**enates the file, and `-n` adds line **n**umbers.
+    2.  `| head -15`: Pipes the numbered output to `head`, which takes only the first 15 lines.
+    3.  `| tail -9`: Pipes those 15 lines to `tail`, which takes the last 9 lines. (The last 9 lines of the first 15 are lines 7, 8, 9, 10, 11, 12, 13, 14, and 15).
+
+**Output:**
+
+```
+     7	and each line
+     8	contains
+     9	one or
+    10	more words
+    11	and if you
+    12	use the cat
+    13	command the
+    14	file contents
+    15	scroll
+```
+
+### 2\. Adding `grep` (The Simple Search)
+
+This command displays the subset of lines 7 through 15 that contain the string "and".
+
+```bash
+cat -n longfile.txt | head -15 | tail -9 | grep "and"
+```
+
+**Output:**
+
+```
+     7	and each line
+    11	and if you
+    13	command the
+```
+
+  * **Problem:** This worked, but it also matched `command`. We only wanted the word "and".
+
+### 3\. The "Whitespace" Problem
+
+Let's try to be more specific by including a space after the word. This excludes "command".
+
+```bash
+cat -n longfile.txt | head -15 | tail -9 | grep "and "
+```
+
+**Output:**
+
+```
+     7	and each line
+    11	and if you
+```
+
+  * **New Problem:** This works, but it excludes lines that might end in the word "and" (because they would not have a space after them).
+
+### 4\. The "Whole Word" Solution (`-w`)
+
+If you really want to match a specific *word*, it is best to use the `-w` (whole word) tag. This is smart enough to handle all the variations (like spaces, punctuation, or end-of-line) automatically.
+
+```bash
+cat -n longfile.txt | head -15 | tail -9 | grep -w "and"
+```
+
+**Output:**
+
+```
+     7	and each line
+    11	and if you
+```
+
+### 5\. Anchoring to the Start of a Line (`^`)
+
+The use of whitespace is safer if you are looking for something at the *beginning* or *end* of a line. This is common when reading log files or structured text where the first word is often important (like a tag `ERROR` or a date).
+
+This command displays the lines that *start with* the word "and". (We'll remove `cat -n` so the line numbers don't interfere with the `^` anchor).
+
+```bash
+cat longfile.txt | head -15 | tail -9 | grep "^and "
+```
+
+**Output:**
+
+```
+and each line
+and if you
+```
+
+
+### 💡 A Note on Efficiency: `cat` vs. Direct Read
+
+Recall that using `cat` to display a file and *then* piping it to another command is often less efficient.
+
+**Less Efficient Style:**
+
+```bash
+cat longfile.txt | head -15 | tail -9 | grep "^and "
+```
+
+This command uses three processes (`cat`, `head`, `tail`) before `grep` even starts.
+
+**More Efficient Style:**
+
+```bash
+head -15 longfile.txt | tail -9 | grep "^and "
+```
+
+This command uses only two processes (`head`, `tail`) because `head` can read the filename directly.
+
+**So why use `cat -n` at all?**
+You should only add an extra command to a pipe if it's *adding value*. In our first examples, `cat -n` was valuable because it added the line numbers for us to see. If you don't need the line numbers, it's better to start with the first command that can read the file directly.
+
+---
