@@ -806,189 +806,387 @@ This new command uses `find` to locate *all* files (`.`) and then `grep` to filt
 
 ---
 
-# 🔀 Datasets with Multiple Delimiters
+# 💾 Working with Datasets
 
-This section demonstrates how to use `sed` to "clean" a file that uses multiple different characters as delimiters (separators).
+The `sed` utility is useful for manipulating the contents of text files. For example, you can print ranges of lines and subsets of lines that match a regular expression. You can also perform search and replace on the lines in a text file. This section contains examples that illustrate how to perform such functionality.
 
-### 📁 Listing 6.2: `delimiter1.txt`
 
-First, let's create the sample dataset, which contains `|`, `:`, and `^` as delimiters.
+## Print Lines
+
+Listing 6.4 is used for several examples in this section. The text notes that the file has "doubled-spaced lines," which is critical for understanding the output.
+
+### 📁 Listing 6.4: `test4.txt`
+
+To create this file, we must add the blank lines for the "double-spacing."
 
 **1. Create the File**
 
 ```bash
-nano delimiter1.txt
+nano test4.txt
 ```
 
 **2. Paste the Content**
-Copy the following lines into the `nano` editor, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+Copy the following lines into the `nano` editor, including the blank lines, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
 
 ```
-1000|Jane:Edwards^Sales
-2000|Tom:Smith^Development
-3000|Dave:Del Ray^Marketing
+abc
+
+def
+
+abc
+
+abc
 ```
 
------
 
-### 📜 Listing 6.3: `delimiter1.sh`
+### 1\. Print a Numeric Range (Lines 1-3)
 
-Next, here is the shell script that illustrates how to replace all the various delimiters in `delimiter1.txt` with a single comma (`,`).
-
-**1. Create the Script**
-
-```bash
-nano delimiter1.sh
-```
-
-**2. Paste the Code**
-Copy the following code into `nano`, then save and exit.
-
-```bash
-#!/bin/bash
-inputfile="delimiter1.txt"
-cat $inputfile | sed -e 's/:/,/' -e 's/|/,/' -e 's/\^/,/'
-```
-
-**3. Make the Script Executable**
-
-```bash
-chmod +x delimiter1.sh
-```
-
-**4. Run the Script**
-
-```bash
-./delimiter1.sh
-```
-
------
-
-### 🖥️ Output
-
-The output from running `delimiter1.sh` is shown here:
-
-```
-1000,Jane,Edwards,Sales
-2000,Tom,Smith,Development
-3000,Dave,Del Ray,Marketing
-```
-
-### 👨‍💻 Code Explanation
-
-As you can see, the second line in `delimiter1.sh` is simple yet powerful:
-
-```bash
-cat $inputfile | sed -e 's/:/,/' -e 's/|/,/' -e 's/\^/,/'
-```
-
-  * **`cat $inputfile`**: Reads the content of `delimiter1.txt`.
-  * **`| sed ...`**: Pipes that content into `sed`.
-  * **`-e 's/:/,/'`**: The first `-e` (expression) flag tells `sed` to substitute (`s`) the first colon (`:`) it finds with a comma (`,`).
-  * **`-e 's/|/,/'`**: The second expression tells `sed` to also substitute the pipe character (`|`) with a comma.
-  * **`-e 's/\^/,/'`**: The third expression tells `sed` to also substitute the caret character (`^`) with a comma. The caret (`^`) is a special metacharacter (meaning "start of line"), so we **must escape it with a backslash (`\`)** to tell `sed` to treat it as a literal character.
-
-You can extend the `sed` command with as many `-e` flags as you require to create a dataset with a single delimiter between values.
-
------
-
-### ⚠️ A Note on Safety
-
-This kind of transformation can be **unsafe** unless you have checked that your *new* delimiter (in this case, a comma `,`) is not already in use in the original data.
-
-For that, a `grep` command is useful. You want the result to be zero.
-
-```bash
-grep -c ',' delimiter1.txt
-```
-
-**Output:**
-
-```
-0
-```
-
-This confirms that the comma (`,`) does not exist in our input file, making it a safe choice for a new delimiter.
-
------
-
-## 🧐 Useful Switches in `sed`
-
-The three command-line switches **`-n`**, **`-e`**, and **`-i`** are useful when you specify them with the `sed` command.
-
-### 1\. The `-n` Switch (Suppress Output)
-
-As a review, specify **`-n`** when you want to **suppress** the printing of the basic stream output (where `sed` prints every line by default).
-
-If you run this command, *nothing* will be printed. The substitution happens, but the default printing is turned off, and you haven't given it a `p` (print) command.
-
-```bash
-sed -n 's/foo/bar/'
-```
-
-### 2\. The `-n` Switch with `/p` (Print Only Matches)
-
-Specify **`-n`** and end with **`/p`** when you want to print *only* the lines where a substitution successfully occurred.
-
-```bash
-sed -n 's/foo/bar/p'
-```
-
-  * **`-n`**: Suppresses all default output.
-  * **`.../p`**: Prints *only* the lines that were successfully modified by the `s` command.
-
-### 3\. The `-e` Switch (Multiple Commands)
-
-We briefly touched on using **`-e`** to do multiple substitutions, but it can also be used to combine other commands. This syntax lets us separate the commands in the last example:
-
-```bash
-sed -n -e 's/foo/bar/' -e 'p'
-```
-
-  * **`-n`**: Suppresses default output.
-  * **`-e 's/foo/bar/'`**: The first expression, which performs the substitution.
-  * **`-e 'p'`**: The second expression, which is an unconditional **p**rint command. This combination will substitute "foo" with "bar" and then print *every* line in the file (in its new, substituted state).
-
------
-
-### 🧠 Advanced Example: Inserting Characters
-
-A more advanced example that hints at the flexibility of `sed` involves the insertion of a character after a fixed number of positions.
+The following code snippet prints the first 3 lines in `test4.txt`. We used this syntax before when deleting rows; it is equally useful for printing.
 
 #### 📜 Code Snippet
 
-Consider the following code snippet:
+```bash
+cat test4.txt | sed -n "1,3p"
+```
+
+*(Note: `sed -n "1,3p" test4.txt` is a more efficient version that produces the same output.)*
+
+#### 🖥️ Output
+
+```
+abc
+
+def
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`cat test4.txt`**: Reads the file's contents.
+  * **`| sed ...`**: Pipes the contents to `sed`.
+  * **`-n`**: This is a crucial flag. It **n**otifies `sed` to *not* print every line by default.
+  * **`"1,3p"`**: This is the command.
+      * **`1,3`**: This is an **address range**. It selects lines 1, 2, and 3.
+      * **`p`**: This is the **p**rint command. It tells `sed` to print the lines that match the address range.
+  * **Result**: The script prints Line 1 ("abc"), Line 2 (blank), and Line 3 ("def").
+
+
+### 2\. Print a Numeric Range (Lines 3-5)
+
+The following code snippet prints lines 3 through 5 in `test4.txt`.
+
+#### 📜 Code Snippet
 
 ```bash
-echo "ABCDEFGHIJKLMNOPQRSTUVWXYZ" | sed "s/.\{3\}/&\n/g"
+cat test4.txt | sed -n "3,5p"
 ```
 
 #### 🖥️ Output
 
-The output from the preceding command is here:
-
 ```
-ABCnDEFnGHInJKLnMNOnPQRnSTUnVWXnYZ
-```
+def
 
-*(Note: This literal output `...n...` suggests the author's environment or a typo in the text, as most modern `sed` implementations would interpret `\n` as an actual newline. We will explain the command as written.)*
+abc
+```
 
 #### 👨‍💻 Code Explanation
 
-While the above example does not seem especially useful, consider a large text stream with no line breaks (everything on one line). You could use something like this to insert newline characters, or something else to break the data into easier-to-process chunks.
+This works just like the previous example.
 
-It is possible to work through exactly what `sed` is doing by looking at each element of the command:
+  * **`"3,5p"`**: The address range selects lines 3, 4, and 5.
+  * **Result**: The script prints Line 3 ("def"), Line 4 (blank), and Line 5 ("abc").
 
-  * **`s/ ... / ... /g`**: This is a **g**lobal **s**ubstitution.
-  * **`.\{3\}`**: This is the pattern to *find*.
-      * **`.`**: The dot is a metacharacter that matches **any single character**.
-      * **`\{3\}`**: This is a **repetition operator**. It means "match the preceding item (the dot) *exactly 3 times*."
-      * The backslashes (`\`) are required because `{` and `}` are special metacharacters in `sed`, and this tells `sed` to treat them as part of the operator, not as literal characters.
-  * **`&\n`**: This is the *replacement* string.
-      * **`&`**: This is a special `sed` variable. It represents **the entire matched text**. For the first match, `&` is "ABC". For the second, it's "DEF", and so on.
-      * **`\n`**: This is the text to insert *after* the matched text. As the text's explanation implies, "The n is clear enough in the replacement column," and the output shows a literal `n`.
-  * **`g`**: The **g**lobal flag, which means "to repeat" this process for every 3-character chunk on the line, not just the first one.
 
-**In plain English, the command does this:** "Find every 3-character sequence. Replace it with *itself* (`&`) followed by the character `n`. Do this globally."
+### 3\. Duplicating All Lines
+
+The following code snippet takes advantage of `sed`'s default behavior. By *omitting* the `-n` flag, `sed` prints every line automatically. The `p` command then adds a *second* print for every line.
+
+#### 📜 Code Snippet
+
+```bash
+cat test4.txt | sed "p"
+```
+
+#### 🖥️ Output
+
+```
+abc
+abc
+
+def
+def
+
+abc
+abc
+
+abc
+abc
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`sed "p"`**:
+      * **No `-n`**: `sed`'s default behavior is to print every line it reads.
+      * **`p`**: The **p**rint command is given *without an address*, so it runs for *every* line.
+  * **Result**: For each line `sed` reads:
+    1.  It prints the line by default.
+    2.  It executes the `p` command, printing the line again.
+
+
+### 4\. Chaining `sed` Commands
+
+The following code snippet prints the first three lines and then capitalizes the string "abc". This demonstrates how `sed`'s default output and the `p` command interact.
+
+#### 📜 Code Snippet
+
+```bash
+cat test4.txt | sed -n "1,3p" | sed "s/abc/ABC/p"
+```
+
+#### 🖥️ Output
+
+```
+ABC
+ABC
+
+def
+```
+
+#### 👨‍💻 Code Explanation
+
+This is a two-stage pipeline.
+
+  * **Stage 1: `cat test4.txt | sed -n "1,3p"`**
+
+      * This command runs first. As we saw in Example 1, its output is:
+        ```
+        abc
+
+        def
+        ```
+
+  * **Stage 2: `| sed "s/abc/ABC/p"`**
+
+      * This output (3 lines) is "piped" as the input to the *second* `sed` command.
+      * This second command *does not* have `-n`, so it will print every line it receives by default.
+      * **Input Line 1 ("abc"):**
+        1.  `s/abc/ABC/` substitute command runs. The line becomes "ABC".
+        2.  `sed` prints the line by default: `ABC`.
+        3.  The substitution *was successful*, so the **`p`** flag fires, printing the line again: `ABC`.
+      * **Input Line 2 (blank):**
+        1.  `s/abc/ABC/` substitute command runs. No match. The line remains blank.
+        2.  `sed` prints the line by default: (a blank line).
+        3.  The substitution *failed*, so the `p` flag does *not* fire.
+      * **Input Line 3 ("def"):**
+        1.  `s/abc/ABC/` substitute command runs. No match. The line remains "def".
+        2.  `sed` prints the line by default: `def`.
+        3.  The substitution *failed*, so the `p` flag does *not* fire.
+
+This is why "ABC" is duplicated, but the blank line and "def" are not.
+
+
+
+## 🔠 Character Classes and `sed`
+
+You can also use regular expressions with `sed`.
+
+### 📁 Setup: `columns4.txt`
+
+As a reminder, here are the contents of `columns4.txt`. (If you don't have it, create it with `nano columns4.txt`).
+
+```
+123 ONE TWO
+456 three four
+ONE TWO THREE FOUR
+five 123 six
+one two three
+four five
+```
+
+*(Note: The outputs in this section have been corrected from the original text, which had several errors. The outputs shown here are the correct results for the commands given.)*
+
+
+### 1\. Match Lines Containing Digits
+
+As our first example, the following code snippet illustrates how to match lines that contain any digit from 0-9.
+
+#### 📜 Code Snippet
+
+```bash
+cat columns4.txt | sed -n '/[0-9]/p'
+```
+
+#### 🖥️ Output
+
+```
+123 ONE TWO
+456 three four
+five 123 six
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`sed -n`**: Suppresses default printing.
+  * **`'/[0-9]/p'`**: This is the command.
+      * **`/[0-9]/`**: This is the pattern. The character class `[0-9]` matches any single character that is a digit.
+      * **`p`**: If the pattern is found *anywhere* on the line, print the line.
+  * **Result**: It prints the three lines that contain digits.
+
+
+### 2\. Match Lines Containing Lowercase Letters
+
+The following code snippet illustrates how to match lines that contain any lowercase letter.
+
+#### 📜 Code Snippet
+
+```bash
+cat columns4.txt | sed -n '/[a-z]/p'
+```
+
+#### 🖥️ Output
+
+```
+456 three four
+five 123 six
+one two three
+four five
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`'/[a-z]/p'`**: The character class `[a-z]` matches any single lowercase letter.
+  * **Result**: It prints the four lines that contain at least one lowercase letter.
+
+
+### 3\. Match Lines Containing Specific Digits
+
+The following code snippet illustrates how to match lines that contain the numbers 4, 5, or 6.
+
+#### 📜 Code Snippet
+
+```bash
+cat columns4.txt | sed -n '/[4-6]/p'
+```
+
+#### 🖥️ Output
+
+```
+456 three four
+five 123 six
+four five
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`'/[4-6]/p'`**: The character class `[4-6]` matches any single digit that is 4, 5, or 6.
+  * **Result**: It prints "456 three four" (matches `4`, `5`, `6`), "five 123 six" (matches `6`), and "four five" (matches `4`, `5`).
+
+
+### 4\. Match Lines with Complex Regex
+
+The following code snippet illustrates how to match lines that start with any two characters followed by "E" (or "EE", "EEE", etc.).
+
+#### 📜 Code Snippet
+
+```bash
+cat columns4.txt | sed -n '/^.\{2\}EE*/p'
+```
+
+#### 🖥️ Output
+
+```
+ONE TWO THREE FOUR
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`'/^.\{2\}EE*/p'`**: This is the pattern.
+      * **`^`**: Anchors the search to the **start of the line**.
+      * **`.\{2\}`**: Matches `.` (any single character) exactly **2** times. The braces must be escaped with `\`. This matches "ON".
+      * **`EE*`**: Matches the literal character "E", followed by `E*` (zero or more "E"s). This pattern effectively means "at least one E".
+  * **Result**: The command matches "ONE...", which starts with two characters ("ON") followed by an "E".
+
+
+
+## 🧹 Removing Control Characters
+
+Control characters (like carriage returns or tabs) of any kind can be removed by `sed` just like any other character.
+
+### 📁 Listing 6.5: `controlchars.txt`
+
+First, you must create this file, which contains literal control characters. You cannot just type `^` and `M`.
+
+**1. Create the File**
+
+```bash
+nano controlchars.txt
+```
+
+**2. Type the Content:**
+
+  * For the first line, type `1 carriage return`. Then, to insert the `^M` character, press **`Ctrl+V`** followed by **`Ctrl+M`**.
+  * Do the same for the second line: type `2 carriage return`, then **`Ctrl+V`**, **`Ctrl+M`**.
+  * For the third line, type `1 tab character`. Then, to insert the `^I` character, press the **`Tab`** key on your keyboard.
+
+The file will look like this in `nano`:
+
+```
+1 carriage return^M
+2 carriage return^M
+1 tab character^I
+```
+
+Save and exit.
+
+
+### 1\. The Removal Command
+
+The following command removes the carriage return (`^M`) and the tab (`^I`) characters from the text file.
+
+#### 📜 Code Snippet
+
+```bash
+cat controlChars.txt | sed "s/^M//" | sed "s/	//"
+```
+
+*(Note: The original text's `sed "s/ //"` is ambiguous. To remove a tab, you must either use a literal tab or a tab-specific regex. Here, we are inserting a literal tab character inside the quotes, as the text implies.)*
+
+#### 👨‍💻 Code Explanation
+
+This is a two-stage `sed` pipeline:
+
+1.  **`sed "s/^M//"`**: The first `sed` command reads the file. To type the `^M`, you must press **`Ctrl+V`**, **`Ctrl+M`** in your terminal. This command finds and removes all carriage return characters.
+2.  **`| sed "s/	//"`**: The "cleaned" output is piped to a second `sed`. To type the tab character here, you must press **`Ctrl+V`**, then **`Tab`**. This command finds and removes all tab characters.
+
+
+### 2\. Verifying the Removal
+
+The text notes that if you redirect the output to a file, you can verify that the control characters are gone.
+
+**1. Run the Command and Redirect**
+
+```bash
+# To type ^M: Ctrl+V, Ctrl+M
+# To type the tab: Ctrl+V, Tab
+cat controlChars.txt | sed "s/^M//" | sed "s/	//" > nocontrol1.txt
+```
+
+**2. Verify with `cat -t`**
+The `cat -t` command (or `-T` on some systems) is used to **t**est and display tabs as `^I` and other non-printing characters. If the file is clean, the output will have no `^I` or `^M` symbols.
+
+#### 📜 Code Snippet
+
+```bash
+cat -t nocontrol1.txt
+```
+
+#### 🖥️ Output
+
+```
+1 carriage return
+2 carriage return
+1 tab character
+```
+
+The file is now clean of all control characters.
 
 ---
