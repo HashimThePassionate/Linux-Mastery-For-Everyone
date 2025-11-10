@@ -2,6 +2,103 @@
 
 In the prior section, we learned how to reduce a stream of data to only the contents that interested us. In this section, we learn how to **transform** that data using the Unix `sed` utility, which is an acronym for “stream editor.”
 
+<details>
+<summary><strong>📋 Table of Contents</strong></summary>
+
+**Core Concepts**
+- [📚 What You Will Learn](#-what-you-will-learn)
+- [❓ What is the `sed` Command?](#-what-is-the-sed-command)
+  - [🔄 The `sed` Execution Cycle](#-the-sed-execution-cycle)
+
+**Pattern Matching**
+- [🎯 Matching String Patterns Using `sed`](#-matching-string-patterns-using-sed)
+  - [📁 Setup: Create the Example File](#-setup-create-the-example-file)
+  - [1. Basic Pattern Matching (Printing Matches)](#1-basic-pattern-matching-printing-matches)
+  - [2. Efficiency: `cat` vs. Direct File Read](#2-efficiency-cat-vs-direct-file-read)
+  - [3. What Happens If You Omit the `-n`? (Duplication)](#3-what-happens-if-you-omit-the--n-duplication)
+  - [4. Matching a Range of Lines](#4-matching-a-range-of-lines)
+
+**String Substitution & Deletion**
+- [🔄 Substituting String Patterns Using `sed`](#-substituting-string-patterns-using-sed)
+  - [1. Basic Substitution (`s/find/replace/`)](#1-basic-substitution-sfindreplace)
+  - [2. Deleting Patterns (First vs. Global)](#2-deleting-patterns-first-vs-global)
+  - [3. Alternative Syntax: `-n` and the `p` Flag](#3-alternative-syntax--n-and-the-p-flag)
+  - [4. Using Regex for Substitution (Character Classes)](#4-using-regex-for-substitution-character-classes)
+  - [5. Deleting Lines (The `d` Command)](#5-deleting-lines-the-d-command)
+  - [6. Advanced Regex Examples](#6-advanced-regex-examples)
+
+**Search & Replace Techniques**
+- [🔄 Search and Replace with `sed`](#-search-and-replace-with-sed)
+  - [1. Basic Substitution](#1-basic-substitution)
+  - [2. Global Substitution (The `/g` Flag)](#2-global-substitution-the-g-flag)
+  - [3. Chaining Substitutions (The `-e` Flag)](#3-chaining-substitutions-the--e-flag)
+  - [4. Using Alternative Delimiters](#4-using-alternative-delimiters)
+  - [5. Writing Output to a File (The `w` Command)](#5-writing-output-to-a-file-the-w-command)
+  - [6. Practical Script: `update2.sh` (In-Place Editing)](#6-practical-script-update2sh-in-place-editing)
+  - [7. Modifying the Script for Subdirectories](#7-modifying-the-script-for-subdirectories)
+
+**Working with Datasets**
+- [💾 Working with Datasets](#-working-with-datasets)
+  - [Print Lines](#print-lines)
+    - [1. Print a Numeric Range (Lines 1-3)](#1-print-a-numeric-range-lines-1-3)
+    - [2. Print a Numeric Range (Lines 3-5)](#2-print-a-numeric-range-lines-3-5)
+    - [3. Duplicating All Lines](#3-duplicating-all-lines)
+    - [4. Chaining `sed` Commands](#4-chaining-sed-commands)
+  - [🔠 Character Classes and `sed`](#-character-classes-and-sed)
+    - [1. Match Lines Containing Digits](#1-match-lines-containing-digits)
+    - [2. Match Lines Containing Lowercase Letters](#2-match-lines-containing-lowercase-letters)
+    - [3. Match Lines Containing Specific Digits](#3-match-lines-containing-specific-digits)
+    - [4. Match Lines with Complex Regex](#4-match-lines-with-complex-regex)
+  - [🧹 Removing Control Characters](#-removing-control-characters)
+    - [1. The Removal Command](#1-the-removal-command)
+    - [2. Verifying the Removal](#2-verifying-the-removal)
+
+**Advanced Topics**
+- [📊 Counting Words in a Dataset](#-counting-words-in-a-dataset)
+  - [Listing 6.6: `wordcountinfile.sh`](#-listing-66-wordcountinfilesh)
+  - [How to Create and Run This Script](#-how-to-create-and-run-this-script)
+  - [Detailed Explanation](#-detailed-explanation)
+- [🧠 Back References in `sed`](#-back-references-in-sed)
+  - [1. Duplicating Characters](#1-duplicating-characters)
+  - [2. Replacing with a Captured Group](#2-replacing-with-a-captured-group)
+  - [3. Inserting a Comma in a Number](#3-inserting-a-comma-in-a-number)
+  - [4. A More General Comma Insertion](#4-a-more-general-comma-insertion)
+- [Displaying Only "Pure" Words in a Dataset](#displaying-only-pure-words-in-a-dataset)
+  - [Step 1: Split into Words](#step-1-split-into-words)
+  - [Step 2: Filter for "Pure" Alphabetic Words](#step-2-filter-for-pure-alphabetic-words)
+  - [Step 3: Sort and Uniq](#step-3-sort-and-uniq)
+  - [Step 4: Extract Only Integers](#step-4-extract-only-integers)
+  - [Step 5: Extract Alphanumeric Words](#step-5-extract-alphanumeric-words)
+- [⚡ One-Line `sed` Commands](#-one-line-sed-commands)
+  - [Print the first line](#print-the-first-line)
+  - [Print the first three lines](#print-the-first-three-lines)
+  - [Print the last line](#print-the-last-line)
+  - [Print the last line (alternate)](#print-the-last-line-alternate)
+  - [Print the last two lines](#print-the-last-two-lines)
+  - [Print lines that do not contain "world"](#print-lines-that-do-not-contain-world)
+  - [Print duplicates of lines that do contain "world"](#print-duplicates-of-lines-that-do-contain-world)
+  - [Print only the fifth line](#print-only-the-fifth-line)
+  - [Print all lines, duplicating line five](#print-all-lines-duplicating-line-five)
+  - [Print lines 4 through 6](#print-lines-4-through-6)
+  - [Delete lines 4 through 6](#delete-lines-4-through-6)
+  - [Delete a range of lines by pattern](#delete-a-range-of-lines-by-pattern)
+  - [Print a range of lines by pattern](#print-a-range-of-lines-by-pattern)
+  - [Duplicate a range of lines by pattern](#duplicate-a-range-of-lines-by-pattern)
+  - [Delete the even-numbered lines](#delete-the-even-numbered-lines)
+  - [Replace a range of letters](#replace-a-range-of-letters)
+  - [Replace a range of letters with multiple characters](#replace-a-range-of-letters-with-multiple-characters)
+  - [Delete tab characters](#delete-tab-characters)
+  - [Delete tab characters and blank spaces](#delete-tab-characters-and-blank-spaces)
+  - [Replace every line with "pasta"](#replace-every-line-with-pasta)
+  - [Insert blank lines](#insert-blank-lines)
+  - [Insert a blank line after every line (double-space)](#insert-a-blank-line-after-every-line-double-space)
+  - [Insert a blank line after every other line](#insert-a-blank-line-after-every-other-line)
+  - [Reverse the lines in the file](#reverse-the-lines-in-the-file)
+
+</details>
+
+---
+
 ## 📚 What You Will Learn
 
 * **Part 1: Basic Examples**
