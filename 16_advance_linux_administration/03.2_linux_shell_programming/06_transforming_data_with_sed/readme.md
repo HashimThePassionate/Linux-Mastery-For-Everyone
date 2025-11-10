@@ -49,7 +49,6 @@ Specifically, *for each line of input*, an execution cycle performs the followin
 
 The `sed` command requires you to specify a string to match the lines in a file. This guide will explain how to do this from scratch.
 
------
 
 ## 📁 Setup: Create the Example File
 
@@ -77,7 +76,6 @@ five
 **3. Save and Exit:**
 Press **`Ctrl + O`** (Write Out), press **`Enter`** to save, and then **`Ctrl + X`** to exit `nano`.
 
------
 
 ## 1\. Basic Pattern Matching (Printing Matches)
 
@@ -109,7 +107,6 @@ Let's break down this command piece by piece:
 
 So, the command tells `sed`: "Do not print anything by default (`-n`). Read `numbers.txt` line by line. If you find a line that matches the pattern `/3/`, execute the `p`rint command for that line."
 
------
 
 ## 2\. Efficiency: `cat` vs. Direct File Read
 
@@ -128,7 +125,6 @@ This produces the exact same result as our first command. However, as noted, it 
 
 As we saw earlier with other commands, it is always more efficient to just read in the file using the `sed` command than to pipe it in. You should only "feed" data from another command if that command *adds value* (such as `cat -n` adding line numbers or `grep` filtering the file first).
 
------
 
 ## 3\. What Happens If You Omit the `-n`? (Duplication)
 
@@ -157,7 +153,6 @@ Here is a step-by-step breakdown of the execution cycle:
 
 If you omit the `-n` option, *every line is printed once by default*. The `p` option then causes *any matching line to be printed a second time*.
 
------
 
 ## 4\. Matching a Range of Lines
 
@@ -193,7 +188,6 @@ This tells `sed`: "Start printing when you see a line that matches `/123/`, and 
 
 The examples in this section illustrate how to use `sed` to substitute new text for an existing text pattern.
 
------
 
 ## 1\. Basic Substitution (`s/find/replace/`)
 
@@ -227,7 +221,6 @@ def
       * **`/abc/`**: The first pattern. This is the text we are searching for.
       * **`/def/`**: The second pattern. This is the text we will replace it with.
 
------
 
 ## 2\. Deleting Patterns (First vs. Global)
 
@@ -251,7 +244,6 @@ defabc
 
 As you see, this only removes the *first* occurrence of the pattern. `sed`'s `s` command, by default, stops after the first successful match on a line.
 
------
 
 ### Deleting All Occurrences (Global `g` Flag)
 
@@ -271,7 +263,6 @@ def
 
   * **`s/abc//g`**: The `g` flag at the end stands for **g**lobal. It instructs `sed` to *not* stop after the first match, but to continue searching and replacing all matches on the entire line (the "pattern buffer").
 
------
 
 ## 3\. Alternative Syntax: `-n` and the `p` Flag
 
@@ -298,7 +289,6 @@ def
 
 For substitutions, `sed "s/.../g"` and `sed -n "s/.../gp"` often produce the same result, but this is not always true for other commands.
 
------
 
 ## 4\. Using Regex for Substitution (Character Classes)
 
@@ -331,7 +321,6 @@ svcc.txt
       * **`//`**: Replaces it with nothing (deletes it).
       * **`g`**: Does this **g**lobally for all digits, not just the first one ("1").
 
------
 
 ## 5\. Deleting Lines (The `d` Command)
 
@@ -352,7 +341,6 @@ four five
 
 *(If you don't have this file, create it with `nano columns4.txt` and paste the text above.)*
 
------
 
 ### Deleting by Line Number Range (`1,3d`)
 
@@ -380,7 +368,6 @@ four five
 
 This instruction tells `sed`: "For each line from 1 to 3, execute the `d` command." All other lines (4, 5, 6) are not affected and are printed by default.
 
------
 
 ### Deleting by Regex Range (`/start/,/end/d`)
 
@@ -436,7 +423,6 @@ The command `sed "/123/,/five/d" columns4.txt` means:
 
 The output from the text is correct, and my analysis matches.
 
------
 
 ## 6\. Advanced Regex Examples
 
@@ -461,7 +447,6 @@ Hullu
       * **`/u/`**: Replaces the matched vowel with "u".
       * **`g`**: The **g**lobal flag is essential. Without it, `sed` would only replace the *first* vowel ("e") and the output would be "hullo".
 
------
 
 ### Deleting Multiple Digits and Letters from a String
 
@@ -491,7 +476,6 @@ azAB x b c d w
 azABxbcdw
 ```
 
------
 
 #### Example 2: Removing All Lowercase Letters
 
@@ -516,7 +500,6 @@ echo $x | sed "s/[a-z]*//g"
       * **`*`**: Matches the preceding item (a lowercase letter) **zero or more** times. This finds *groups* of lowercase letters (like "a" and "z") and deletes them.
       * **`//g`**: Replaces all matches globally with nothing.
 
------
 
 #### Example 3: Removing All Letters (Lowercase and Uppercase)
 
@@ -561,5 +544,264 @@ This command produces the output the original text was likely trying to get:
 ```
 123 10  20  300  4000
 ```
+
+---
+
+# 🔄 Search and Replace with `sed`
+
+The previous section showed you how to delete a range of rows of a text file. As deleting is just substituting an empty result for what you match, it should now be clear that a replace activity involves populating that part of the command with something that achieves your desired outcome.
+
+This section contains various examples that illustrate how to get the exact substitution you desire.
+
+
+### 1\. Basic Substitution
+
+This example illustrates how to convert lowercase "abc" to uppercase "ABC". `sed` only works on the *first* occurrence on a line by default.
+
+#### 📜 Code Snippet
+
+```bash
+echo "abc" | sed "s/abc/ABC/"
+```
+
+#### 🖥️ Output
+
+```
+ABC
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`s/abc/ABC/`**: This is the substitution instruction.
+      * **`s`**: The **s**ubstitute command.
+      * **`/abc/`**: The pattern to find.
+      * **`/ABC/`**: The replacement string.
+
+
+### 2\. Global Substitution (The `/g` Flag)
+
+To make the substitution work on *every* case of "abc" on a line, you must add the "global" flag (`/g`).
+
+#### 📜 Code Snippet
+
+```bash
+echo "abcdefabc" | sed "s/abc/ABC/g"
+```
+
+#### 🖥️ Output
+
+```
+ABCdefABC
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`s/abc/ABC/g`**: The **`g`** at the end stands for **g**lobal. It instructs `sed` to continue searching and replacing all matches on the line, not just the first one.
+
+
+### 3\. Chaining Substitutions (The `-e` Flag)
+
+The following `sed` expression performs three consecutive substitutions, using the `-e` flag to string them together. It changes exactly one (the first) "a" to "A", one "b" to "B", and one "c" to "C".
+
+#### 📜 Code Snippet
+
+```bash
+echo "abcde" | sed -e "s/a/A/" -e "s/b/B/" -e "s/c/C/"
+```
+
+#### 🖥️ Output
+
+```
+ABCde
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`-e "..."`**: This flag indicates that the following string is an **e**xpression (or script) to execute. You can use multiple `-e` flags to run multiple commands on the same input stream.
+
+Obviously, for this *specific* example, you could use a simpler expression that combines the three substitutions into one:
+
+```bash
+echo "abcde" | sed "s/abc/ABC/"
+```
+
+Nevertheless, the `–e` switch is useful when you need to perform more complex substitutions that cannot be combined into a single one.
+
+
+### 4\. Using Alternative Delimiters
+
+The `/` character is not the only delimiter that `sed` supports. This is extremely useful when your strings contain the `/` character (like file paths). You can use almost any other character, such as `#`, `|`, or `:`.
+
+For example, you can reverse the order of `/aa/bb/cc/` with this command:
+
+#### 📜 Code Snippet
+
+```bash
+echo "/aa/bb/cc" | sed -n "s#/aa/bb/cc#/cc/bb/aa/#p"
+```
+
+#### 🖥️ Output
+
+```
+/cc/bb/aa/
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`sed -n ...`**: The `-n` flag suppresses all automatic output.
+  * **`s#...#...#p`**: This is the full command.
+      * **`s`**: The **s**ubstitute command.
+      * **`#`**: This is our new, chosen delimiter.
+      * **`/aa/bb/cc`**: The pattern to find.
+      * **`/cc/bb/aa/`**: The replacement string.
+      * **`p`**: The **p**rint flag. Since we suppressed output with `-n`, this explicitly prints *only* the lines where a substitution occurred.
+
+
+### 5\. Writing Output to a File (The `w` Command)
+
+The `w` terminal command instruction is a unique feature that writes the `sed` output to **both** standard output (the screen) *and* to a named file, but only if the match succeeds.
+
+#### 📜 Code Snippet
+
+```bash
+echo "abcdefabc" | sed "s/abc/ABC/w upper1"
+```
+
+#### 🖥️ Output (to Terminal)
+
+```
+ABCdefabc
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`s/abc/ABC/w upper1`**:
+      * `s/abc/ABC/`: Performs the substitution. Because we did *not* use `-n`, `sed` prints its resulting line ("ABCdefabc") to standard output by default.
+      * **`w upper1`**: This is the **w**rite command. *Because* the substitution was successful on this line, `sed` also writes the *result* of the substitution ("ABCdefabc") to a new file named `upper1`.
+
+If you examine the contents of the text file `upper1` (by running `cat upper1`), you will see that it contains the same string, `ABCdefabc`.
+
+This two-stream behavior is unusual but sometimes useful. It is more common to simply send the standard output to a file using the `>` (redirection) syntax, but in that case, nothing is written to the terminal screen. The previous `w` syntax allows both at the same time.
+
+**Standard Redirection (Screen is silent):**
+
+```bash
+# This syntax works
+echo "abcdefabc" | sed "s/abc/ABC/" > upper1
+
+# This syntax also works
+echo "abcdefabc" | sed -n "s/abc/ABC/p" > upper1
+```
+
+
+### 6\. Practical Script: `update2.sh` (In-Place Editing)
+
+Listing 6.1 displays the content of `update2.sh` which replaces the occurrence of the string "hello" with the string "goodbye" in all files with the `.txt` suffix in the current directory.
+
+This script works by creating a temporary file, which is a safe way to perform "in-place" edits.
+
+#### 📂 Setup: Create an Example File
+
+Before we begin, let's create a file for the script to modify.
+
+```bash
+nano hello.txt
+```
+
+Paste the following line into the file, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`):
+
+```
+This file says hello.
+```
+
+#### 📜 Listing 6.1: `update2.sh`
+
+Here is the script code.
+
+```bash
+#!/bin/bash
+# We use $(ls) which is the modern version of `ls`
+
+for f in $(ls *txt)
+do
+ # Create a new, temporary filename
+ newfile="${f}_new"
+ 
+ # Read the original file, run sed, and save to the new file
+ cat $f | sed -n "s/hello/goodbye/gp" > $newfile
+ 
+ # Replace the original file with the new file
+ mv $newfile $f
+done
+```
+
+#### 👨‍💻 Code Explanation
+
+Listing 6.1 contains a `for` loop that iterates over the list of text files with the `txt` suffix.
+
+1.  **`for f in $(ls *txt)`**: This loop finds every file ending in `.txt` (like our `hello.txt`) and processes each one, storing the filename in the variable `f`.
+2.  **`newfile="${f}_new"`**: For each file, this line initializes a new variable `newfile`. If `$f` is "hello.txt", then `$newfile` becomes "hello.txt\_new".
+3.  **`cat $f | sed ... > $newfile`**: This is the core line.
+      * `cat $f`: Reads the *original* file's contents (`This file says hello.`).
+      * `| sed -n "s/hello/goodbye/gp"`: Pipes that content to `sed`. `sed` finds "hello" and replaces it with "goodbye". The `g` (global) and `p` (print) flags ensure all replacements are made and printed.
+      * `> $newfile`: The output of `sed` (`This file says goodbye.`) is **redirected** into the temporary file (`hello.txt_new`). The original `hello.txt` is not yet touched.
+4.  **`mv $newfile $f`**: The `mv` (move) command renames `hello.txt_new` to `hello.txt`. This overwrites the original file, completing the "in-place" edit.
+
+#### 🚀 How to Create and Run This Script
+
+**1. Create the Script File**
+
+```bash
+nano update2.sh
+```
+
+**2. Paste the Code**
+Copy the code from **Listing 6.1** above and paste it into the `nano` editor. Save and exit.
+
+**3. Make the Script Executable**
+
+```bash
+chmod +x update2.sh
+```
+
+**4. Run the Script**
+
+```bash
+./update2.sh
+```
+
+#### 🖥️ Verification
+
+The script will run silently. To see if it worked, just read the original file:
+
+```bash
+cat hello.txt
+```
+
+**Output:**
+
+```
+This file says goodbye.
+```
+
+
+### 7\. Modifying the Script for Subdirectories
+
+If you want to perform the update in matching files in *all* subdirectories, not just the current one, you must replace the `for` statement.
+
+**Replace this:**
+
+```bash
+for f in $(ls *txt)
+```
+
+**...with this:**
+(Note: The original text's `–print` has been corrected to `-print`)
+
+```bash
+for f in $(find . -print | grep "txt$")
+```
+
+This new command uses `find` to locate *all* files (`.`) and then `grep` to filter that list for only the paths that end in "txt".
 
 ---
