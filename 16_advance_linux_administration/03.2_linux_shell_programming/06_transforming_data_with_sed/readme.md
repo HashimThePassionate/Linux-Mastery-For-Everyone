@@ -44,3 +44,147 @@ Specifically, *for each line of input*, an execution cycle performs the followin
 
 
 ---
+
+# 🎯 Matching String Patterns Using `sed`
+
+The `sed` command requires you to specify a string to match the lines in a file. This guide will explain how to do this from scratch.
+
+-----
+
+## 📁 Setup: Create the Example File
+
+First, we need the `numbers.txt` file that is used in these examples.
+
+**1. Create the file:**
+Open your terminal and use `nano` (or your preferred text editor) to create the file:
+
+```bash
+nano numbers.txt
+```
+
+**2. Add Content:**
+Paste the following lines into the editor:
+
+```
+1
+2
+123
+3
+five
+4
+```
+
+**3. Save and Exit:**
+Press **`Ctrl + O`** (Write Out), press **`Enter`** to save, and then **`Ctrl + X`** to exit `nano`.
+
+-----
+
+## 1\. Basic Pattern Matching (Printing Matches)
+
+The most common use of `sed` is to find and print lines that match a specific pattern. Let's find all lines that contain the string "3".
+
+Here is the most common and efficient way to write the command:
+
+```bash
+sed -n "/3/p" numbers.txt
+```
+
+### 🖥️ Output
+
+```
+123
+3
+```
+
+### 👨‍💻 Code Explanation
+
+Let's break down this command piece by piece:
+
+  * **`sed`**: This invokes the **s**tream **ed**itor.
+  * **`-n`**: This is a very important option. By default, `sed`'s execution cycle prints *every single line* it reads. The `-n` option **suppresses** this automatic, "default" printing.
+  * **`"/3/p"`**: This is the instruction or "script" we give to `sed`.
+      * **`/3/`**: This is the **pattern** to search for. The slashes (`/`) are delimiters, and `3` is the string we want to match.
+      * **`p`**: This is the **p**rint command. It tells `sed` to print the line if, and only if, the pattern (`/3/`) was found.
+  * **`numbers.txt`**: This is the input file `sed` will read from.
+
+So, the command tells `sed`: "Do not print anything by default (`-n`). Read `numbers.txt` line by line. If you find a line that matches the pattern `/3/`, execute the `p`rint command for that line."
+
+-----
+
+## 2\. Efficiency: `cat` vs. Direct File Read
+
+You will often see the same command written a different way, using `cat` and a pipe (`|`).
+
+**The Inefficient Way:**
+
+```bash
+cat numbers.txt | sed -n "/3/p"
+```
+
+This produces the exact same result as our first command. However, as noted, it is less efficient.
+
+  * The **`cat | sed`** method uses **two processes**. `cat`'s only job is to read the file and "pipe" its contents into `sed`.
+  * The **`sed ... numbers.txt`** method uses **one process**. `sed` is perfectly capable of reading a file on its own.
+
+As we saw earlier with other commands, it is always more efficient to just read in the file using the `sed` command than to pipe it in. You should only "feed" data from another command if that command *adds value* (such as `cat -n` adding line numbers or `grep` filtering the file first).
+
+-----
+
+## 3\. What Happens If You Omit the `-n`? (Duplication)
+
+This is a very common point of confusion. What happens if you forget the `-n` option?
+
+Let's run the command:
+
+```bash
+sed "/3/p" numbers.txt
+```
+
+### 🖥️ Annotated Output
+
+The text provides an excellent, annotated explanation of this output. `sed`'s default behavior is to print **every line** *before* it even checks your command.
+
+Here is a step-by-step breakdown of the execution cycle:
+
+| Line Read | `sed`'s Default Print | Pattern `/3/` Match? | Run `p` Command? | Final Output |
+| :--- | :--- | :--- | :--- | :--- |
+| `1` | `1` | No | No | `1` |
+| `2` | `2` | No | No | `2` |
+| `123` | `123` | **Yes** | **Yes** -\> `123` | `123`<br>`123` |
+| `3` | `3` | **Yes** | **Yes** -\> `3` | `3`<br>`3` |
+| `five` | `five` | No | No | `five` |
+| `4` | `4` | No | No | `4` |
+
+If you omit the `-n` option, *every line is printed once by default*. The `p` option then causes *any matching line to be printed a second time*.
+
+-----
+
+## 4\. Matching a Range of Lines
+
+It is also possible to match two patterns and print everything *between* the lines that match. This is a very powerful feature.
+
+The command finds the line with "123", starts printing, and continues printing every line until it finds the line with "five".
+
+```bash
+sed -n "/123/,/five/p" numbers.txt
+```
+
+### 🖥️ Output
+
+```
+123
+3
+five
+```
+
+### 👨‍💻 Code Explanation
+
+  * **`sed -n ...`**: We use `-n` again because we *only* want to print the lines specified by our command.
+  * **`"/123/,/five/p"`**: This is a **range** instruction.
+      * **`/123/`**: This is the **START** pattern.
+      * **`/five/`**: This is the **END** pattern.
+      * **`,p`**: This applies the `p`rint command to every line *within that range* (inclusive).
+
+This tells `sed`: "Start printing when you see a line that matches `/123/`, and continue printing every line until you see a line that matches `/five/`."
+
+---
