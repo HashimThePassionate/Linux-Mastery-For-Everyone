@@ -1190,3 +1190,818 @@ cat -t nocontrol1.txt
 The file is now clean of all control characters.
 
 ---
+
+
+# 📊 Counting Words in a Dataset
+
+Listing 6.6 displays the content of `WordCountInFile.sh`, which illustrates how to combine various bash commands to count the words (and their occurrences) in a file.
+
+## 📜 Listing 6.6: `wordcountinfile.sh`
+
+```bash
+#!/bin/bash
+# How this code sample works:
+# The file is fed to the "tr" command,
+# the "tr" command changes uppercase to lowercase
+# sed removes commas and periods, then changes whitespace to newlines
+# uniq needs each word on its own line to count the words properly
+# uniq converts data to unique words
+# uniq also displays the number of times each word appeared
+# The final sort orders the data by the wordcount.
+cat "$1" | xargs -n1 | tr A-Z a-z | \
+sed -e 's/\.//g' -e 's/\,//g' -e 's/ /\ /g' | \
+sort | uniq -c | sort -nr
+```
+
+## 🚀 How to Create and Run This Script
+
+To make this "complete," you need two files: the script itself and a sample text file to analyze.
+
+**1. Create a Sample Text File (`testfile.txt`)**
+
+First, let's create a file to test our word counter.
+
+```bash
+nano testfile.txt
+```
+
+Paste the following text into `nano`, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`):
+
+```
+Hello world.
+This is a test.
+Hello again, world!
+Test, test, test.
+```
+
+**2. Create the Script File (`wordcountinfile.sh`)**
+
+Next, create the script file.
+
+```bash
+nano wordcountinfile.sh
+```
+
+Paste the code from **Listing 6.6** into the `nano` editor. Save and exit.
+
+**3. Make the Script Executable**
+
+You must give the script permission to run.
+
+```bash
+chmod +x wordcountinfile.sh
+```
+
+**4. Run the Script**
+
+Now, run the script and provide `testfile.txt` as the first argument (`$1`).
+
+```bash
+./wordcountinfile.sh testfile.txt
+```
+
+### 🖥️ Example Output
+
+The script will process `testfile.txt` and give you a sorted list of word counts, from most frequent to least frequent.
+
+```bash
+      3 test
+      2 world
+      2 hello
+      1 this
+      1 is
+      1 again
+      1 a
+```
+
+### 👨‍💻 Detailed Explanation
+
+The comments in the script provide a good overview. Here is a more detailed, step-by-step breakdown of the pipeline:
+
+1.  **`cat "$1"`**: Reads the content of the file provided as the first argument (`testfile.txt`) to the script.
+2.  **`| xargs -n1`**: This is a way to split the text. `xargs -n1` takes all the input and outputs it one "word" (argument) per line.
+3.  **`| tr A-Z a-z`**: **Tr**anslates all uppercase characters (A-Z) to their lowercase equivalents (a-z). This ensures that "Hello" and "hello" are counted as the same word.
+4.  **`| sed ...`**: This stage runs multiple `sed` expressions:
+      * `-e 's/\.//g'`: **S**ubstitutes (s) all literal periods (`.`) with nothing, **g**lobally (g).
+      * `-e 's/\,//g'`: **S**ubstitutes all commas (`,`) with nothing, globally.
+      * `-e 's/ /\ /g'`: This command, `s/ /\ /g`, attempts to replace a space with a space. It is redundant and has no effect, as `xargs -n1` already handled the spaces.
+5.  **`| sort`**: Sorts the resulting list of words alphabetically. This is a **crucial** prerequisite for `uniq`.
+6.  **`| uniq -c`**: `uniq` (unique) filters the sorted list.
+      * `-c`: This flag tells `uniq` to **c**ount how many times each line (word) was repeated consecutively. It prefixes each unique word with its count.
+7.  **`| sort -nr`**: This final sort organizes the counted output.
+      * `-n`: Sorts **n**umerically (based on the count).
+      * `-r`: **R**everses the sort, putting the highest numbers (most common words) at the top.
+
+
+## 🧠 Back References in `sed`
+
+In the section describing `grep`, you learned about backreferences. Similar functionality is available with the `sed` command. The main difference is that the backreferences can also be used in the **replacement** section of the command.
+
+A backreference "remembers" text captured inside escaped parentheses `\( ... \)`. The first captured group is `\1`, the second is `\2`, and so on.
+
+*(These examples are "complete" and can be run directly in your terminal.)*
+
+### 1\. Duplicating Characters
+
+This `sed` command matches two consecutive "a" letters and replaces them with four "a"s.
+
+#### 📜 Code Snippet
+
+```bash
+echo "aa" | sed -n "s#\([a-z]\)\1#\1\1\1\1#p"
+```
+
+#### 🖥️ Output
+
+```
+aaaa
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`sed -n "..."`**: Uses `-n` (no default output) and `p` (print) to only show the result.
+  * **`s#...#...#p`**: Uses `#` as a delimiter instead of `/`.
+  * **Pattern: `\([a-z]\)\1`**
+      * `\([a-z]\)`: This is **Group 1**. It matches any single lowercase letter. In this case, it matches the first `a`.
+      * `\1`: This is a backreference to **Group 1**. It matches the text *captured* by the first group. So, it matches the second `a`.
+  * **Replacement: `\1\1\1\1`**
+      * Replaces the matched text ("aa") with the content of Group 1 ("a") four times.
+
+### 2\. Replacing with a Captured Group
+
+This command replaces all duplicate pairs of letters with the letters "aa".
+
+#### 📜 Code Snippet
+
+```bash
+echo "aa/bb/cc" | sed -n "s#\(aa\)/\(bb\)/\(cc\)#\1/\1/\1/#p"
+```
+
+#### 🖥️ Output
+
+```
+aa/aa/aa/
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **Pattern: `\(aa\)/\(bb\)/\(cc\)`**
+      * `\(aa\)`: Captures "aa" as **Group 1** (`\1`).
+      * `\(bb\)`: Captures "bb" as **Group 2** (`\2`).
+      * `\(cc\)`: Captures "cc" as **Group 3** (`\3`).
+  * **Replacement: `\1/\1/\1/`**
+      * Replaces the entire matched string with the content of **Group 1** three times, separated by slashes.
+
+### 3\. Inserting a Comma in a Number
+
+This command inserts a comma in a four-digit number.
+
+#### 📜 Code Snippet
+
+```bash
+echo "1234" | sed -n "s@\([0-9]\)\([0-9]\)\([0-9]\)\([0-9]\)@\1,\2\3\4@p"
+```
+
+#### 🖥️ Output
+
+```
+1,234
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`s@...@...@p`**: Uses `@` as a delimiter.
+  * **Pattern: `\([0-9]\)\([0-9]\)\([0-9]\)\([0-9]\)`**
+      * It runs the `[0-9]` (one single digit) command four times, capturing each digit into its own group (`\1`, `\2`, `\3`, `\4`).
+  * **Replacement: `\1,\2\3\4`**
+      * It rebuilds the string using the captured digits, inserting a literal comma (`,`) after the first one.
+
+### 4\. A More General Comma Insertion
+
+This `sed` expression can insert a comma in a five-digit number.
+
+#### 📜 Code Snippet
+
+```bash
+echo "12345" | sed 's/\([0-9]\{3\}\)$/,\1/g;s/^,//'
+```
+
+#### 🖥️ Output
+
+```
+12,345
+```
+
+#### 👨‍💻 Code Explanation
+
+This is a more advanced, two-part command separated by a semicolon (`;`).
+
+1.  **`s/\([0-9]\{3\}\)$/,\1/g`**: This part finds the last 3 digits.
+      * `\([0-9]\{3\}\)`: Matches and **captures (`\1`)** a sequence of **exactly 3 digits**.
+      * `$`: **Anchors** this match to the **end of the line**.
+      * `/,\1/g`: Replaces that 3-digit group with a comma *before* it.
+      * After this command, "12345" becomes "12,345".
+2.  **`s/^,//`**: This is a cleanup command. If the number was just "345", the first command would have turned it into ",345". This second command, `s/^,//`, searches for a comma at the **start of the line (`^`)** and removes it.
+
+
+##  Displaying Only "Pure" Words in a Dataset
+
+In the previous section, we solved this task using `egrep`. This section shows you how to solve the same task using `sed`. For simplicity, let’s work with a text string. The approach is similar to the word-counting script.
+
+*(These examples are also "complete" and can be run directly in your terminal.)*
+
+#### 📜 Setup
+
+```bash
+x="ghi abc Ghi 123 #def5 123z"
+```
+
+### Step 1: Split into Words
+
+First, split the variable `x` into one word per line by replacing spaces with newlines (`\n`).
+
+```bash
+echo $x | tr -s ' ' '\n'
+```
+
+#### 🖥️ Output
+
+```
+ghi
+abc
+Ghi
+123
+#def5
+123z
+```
+
+### Step 2: Filter for "Pure" Alphabetic Words
+
+Second, we invoke `sed` to filter this list.
+
+#### 📜 Code Snippet
+
+```bash
+echo $x | tr -s ' ' '\n' | sed -nE "/(^[a-zA-Z]+$)/p"
+```
+
+#### 🖥️ Output
+
+```
+ghi
+abc
+Ghi
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`| sed -nE "..."`**:
+      * **`-n`**: Suppresses default printing. We only want to print matches.
+      * **`-E`**: Enables **E**xtended **R**egular **E**xpressions. This allows us to use `+` (one or more) without escaping it.
+      * **`"/(^[a-zA-Z]+$)/p"`**: This is a "print" command with a regex address.
+          * `^`: Matches the **start** of the line.
+          * `[a-zA-Z]+`: Matches **one or more** alphabetic characters.
+          * `$`: Matches the **end** of the line.
+          * This pattern *only* matches lines that contain *nothing but* letters.
+          * `p`: **P**rints the lines that match this pattern.
+
+### Step 3: Sort and Uniq
+
+If you also want to sort the output and print only the unique words, pipe the result to `sort` and `uniq`.
+
+#### 📜 Code Snippet
+
+```bash
+echo $x | tr -s ' ' '\n' | sed -nE "/(^[a-zA-Z]+$)/p" | sort | uniq
+```
+
+#### 🖥️ Output
+
+```
+Ghi
+abc
+ghi
+```
+
+### Step 4: Extract Only Integers
+
+If you want to extract only the integers, you use the same logic but change the regex to match digits.
+
+#### 📜 Code Snippet
+
+```bash
+echo $x | tr -s ' ' '\n' | sed -nE "/(^[0-9]+$)/p" | sort | uniq
+```
+
+#### 🖥️ Output
+
+```
+123
+```
+
+### Step 5: Extract Alphanumeric Words
+
+If you want to extract words with letters *and* numbers, you expand the character class.
+
+#### 📜 Code Snippet
+
+```bash
+echo $x | tr -s ' ' '\n' | sed -nE "/(^[0-9a-zA-Z]+$)/p" | sort | uniq
+```
+
+#### 🖥️ Output
+
+```
+123
+123z
+Ghi
+abc
+ghi
+```
+
+Now you can replace `echo $x` with a dataset (like `cat file.txt`) to retrieve only alphabetic strings from that dataset.
+
+
+## ⚡ One-Line `sed` Commands
+
+This section shows useful problems you can solve with a single line of `sed` and exposes you to more switches and arguments.
+
+### 📁 Listing 6.7: `data4.txt` (Setup)
+
+To run these "complete examples," you must first create the file `data4.txt`.
+
+**1. Create the File**
+(Note: The file has leading spaces, which are important for the examples).
+
+```bash
+nano data4.txt
+```
+
+**2. Paste the Content**
+Paste the following text into `nano`, then save and exit:
+
+```
+ hello world4
+ hello world5 two
+ hello world6 three
+ hello world4 four
+line five
+line six
+line seven
+```
+
+**3. Run the Commands**
+You can now run each of the following commands in your terminal to test them.
+
+
+#### Print the first line
+
+```bash
+sed q < data4.txt
+```
+
+  * **`q`**: The **q**uit command. `sed` prints the first line (default behavior) and then immediately quits.
+  * **Output:** `  hello world4 `
+
+
+#### Print the first three lines
+
+```bash
+sed 3q < data4.txt
+```
+
+  * **`3q`**: An address (`3`) combined with the **q**uit command. `sed` prints lines 1 and 2. On line 3, it prints, then quits.
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+     hello world6 three
+    ```
+
+
+#### Print the last line
+
+```bash
+sed '$!d' < data4.txt
+```
+
+  * **`$!d`**:
+      * `$!`: An address that means "any line that is **not** (`!`) the **last line** (`$`)".
+      * `d`: The **d**elete command.
+  * This command deletes every line *except* the last one, which is then printed by default.
+  * **Output:** `line seven`
+
+
+#### Print the last line (alternate)
+
+```bash
+sed -n '$p' < data4.txt
+```
+
+  * **`-n`**: Suppresses default output.
+  * **`$p`**: An address (`$`) for the **last line**, and the **p**rint command.
+  * **Output:** `line seven`
+
+
+#### Print the last two lines
+
+```bash
+sed '$!N;$!D' < data4.txt
+```
+
+  * This is a complex command that creates a "sliding window" of text.
+  * **`$!N`**: For every line *except* the last one (`$!`), append the **N**ext line into the pattern space.
+  * **`$!D`**: For every line *except* the last one (`$!`), **D**elete the *first line* from the pattern space and restart the loop (without reading a new line).
+  * **Result:** The script continuously deletes the top line and adds a new line to the bottom until it hits the last two lines. The `D` command isn't run, and the two lines in the pattern space are printed at the end.
+  * **Output:**
+    ```
+    line six
+    line seven
+    ```
+
+
+#### Print lines that do not contain "world"
+
+```bash
+sed '/world/d' < data4.txt
+```
+
+  * **`/world/d`**: An address (`/world/`) and a command (`d`). This finds any line containing "world" and **d**eletes it. All other lines are printed by default.
+  * **Output:**
+    ```
+    line five
+    line six
+    line seven
+    ```
+
+
+#### Print duplicates of lines that do contain "world"
+
+```bash
+sed '/world/p' < data4.txt
+```
+
+  * **No `-n`**: `sed` prints every line by default.
+  * **`/world/p`**: An address (`/world/`) and a command (`p`). If a line contains "world", it is **p**rinted a *second time*.
+  * **Output:**
+    ```
+     hello world4
+     hello world4
+     hello world5 two
+     hello world5 two
+     hello world6 three
+     hello world6 three
+     hello world4 four
+     hello world4 four
+    line five
+    line six
+    line seven
+    ```
+
+
+#### Print only the fifth line
+
+```bash
+sed -n '5p' < data4.txt
+```
+
+  * **`-n`**: Suppresses default output.
+  * **`5p`**: An address (`5`) for line 5, and the **p**rint command.
+  * **Output:** `line five`
+
+
+#### Print all lines, duplicating line five
+
+```bash
+sed '5p' < data4.txt
+```
+
+  * **No `-n`**: Prints every line by default.
+  * **`5p`**: On line 5, **p**rint it a second time.
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+     hello world6 three
+     hello world4 four
+    line five
+    line five
+    line six
+    line seven
+    ```
+
+
+#### Print lines 4 through 6
+
+```bash
+sed -n '4,6p' < data4.txt
+```
+
+  * **`-n`**: Suppresses default output.
+  * **`4,6p`**: A numeric range (`4,6`) and the **p**rint command.
+  * **Output:**
+    ```
+     hello world4 four
+    line five
+    line six
+    ```
+
+
+#### Delete lines 4 through 6
+
+```bash
+sed '4,6d' < data4.txt
+```
+
+  * **`4,6d`**: A numeric range (`4,6`) and the **d**elete command. These lines are deleted; all others are printed.
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+     hello world6 three
+    line seven
+    ```
+
+
+#### Delete a range of lines by pattern
+
+```bash
+sed '/world6/,/six/d' < data4.txt
+```
+
+  * **`/world6/,/six/d`**: A regex range address. Deletes all lines starting from the one matching "world6" (line 3) through the one matching "six" (line 6).
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+    line seven
+    ```
+
+
+#### Print a range of lines by pattern
+
+```bash
+sed -n '/world6/,/six/p' < data4.txt
+```
+
+  * **`-n`**: Suppresses default output.
+  * **`/world6/,/six/p`**: Prints *only* the lines in the range from "world6" to "six".
+  * **Output:**
+    ```
+     hello world6 three
+     hello world4 four
+    line five
+    line six
+    ```
+
+
+#### Duplicate a range of lines by pattern
+
+```bash
+sed '/world6/,/six/p' < data4.txt
+```
+
+  * **No `-n`**: Prints all lines by default.
+  * **`/world6/,/six/p`**: **P**rints a *second* copy of all lines in the range.
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+     hello world6 three
+     hello world6 three
+     hello world4 four
+     hello world4 four
+    line five
+    line five
+    line six
+    line six
+    line seven
+    ```
+
+
+#### Delete the even-numbered lines
+
+```bash
+sed 'n;d;' < data4.txt
+```
+
+  * **`n;d;`**: A two-command script.
+      * **`n`**: Prints the current pattern space (line 1), then fetches the **n**ext line (line 2).
+      * **`d`**: **D**eletes the pattern space (which now holds line 2).
+  * This cycle repeats, printing odd lines and deleting even lines.
+  * **Output:**
+    ```
+     hello world4
+     hello world6 three
+    line five
+    line seven
+    ```
+
+
+#### Replace a range of letters
+
+```bash
+sed "s/[a-m]/,/g" < data4.txt
+```
+
+  * **`s/[a-m]/,/g`**: **S**ubstitutes any letter in the range `a` through `m` with a comma (`,`), **g**lobally.
+  * **Output:**
+    ```
+    ,,o wor,,4
+    ,,o wor,,5 two
+    ,,o wor,,6 t,r,,
+    ,,o wor,,4 ,our
+    ,,n, ,,v,
+    ,,n, s,x
+    ,,n, s,v,n
+    ```
+
+
+#### Replace a range of letters with multiple characters
+
+```bash
+sed "s/[a-m]/,@#/g" < data4.txt
+```
+
+  * **`s/[a-m]/,@#/g`**: Same as above, but replaces with the literal string `,@#`.
+  * **Output:**
+    ```
+    ,@#,@#,@#,@#o wor,@#,@#4
+    ,@#,@#,@#,@#o wor,@#,@#5 two
+    ,@#,@#,@#,@#o wor,@#,@#6 t,@#r,@#,@#
+    ,@#,@#,@#,@#o wor,@#,@#4 ,@#our
+    ,@#,@#n,@# ,@#,@#v,@#
+    ,@#,@#n,@# s,@#x
+    ,@#,@#n,@# s,@#v,@#n
+    ```
+
+
+#### Delete tab characters
+
+  * **Note:** The `sed` command does not recognize escape sequences such as `\t`. You must insert a **literal tab**.
+  * **How to type:** In the bash shell, press **`Ctrl+V`**, then press the **`<TAB>`** key.
+
+<!-- end list -->
+
+```bash
+sed 's/	//g' < data4.txt
+```
+
+*(Where `	` is a literal tab you inserted with `Ctrl+V`, `<TAB>`)*
+
+
+#### Delete tab characters and blank spaces
+
+*(Note: The text's command `sed 's/ //g'` only deletes spaces. To delete *both* tabs and spaces, you must include both in a character class `[ ]`)*.
+
+**Command to delete spaces (as written in text):**
+
+```bash
+sed 's/ //g' < data4.txt
+```
+
+  * **Output:**
+    ```
+    helloworld4
+    helloworld5two
+    helloworld6three
+    helloworld4four
+    linefive
+    linesix
+    lineseven
+    ```
+
+**Command to delete spaces AND tabs:**
+
+```bash
+sed 's/[ 	]//g' < data4.txt
+```
+
+*(Where `	` is a literal tab inserted with `Ctrl+V`, `<TAB>`)*
+
+
+#### Replace every line with "pasta"
+
+```bash
+sed 's/.*/pasta/' < data4.txt
+```
+
+  * **`s/.*/pasta/`**:
+      * `.*`: A regex that matches "any character (`.`), zero or more times (`*`)". This matches the entire line.
+      * `/pasta/`: Replaces the entire line with "pasta".
+  * **Output:**
+    ```
+    pasta
+    pasta
+    pasta
+    pasta
+    pasta
+    pasta
+    pasta
+    ```
+
+
+#### Insert blank lines
+
+```bash
+sed '3G;3G;5G' < data4.txt
+```
+
+  * **`G`**: Appends a newline, followed by the contents of the "hold space" (which is empty by default), to the current pattern space.
+  * **`3G;3G;`**: On line 3, do this *twice*, adding two blank lines.
+  * **`5G`**: On line 5, do this *once*, adding one blank line.
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+     hello world6 three
+
+
+     hello world4 four
+    line five
+
+    line six
+    line seven
+    ```
+
+
+#### Insert a blank line after every line (double-space)
+
+```bash
+sed G < data4.txt
+```
+
+  * **`G`**: No address is given, so the `G` command runs on *every* line.
+  * **Output:**
+    ```
+     hello world4
+
+     hello world5 two
+
+     hello world6 three
+
+     hello world4 four
+
+    line five
+
+    line six
+
+    line seven
+
+    ```
+
+
+#### Insert a blank line after every other line
+
+```bash
+sed 'n;G' < data4.txt
+```
+
+  * **`n;G`**:
+      * `n`: Print the current pattern space (line 1), then fetch the **n**ext line (line 2).
+      * `G`: Append a newline to the *new* pattern space (line 2).
+  * This cycle repeats, adding a blank line after every *even-numbered* line.
+  * **Output:**
+    ```
+     hello world4
+     hello world5 two
+
+     hello world6 three
+     hello world4 four
+
+    line five
+    line six
+
+    line seven
+    ```
+
+
+#### Reverse the lines in the file
+
+```bash
+sed '1!G;h;$!d' < data4.txt
+```
+
+  * This is the most famous `sed` one-liner. It works by building up the reversed file in the hold space.
+  * **`1!G`**: If it's **not** (`!`) line 1 (`1`), **G**et (append) the hold space to the pattern space.
+  * **`h`**: **H**old. Copy the (possibly new) pattern space over the hold space.
+  * **`$!d`**: If it's **not** (`!`) the last line (`$`), **d**elete the pattern space.
+  * **Trace:**
+      * Line 1: `1!G` (skip). `h` (HS="L1"). `$!d` (delete).
+      * Line 2: `1!G` (run). PS="L2\\nL1". `h` (HS="L2\\nL1"). `$!d` (delete).
+      * ...
+      * Last Line (7): `1!G` (run). PS="L7\\nL6...L1". `h` (HS="L7...L1"). `$!d` (skip).
+      * End of file: `sed` prints the final pattern space.
+  * **Output:**
+    ```
+    line seven
+    line six
+    line five
+     hello world4 four
+     hello world6 three
+     hello world5 two
+     hello world4
+    ```
+
+
+---
