@@ -805,3 +805,190 @@ for f in $(find . -print | grep "txt$")
 This new command uses `find` to locate *all* files (`.`) and then `grep` to filter that list for only the paths that end in "txt".
 
 ---
+
+# 🔀 Datasets with Multiple Delimiters
+
+This section demonstrates how to use `sed` to "clean" a file that uses multiple different characters as delimiters (separators).
+
+### 📁 Listing 6.2: `delimiter1.txt`
+
+First, let's create the sample dataset, which contains `|`, `:`, and `^` as delimiters.
+
+**1. Create the File**
+
+```bash
+nano delimiter1.txt
+```
+
+**2. Paste the Content**
+Copy the following lines into the `nano` editor, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+```
+1000|Jane:Edwards^Sales
+2000|Tom:Smith^Development
+3000|Dave:Del Ray^Marketing
+```
+
+-----
+
+### 📜 Listing 6.3: `delimiter1.sh`
+
+Next, here is the shell script that illustrates how to replace all the various delimiters in `delimiter1.txt` with a single comma (`,`).
+
+**1. Create the Script**
+
+```bash
+nano delimiter1.sh
+```
+
+**2. Paste the Code**
+Copy the following code into `nano`, then save and exit.
+
+```bash
+#!/bin/bash
+inputfile="delimiter1.txt"
+cat $inputfile | sed -e 's/:/,/' -e 's/|/,/' -e 's/\^/,/'
+```
+
+**3. Make the Script Executable**
+
+```bash
+chmod +x delimiter1.sh
+```
+
+**4. Run the Script**
+
+```bash
+./delimiter1.sh
+```
+
+-----
+
+### 🖥️ Output
+
+The output from running `delimiter1.sh` is shown here:
+
+```
+1000,Jane,Edwards,Sales
+2000,Tom,Smith,Development
+3000,Dave,Del Ray,Marketing
+```
+
+### 👨‍💻 Code Explanation
+
+As you can see, the second line in `delimiter1.sh` is simple yet powerful:
+
+```bash
+cat $inputfile | sed -e 's/:/,/' -e 's/|/,/' -e 's/\^/,/'
+```
+
+  * **`cat $inputfile`**: Reads the content of `delimiter1.txt`.
+  * **`| sed ...`**: Pipes that content into `sed`.
+  * **`-e 's/:/,/'`**: The first `-e` (expression) flag tells `sed` to substitute (`s`) the first colon (`:`) it finds with a comma (`,`).
+  * **`-e 's/|/,/'`**: The second expression tells `sed` to also substitute the pipe character (`|`) with a comma.
+  * **`-e 's/\^/,/'`**: The third expression tells `sed` to also substitute the caret character (`^`) with a comma. The caret (`^`) is a special metacharacter (meaning "start of line"), so we **must escape it with a backslash (`\`)** to tell `sed` to treat it as a literal character.
+
+You can extend the `sed` command with as many `-e` flags as you require to create a dataset with a single delimiter between values.
+
+-----
+
+### ⚠️ A Note on Safety
+
+This kind of transformation can be **unsafe** unless you have checked that your *new* delimiter (in this case, a comma `,`) is not already in use in the original data.
+
+For that, a `grep` command is useful. You want the result to be zero.
+
+```bash
+grep -c ',' delimiter1.txt
+```
+
+**Output:**
+
+```
+0
+```
+
+This confirms that the comma (`,`) does not exist in our input file, making it a safe choice for a new delimiter.
+
+-----
+
+## 🧐 Useful Switches in `sed`
+
+The three command-line switches **`-n`**, **`-e`**, and **`-i`** are useful when you specify them with the `sed` command.
+
+### 1\. The `-n` Switch (Suppress Output)
+
+As a review, specify **`-n`** when you want to **suppress** the printing of the basic stream output (where `sed` prints every line by default).
+
+If you run this command, *nothing* will be printed. The substitution happens, but the default printing is turned off, and you haven't given it a `p` (print) command.
+
+```bash
+sed -n 's/foo/bar/'
+```
+
+### 2\. The `-n` Switch with `/p` (Print Only Matches)
+
+Specify **`-n`** and end with **`/p`** when you want to print *only* the lines where a substitution successfully occurred.
+
+```bash
+sed -n 's/foo/bar/p'
+```
+
+  * **`-n`**: Suppresses all default output.
+  * **`.../p`**: Prints *only* the lines that were successfully modified by the `s` command.
+
+### 3\. The `-e` Switch (Multiple Commands)
+
+We briefly touched on using **`-e`** to do multiple substitutions, but it can also be used to combine other commands. This syntax lets us separate the commands in the last example:
+
+```bash
+sed -n -e 's/foo/bar/' -e 'p'
+```
+
+  * **`-n`**: Suppresses default output.
+  * **`-e 's/foo/bar/'`**: The first expression, which performs the substitution.
+  * **`-e 'p'`**: The second expression, which is an unconditional **p**rint command. This combination will substitute "foo" with "bar" and then print *every* line in the file (in its new, substituted state).
+
+-----
+
+### 🧠 Advanced Example: Inserting Characters
+
+A more advanced example that hints at the flexibility of `sed` involves the insertion of a character after a fixed number of positions.
+
+#### 📜 Code Snippet
+
+Consider the following code snippet:
+
+```bash
+echo "ABCDEFGHIJKLMNOPQRSTUVWXYZ" | sed "s/.\{3\}/&\n/g"
+```
+
+#### 🖥️ Output
+
+The output from the preceding command is here:
+
+```
+ABCnDEFnGHInJKLnMNOnPQRnSTUnVWXnYZ
+```
+
+*(Note: This literal output `...n...` suggests the author's environment or a typo in the text, as most modern `sed` implementations would interpret `\n` as an actual newline. We will explain the command as written.)*
+
+#### 👨‍💻 Code Explanation
+
+While the above example does not seem especially useful, consider a large text stream with no line breaks (everything on one line). You could use something like this to insert newline characters, or something else to break the data into easier-to-process chunks.
+
+It is possible to work through exactly what `sed` is doing by looking at each element of the command:
+
+  * **`s/ ... / ... /g`**: This is a **g**lobal **s**ubstitution.
+  * **`.\{3\}`**: This is the pattern to *find*.
+      * **`.`**: The dot is a metacharacter that matches **any single character**.
+      * **`\{3\}`**: This is a **repetition operator**. It means "match the preceding item (the dot) *exactly 3 times*."
+      * The backslashes (`\`) are required because `{` and `}` are special metacharacters in `sed`, and this tells `sed` to treat them as part of the operator, not as literal characters.
+  * **`&\n`**: This is the *replacement* string.
+      * **`&`**: This is a special `sed` variable. It represents **the entire matched text**. For the first match, `&` is "ABC". For the second, it's "DEF", and so on.
+      * **`\n`**: This is the text to insert *after* the matched text. As the text's explanation implies, "The n is clear enough in the replacement column," and the output shows a literal `n`.
+  * **`g`**: The **g**lobal flag, which means "to repeat" this process for every 3-character chunk on the line, not just the first one.
+
+**In plain English, the command does this:** "Find every 3-character sequence. Replace it with *itself* (`&`) followed by the character `n`. Do this globally."
+
+---
