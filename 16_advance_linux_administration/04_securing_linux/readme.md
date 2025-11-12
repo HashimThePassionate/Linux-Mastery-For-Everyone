@@ -182,3 +182,367 @@ MCS allows users to label files with **categories** in addition to levels. This 
 > Wrapping up our brief discussion on ACMs, we should note that the internals of **DAC** and **ACLs** were covered in *Section 4, Managing Users and Groups*, particularly in the *Managing permissions* section.
 
 ---
+
+Here is a comprehensive, detailed explanation of the provided text.
+
+# 🛡️ Introducing AppArmor
+
+**AppArmor** (Application Armor) is a Linux security module based on the **Mandatory Access Control (MAC)** model that confines applications to a limited set of resources.
+
+AppArmor uses an access control mechanism based on **security profiles** that have been loaded into the Linux kernel. Each profile contains a collection of rules for accessing various system resources. AppArmor can be configured to either **enforce** access control (block violations) or just **complain** about access control violations (log them but allow them).
+
+AppArmor proactively protects applications and operating system resources from internal and external threats, including **zero-day attacks**, by preventing both known and unknown vulnerabilities from being exploited.
+
+AppArmor has been built into the mainline Linux kernel since version 2.6.36 and is currently shipped with **Ubuntu, Debian, openSUSE**, and similar distributions.
+
+In the following sections, we’ll use an **Ubuntu Server 22.04 LTS** environment to showcase a few practical examples with AppArmor. Most of the related command-line utilities will work the same on any platform with AppArmor installed.
+
+
+## 🚀 Working with AppArmor
+
+AppArmor command-line utilities usually require superuser privileges. The following command checks the current status of AppArmor:
+
+```bash
+sudo aa-status
+```
+
+Here’s an excerpt from the command’s output:
+
+```bash
+hashim@Hashim:~/Repo$ sudo aa-status
+apparmor module is loaded.
+215 profiles are loaded.
+132 profiles are in enforce mode.
+   /snap/snapd/25202/usr/lib/snapd/snap-confine
+   /snap/snapd/25202/usr/lib/snapd/snap-confine//mount-namespace-capture-helper
+...
+```
+
+The `aa-status` (or `apparmor_status`) command provides a full list of the currently loaded AppArmor profiles. We’ll examine AppArmor profiles next.
+
+### 📜 Introducing AppArmor Profiles
+
+With AppArmor, processes are confined (or restricted) by **profiles**. AppArmor profiles are loaded upon system start and run in either `enforce` mode or `complain` mode. Let’s explore these modes in some detail:
+
+  * **`enforce` mode:** AppArmor prevents applications running in enforce mode from performing restricted actions (e.g., writing to a file they shouldn't). Access violations are signaled with log entries in `syslog`. Ubuntu, by default, loads the application profiles in enforce mode.
+  * **`complain` mode:** Applications running in complain mode *can* take restricted actions, while AppArmor creates a log entry for the related violation. `complain` mode is ideal for testing AppArmor profiles. Potential errors or access violations can be caught and fixed before switching the profiles to `enforce` mode.
+
+With these introductory notes in mind, let’s create a simple application with an AppArmor profile.
+
+
+## 🛠️ Creating a Profile
+
+In this section, we’ll create a simple application guarded by AppArmor. We hope this exercise will help you get a reasonable idea of the inner workings of AppArmor. Let’s name this application `appackt`.
+
+We’ll make it a simple script that creates a file, writes to it, and then deletes the file. The goal is to have AppArmor prevent our app from accessing any other paths in the local system. To try to make some sense of this, think of it as trivial log recycling.
+
+### 1\. The `appackt` Script
+
+Here’s the `appackt` script, and please pardon the thrifty implementation:
+
+```bash
+hashim@Hashim:~/Repo$ nano appackt
+hashim@Hashim:~/Repo$ cat appackt 
+#!/bin/bash
+# Assuming ./log directory exists!
+if [[ ! -d "./log" ]]
+then
+    echo "No log dir!"
+    exit 1
+fi
+LOG_FILE="./log/appackt"
+echo "Creating ${LOG_FILE}..."
+touch ${LOG_FILE}
+echo "Writing to ${LOG_FILE}..."
+date +"%b %d %T ${HOSTNAME}: Hello from Packt!" >> ${LOG_FILE}
+echo "Reading from ${LOG_FILE}..."
+cat ${LOG_FILE}
+echo "Deleting ${LOG_FILE}..."
+rm ${LOG_FILE}
+```
+
+**Code Explanation:**
+
+  * `if [[ ! -d "./log" ]]`: Checks if the directory named `log` does **not** (`!`) exist.
+  * `LOG_FILE="./log/appackt"`: Defines a variable for the path where the script will work.
+  * `touch ${LOG_FILE}`: Creates the empty log file.
+  * `date ... >> ${LOG_FILE}`: Appends the current date, time, hostname, and a message to the log file.
+  * `cat ${LOG_FILE}`: Reads the log file and prints its content.
+  * `rm ${LOG_FILE}`: Deletes the log file.
+
+### 2\. Initial Setup and Run
+
+We are assuming that the `log` directory already exists at the same location as the script. Let’s make the script executable and run it to confirm it works.
+
+```bash
+hashim@Hashim:~/Repo$ mkdir ./log
+hashim@Hashim:~/Repo$ ls
+appackt  log
+hashim@Hashim:~/Repo$ chmod a+x appackt
+hashim@Hashim:~/Repo$ ./appackt 
+Creating ./log/appackt...
+Writing to ./log/appackt...
+Reading from ./log/appackt...
+Nov 12 12:38:41 Hashim: Hello from Packt!
+Deleting ./log/appackt...
+```
+
+The script runs successfully without any AppArmor confinement.
+
+### 3\. Install AppArmor Utilities
+
+Now, let’s work on guarding and enforcing our script with AppArmor. Before we start, we need to install the `apparmor-utils` package—the AppArmor toolset:
+
+```bash
+sudo apt install -y apparmor-utils
+```
+
+We’ll use a couple of tools to help create the profile:
+
+  * **`aa-genprof`**: **Gen**erates a new AppArmor security **prof**ile by "learning" what an application does.
+  * **`aa-logprof`**: Updates an existing AppArmor security **prof**ile by scanning logs for violations.
+
+### 4\. Generate the Profile with `aa-genprof`
+
+We use `aa-genprof` to monitor our application at runtime and have AppArmor learn about it. This is a **two-terminal process**.
+
+**In Terminal 1:** Run `aa-genprof`.
+
+```bash
+sudo aa-genprof ./appackt
+```
+
+There is a first prompt waiting for us. `aa-genprof` is now monitoring system logs for any actions performed by `./appackt`.
+
+**In Terminal 2:** Run the application.
+While the prompt in Terminal 1 is waiting, we will switch to Terminal 2 and run the following command:
+
+```bash
+./appackt
+```
+
+This run will generate the "events" (like `touch`, `date`, `cat`, `rm`) that `aa-genprof` is waiting to see.
+
+**Back in Terminal 1:**
+Now, we must go back to Terminal 1 and answer the prompts sent by `aa-genprof`.
+
+  * **Prompt 1: Waiting to scan**
+
+      * **Explanation:** This prompt asks to scan the system log for AppArmor events in order to detect possible complaints (violations).
+      * **Answer: `S` (S)can**
+
+  * **Prompts 2 to 5: Execute permissions (Inherit)**
+
+      * **Explanation:** The tool will find that `appackt` (a bash script) executed other commands: `/usr/bin/touch`, `/usr/bin/date`, `/usr/bin/cat`, and `/usr/bin/rm`. It asks for "execute" permissions for these.
+      * **Answer: `I` (I)nherit**
+      * **What `(I)nherit` means:** This is a common choice for scripts. It means the child process (like `touch`) will run under the *same profile* as the parent (`appackt`).
+
+  * **Prompts 6 to 9: Read/write permissions (Allow)**
+
+      * **Explanation:** The tool will see the script trying to read/write to files like `/dev/tty` (the terminal), `/home/hashim/Repo/log/appackt` (our log file), and `/etc/ld.so.cache` (a system library cache). It asks for `r` (read) and `w` (write) permissions.
+      * **Answer: `A` (A)llow**
+      * **What `(A)llow` means:** This explicitly adds a rule to the profile to permit this specific action (e.g., "allow write access to `/home/hashim/Repo/log/appackt`").
+
+  * **Prompt 10: Save changes**
+
+      * **Explanation:** The prompt asks to save or review changes.
+      * **Answer: `S` (S)ave**
+
+At this point, we have finished scanning with `aa-genprof`, and we can answer the last prompt with **`F` (F)inish**.
+
+Our app (`appackt`) is now enforced by AppArmor in `enforce` mode (by default).
+
+### 5\. Refine the Profile with `aa-logprof`
+
+For the rest of the steps, we only need one terminal window. Let’s run the `aa-logprof` command to further tune our `appackt` security profile if needed:
+
+```bash
+sudo aa-logprof
+```
+
+We’ll get several prompts again, similar to the previous ones, asking for further permissions needed by our script or by other applications. The prompts alternate between **(I)nherit** and **(A)llow** answers, where appropriate. It’s always recommended to ponder upon the permissions asked and act accordingly.
+
+We may have to run the `aa-logprof` command a couple of times because, with each iteration, new permissions will be discovered and addressed, depending on the child processes that are spawned by our script, and so on.
+
+### 6\. Clean Up Orphaned Profiles (Optional)
+
+`aa-logprof` may discover old, orphaned profile entries in the kernel's cache. They will all be named according to the path of our application (e.g., `/home/hashim/Repo/appackt//null-/usr/bin/touch`). We can clean up these entries with the following command:
+
+```bash
+hashim@Hashim:~/Repo$ sudo aa-remove-unknown
+```
+
+**Example Output:**
+
+```
+Warning: found usr.sbin.sssd in /etc/apparmor.d/force-complain, forcing complain mode
+Removing 'snap.snapd-desktop-integration.snapd-desktop-integration'
+Removing 'snap.snapd-desktop-integration.hook.configure'
+...
+Removing '/snap/snapd/25202/usr/lib/snapd/snap-confine'
+Removing '/home/hashim/Repo/appackt//null-/usr/bin/touch'
+Removing '/home/hashim/Repo/appackt//null-/usr/bin/rm'
+Removing '/home/hashim/Repo/appackt//null-/usr/bin/date'
+Removing '/home/hashim/Repo/appackt//null-/usr/bin/cat'
+```
+
+**Explanation:** This command removes *all* unknown or orphaned profiles, including many from `snap` packages. At the bottom, you can see it cleaning up the temporary "child" profiles that `aa-genprof` created during its learning process.
+
+### 7\. Verify the Profile is Enforcing
+
+We can now verify that our app is indeed guarded with AppArmor:
+
+```bash
+sudo aa-status
+```
+
+The relevant excerpt from the output is as follows:
+
+```bash
+hashim@Hashim:~/Repo$ sudo aa-status
+apparmor module is loaded.
+185 profiles are loaded.
+102 profiles are in enforce mode.
+   /home/hashim/Repo/appackt
+   /usr/bin/man
+...
+```
+
+Our application (`/home/hashim/Repo/appackt`) is shown, as expected, in `enforce` mode.
+
+### 8\. Test the Profile (Validation)
+
+Next, we need to validate that our app complies with the security policies enforced by AppArmor. Let’s edit the `appackt` script and change the `LOG_FILE` path from `log` to `logs`.
+
+```bash
+# Change line 6 from ./log/appackt to ./logs/appackt
+hashim@Hashim:~/Repo$ nano appackt
+```
+
+We have changed the output directory from `log` to `logs`. Let’s create this new `logs` directory and run our app:
+
+```bash
+hashim@Hashim:~/Repo$ mkdir logs
+hashim@Hashim:~/Repo$ ./appackt
+```
+
+**Example Output (Permission Denied):**
+
+```
+Creating ./log/appackt...
+touch: cannot touch './log/appackt': Permission denied
+Writing to ./log/appackt...
+./appackt: line 12: ./log/appackt: Permission denied
+Reading from ./log/appackt...
+./appackt: line 14: /usr/bin/cat: Permission denied
+Deleting ./log/appackt...
+./appackt: line 16: /usr/bin/rm: Permission denied
+```
+
+**Explanation of Failure:**
+The preceding output suggests that `appackt` is attempting to access a path *outside the permitted boundaries* (our profile only allows access to `./log/`, not `./logs/`), thus validating our profile is working.
+
+*(Note: The `echo` messages in the output still say `"./log/appackt"` because we only changed the `LOG_FILE` variable in the script, not the `echo` statements. The "Permission denied" errors confirm the script *tried* to access the new, un-profiled path.)*
+
+
+## 🚦 Managing Profile States
+
+Let’s revert the preceding changes (change `./logs/` back to `./log/`) and have the `appackt` script act normally.
+
+### Set to Enforce Mode
+
+We can explicitly set a profile to `enforce` mode with the following command:
+
+```bash
+hashim@Hashim:~/Repo$ sudo aa-enforce /home/hashim/Repo/appackt 
+```
+
+**Example Output:**
+
+```
+skipping unparseable profile /etc/apparmor.d/fusermount3 (Can't parse mount rule mount fstype=@{fuse_types} options=(nosuid,nodev) options in (ro,rw,noatime,dirsync,nodiratime,noexec,sync) -> @{HOME}/**/,)
+Setting /home/hashim/Repo/appackt to enforce mode.
+```
+
+### Set to Complain Mode
+
+If we wanted to make further adjustments to our application and then test it, we would change the profile mode to `complain` and then re-run `aa-logprof` to learn the new rules.
+
+```bash
+hashim@Hashim:~/Repo$ sudo aa-complain /home/hashim/Repo/appackt 
+```
+
+**Example Output:**
+
+```
+skipping unparseable profile /etc/apparmor.d/fusermount3 (Can't parse mount rule mount fstype=@{fuse_types} options=(nosuid,nodev) options in (ro,rw,noatime,dirsync,nodiratime,noexec,sync) -> @{HOME}/**/,)
+Setting /home/hashim/Repo/appackt to complain mode.
+```
+
+AppArmor profiles are plain text files stored in the `/etc/apparmor.d/` directory. Creating or modifying them usually involves manually editing the files or using the `aa-genprof` and `aa-logprof` tools.
+
+Next, let’s look at how to disable or enable AppArmor application profiles.
+
+
+## 🚫 Disabling and Enabling Profiles
+
+Sometimes, we may want to disable a problematic application profile while working on a better version. Here’s how we do this.
+
+### 1\. Locate the Profile File
+
+First, we need to locate the application profile we want to disable. The related file is in the `/etc/apparmor.d/` directory and it’s **named according to its full path, with dots (`.`) instead of slashes (`/`)**.
+
+In our case, the file for `/home/hashim/Repo/appackt` is `home.hashim.Repo.appackt`.
+
+```bash
+hashim@Hashim:~/Repo$ cd /etc/apparmor.d/
+hashim@Hashim:/etc/apparmor.d$ ls | grep "hashim"
+home.hashim.Repo.appackt
+```
+
+### 2\. Disable the Profile
+
+To disable the profile, we **create a symbolic link** to it inside the `/etc/apparmor.d/disable/` directory, and then **unload it from the kernel** using `apparmor_parser -R`.
+
+```bash
+hashim@Hashim:/etc/apparmor.d$ sudo ln -s /etc/apparmor.d/home.hashim.Repo.appackt /etc/apparmor.d/disable/ 
+hashim@Hashim:/etc/apparmor.d$ sudo apparmor_parser -R /etc/apparmor.d/home.hashim.Repo.appackt
+```
+
+  * `ln -s`: Creates the symbolic link. AppArmor knows to ignore profiles linked here.
+  * `apparmor_parser -R`: **R**emoves (unloads) the profile from the kernel's memory.
+
+If we run the `sudo aa-status` command, we won’t see our `appackt` profile anymore. In this situation, the `appackt` script is not enforced by any restrictions.
+
+### 3\. Re-enable the Profile
+
+To re-enable the related security profile, we reverse the process: **remove the symbolic link** and **reload the profile into the kernel** with `apparmor_parser -r`.
+
+```bash
+sudo rm /etc/apparmor.d/disable/home.hashim.Repo.appackt
+sudo apparmor_parser -r /etc/apparmor.d/home.hashim.Repo.appackt
+```
+
+  * `rm`: Removes the symbolic link.
+  * `apparmor_parser -r`: **R**eplaces (loads) the profile back into the kernel.
+
+### Deleting AppArmor Security Profiles
+
+Deleting AppArmor security profiles is functionally equivalent to disabling them. We can also choose to remove the related file (`/etc/apparmor.d/home.hashim.Repo.appackt`) from the filesystem altogether.
+
+If we delete a profile without removing it from the kernel first (with `apparmor_parser -R`), we can use the `aa-remove-unknown` command to clean up orphaned entries.
+
+
+## 🏁 Final Considerations
+
+Working with **AppArmor** is relatively easier than **SELinux**, especially when it comes to generating security policies or switching back and forth between permissive (`complain`) and non-permissive (`enforce`) mode. SELinux can only toggle the permissive context for the *entire system*, while AppArmor does it at the *application level*.
+
+On the other hand, there might be no choice between the two, as some major Linux distributions either support one or the other.
+
+  * **AppArmor** is used on Debian, Ubuntu, and openSUSE.
+  * **SELinux** runs on RHEL, Fedora, and SLE.
+    Theoretically, you can always try to port the related kernel modules across distros, but that’s not a trivial task.
+
+As a final note, we should reiterate that in the big picture of Linux security, SELinux and AppArmor are **ACMs** that act *locally* on a system, at the application level. When it comes to securing applications and computer systems from the *outside world*, **firewalls** come into play.
+
+---
