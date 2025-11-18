@@ -435,3 +435,285 @@ four      *      five*          *          *
 Keep in mind that `printf` is reasonably powerful, and as such, it has its own complex syntax, which is beyond the scope of this chapter. A search online can find the manual pages and also discussions of “how to do X with printf().”
 
 ---
+
+# 🧠 Conditional Logic and Control Statements in `awk`
+
+Like other programming languages, `awk` provides support for conditional logic (**`if/else`**) and control statements (**`for/while`** loops).
+
+The unique power of `awk` is that it allows you to place this complex logic *inside* a piped command stream. This avoids the need to create, install, and add a custom executable shell script to your path for many common tasks.
+
+## 1\. The `if/else` Statement
+
+The following code block shows you how to use `if/else` logic.
+
+*(Note: The `if/else` syntax in the original text was invalid. The code below has been corrected to be fully runnable.)*
+
+#### 📜 Code Snippet
+
+This script runs in the main action block, which executes once for the empty string provided by `echo`.
+
+```bash
+echo "" | awk '
+BEGIN { x = 10 }
+{
+ if (x % 2 == 0) {
+    print "x is even"
+ } else {
+    print "x is odd"
+ }
+}
+'
+```
+
+#### 🖥️ Output
+
+```
+x is even
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`BEGIN { x = 10 }`**: The `BEGIN` block runs *once* before any input is processed. It initializes a variable `x` with the value `10`.
+  * **`{ ... }`**: This is the main action block. It runs for each line of input (in this case, it runs once for the single, empty line from `echo ""`).
+  * **`if (x % 2 == 0)`**: This is the condition.
+      * `x % 2`: The `%` (modulo) operator calculates the remainder of `x` divided by 2.
+      * `== 0`: It checks if the remainder is equal to 0.
+  * **`{ print "x is even" }`**: This action block is executed if the condition is **true**.
+  * **`else { print "x is odd" }`**: This action block is executed if the condition is **false**.
+
+Since `x` is 10, the remainder is 0, so the `if` block is executed, printing "x is even".
+
+
+## 2\. The `while` Statement
+
+The following code block illustrates how to use a `while` loop in `awk`. A `while` loop will continue to run as long as its condition is true.
+
+#### 📜 Code Snippet
+
+```bash
+echo "" | awk '
+{
+ x = 0
+ while(x < 4) {
+    print "x:",x
+    x = x + 1
+ }
+}
+'
+```
+
+#### 🖥️ Output
+
+```
+x: 0
+x: 1
+x: 2
+x: 3
+```
+
+#### 👨‍💻 Code Explanation
+
+1.  **`x = 0`**: A variable `x` is initialized to 0.
+2.  **`while(x < 4)`**: The loop checks the condition. Is 0 less than 4? Yes.
+3.  **`print "x:",x`**: Prints `x: 0`.
+4.  **`x = x + 1`**: Increments `x` to 1.
+5.  The loop repeats. Is 1 less than 4? Yes. It prints `x: 1` and increments `x`.
+6.  This continues until `x` becomes 4. The condition `(4 < 4)` is now **false**, and the loop terminates.
+
+
+## 3\. The `do-while` Statement
+
+The following code block illustrates how to use a `do-while` loop. This type of loop is very similar to a `while` loop, with one key difference: the code block is executed *first*, and the condition is checked *afterward*. This guarantees the loop will run at least once.
+
+#### 📜 Code Snippet
+
+```bash
+echo "" | awk '
+{
+ x = 0
+ do {
+    print "x:",x
+    x = x + 1
+ } while(x < 4)
+}
+'
+```
+
+#### 🖥️ Output
+
+```
+x: 0
+x: 1
+x: 2
+x: 3
+```
+
+#### 👨‍💻 Code Explanation
+
+The execution flow is almost identical to the `while` loop. The main difference would be if the condition was initially false (e.g., `x = 5`). A `while` loop would run zero times, but a `do-while` loop would run once, print `x: 5`, and then terminate.
+
+
+## 4\. A `for` Loop in `awk`
+
+Listing 7.3 displays the content of `Loop.sh` that illustrates how to print a list of numbers in a loop.
+
+#### 📜 Listing 7.3: `Loop.sh`
+
+```bash
+echo "" | awk '
+BEGIN {}
+{
+ for(i=0; i<5; i++) {
+    printf("%3d", i)
+ }
+}
+END { print "\n" }
+'
+```
+
+#### 🖥️ Output
+
+```
+  0  1  2  3  4
+```
+
+#### 👨‍💻 Code Explanation
+
+  * **`for(i=0; i<5; i++)`**: This is a C-style `for` loop with three parts:
+    1.  **Initialization (`i=0`)**: A counter `i` is set to 0 before the loop starts.
+    2.  **Condition (`i<5`)**: The loop will run as long as `i` is less than 5.
+    3.  **Increment (`i++`)**: After each loop iteration, `i` is incremented by 1. (`i++` is a shortcut for `i=i+1`).
+  * **`printf("%3d", i)`**: This is the **print formatted** command.
+      * `printf` does **not** add a newline after it prints, unlike `print`.
+      * `"%3d"`: This is the format specifier.
+          * `d`: Print a `d`ecimal integer (a number).
+          * `3`: Pad the number with spaces to be 3 characters wide.
+  * **`END { print "\n" }`**: The `END` block runs *after* all input is processed. This is used to print a single newline character (`\n`) to move the command prompt to the next line after the loop's output.
+
+
+## 5\. A `for` Loop with a `break` Statement
+
+The following code block illustrates how to use a **`break`** statement. `break` will exit a loop immediately, regardless of the loop's condition.
+
+#### 📜 Code Snippet
+
+```bash
+echo "" | awk '
+{
+ for(x=1; x<4; x++) {
+    print "x:",x
+    if(x == 2) {
+       break;
+    }
+ }
+}
+'
+```
+
+#### 🖥️ Output
+
+*(Note: The typo `X:2` from the original text has been corrected to `x:2`.)*
+
+```
+x: 1
+x: 2
+```
+
+#### 👨‍💻 Code Explanation
+
+1.  The loop starts with `x=1`. It prints `x: 1`. The `if` condition (`1 == 2`) is false.
+2.  `x` is incremented to 2. The loop runs.
+3.  It prints `x: 2`.
+4.  The `if` condition (`2 == 2`) is **true**.
+5.  The **`break;`** statement is executed.
+6.  `awk` immediately exits the `for` loop. The loop *does not* run for `x=3`.
+
+
+## 6\. The `next` and `continue` Statements
+
+The `next` and `continue` statements are powerful control commands, but they do very different things.
+
+  * **`next`**: This command stops processing the *current line* of input and tells `awk` to immediately move to the **next line** of the input file.
+  * **`continue`**: This command is used *inside a loop* (`for` or `while`). It stops the *current loop iteration* and tells `awk` to immediately start the **next iteration** of the loop.
+
+The conceptual example in the text is difficult to run. Here is a complete, practical example that demonstrates both commands.
+
+### 📜 Complete Example: `next` vs. `continue`
+
+First, let's create a file to process.
+
+**1. Create `records.txt`**
+
+```bash
+nano records.txt
+```
+
+Paste the following content and save:
+
+```
+USER:admin
+# This is a comment, skip it
+USER:guest
+```
+
+**2. Create the `awk` Command**
+This script will skip any line containing `#` and will also skip iteration 2 of its internal loop.
+
+```bash
+awk '
+BEGIN { FS=":" }
+
+# 1. Check for a comment. If found, stop processing this line.
+/#/ { 
+    print "--> Found a comment, skipping line."
+    next 
+}
+
+# 2. This block only runs if "next" was NOT called.
+{
+    print "Processing record for user:", $2
+    
+    # 3. A loop to demonstrate "continue"
+    for(i=1; i<4; i++) {
+        if (i == 2) {
+            print "  - Skipping iteration 2 with (continue)..."
+            continue # Skips the rest of this loop iteration
+        }
+        print "  - Iteration", i
+    }
+}
+' records.txt
+```
+
+#### 🖥️ Output
+
+```
+Processing record for user: admin
+  - Iteration 1
+  - Skipping iteration 2 with (continue)...
+  - Iteration 3
+--> Found a comment, skipping line.
+Processing record for user: guest
+  - Iteration 1
+  - Skipping iteration 2 with (continue)...
+  - Iteration 3
+```
+
+#### 👨‍💻 Code Explanation
+
+1.  **Line 1 ("USER:admin"):**
+      * The `/#/` pattern is not found.
+      * The main block runs. It prints `Processing record for user: admin`.
+      * The `for` loop starts.
+      * `i=1`: Prints `Iteration 1`.
+      * `i=2`: The `if` is true. It prints `Skipping iteration...` and `continue` is called. The `print " - Iteration", i` line is skipped.
+      * `i=3`: Prints `Iteration 3`.
+2.  **Line 2 ("\# This is a comment..."):**
+      * The `/#/` pattern **is found**.
+      * It prints `--> Found a comment, skipping line.`.
+      * The **`next`** command is called. `awk` *immediately* stops processing this line and moves to the next line of input. The main block and `for` loop are never run for this line.
+3.  **Line 3 ("USER:guest"):**
+      * The `/#/` pattern is not found.
+      * The main block runs, and the `for` loop logic repeats, just as it did for the "admin" user.
+
+---
