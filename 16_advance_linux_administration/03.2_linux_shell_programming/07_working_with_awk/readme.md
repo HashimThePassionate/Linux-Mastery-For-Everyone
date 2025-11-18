@@ -292,3 +292,146 @@ As we have discussed, this method can be inefficient as it uses an extra process
 Keep in mind that the next person to examine your code may not be familiar with your coding style, so clarity is key.
 
 ---
+
+# 🖨️ Aligning Text with the `printf()` Command
+
+Since `awk` is a programming language inside a single command, it also has its own way of producing formatted output via the `printf()` statement. This is a much more powerful and precise alternative to the standard `print` command.
+
+
+### 📁 Listing 7.1: `columns2.txt`
+
+First, let's create the sample dataset. This file is intentionally "messy," with a different number of words (fields) on each line.
+
+**1. Create the File**
+
+```bash
+nano columns2.txt
+```
+
+**2. Paste the Content**
+Copy the following lines into the `nano` editor, then save and exit (`Ctrl+O`, `Enter`, `Ctrl+X`).
+
+```
+one two
+three four
+one two three four
+five six
+one two three
+four five
+```
+
+
+### 📜 Listing 7.2: `AlignColumns1.sh`
+
+Next, here is the `awk` script that will read `columns2.txt` and align its contents into fixed-width columns.
+
+**1. Create the Script**
+
+```bash
+nano AlignColumns1.sh
+```
+
+**2. Paste the Code**
+Copy the following code into `nano`, then save and exit.
+
+```bash
+#!/bin/bash
+awk '
+{
+ # left-align $1 on a 10-char column
+ # right-align $2 on a 10-char column
+ # right-align $3 on a 10-char column
+ # right-align $4 on a 10-char column
+ printf("%-10s*%10s*%10s*%10s*\n", $1, $2, $3, $4)
+}
+' columns2.txt
+```
+
+**3. Make the Script Executable**
+
+```bash
+chmod +x AlignColumns1.sh
+```
+
+
+### 👨‍💻 Detailed Code Explanation
+
+Listing 7.2 contains a single `awk` command that runs the script block `{...}` for *every line* in `columns2.txt`.
+
+The core of this script is the `printf()` statement:
+
+```awk
+printf("%-10s*%10s*%10s*%10s*\n", $1, $2, $3, $4)
+```
+
+Let's break this down piece by piece:
+
+  * **`printf(...)`**: This stands for "print formatted." Unlike `print`, it does **not** automatically add a newline character.
+  * **`"..."`**: This is the **format string**. It's a template that tells `printf` *how* to display the data.
+  * **`$1, $2, $3, $4`**: These are the **arguments** (the data) that will be fed into the template. `$1` is the first word on the line, `$2` is the second, and so on.
+
+#### Breakdown of the Format String: `%-10s*%10s*%10s*%10s*\n`
+
+  * **`%-10s`**: This is the first placeholder, for `$1`.
+      * `%s`: Stands for "string."
+      * `10`: Pads the string with spaces to be **10 characters wide**.
+      * `-`: This is the **left-alignment** flag. Without it, the text would be right-aligned.
+  * **`*`**: This is a **literal character**. It is printed exactly as shown, acting as a visual separator for our columns.
+  * **`%10s`**: This is the placeholder for `$2`, `$3`, and `$4`.
+      * `%s`: Stands for "string."
+      * `10`: Pads the string to be **10 characters wide**.
+      * *(No `-` flag)*: By default, `printf` uses **right-alignment**.
+  * **`\n`**: This is the **newline character**. We must add this manually, or all the output would print on a single, long line.
+
+**What happens to missing fields?**
+On lines like "one two", the variables `$3` and `$4` are just empty strings (`""`). `printf` still pads these empty strings to be 10 characters wide, giving you 10 spaces.
+
+
+### 🚀 Run and Analyze Output
+
+When you launch the script, `awk` processes each line of `columns2.txt` and formats it.
+
+**Run the script:**
+
+```bash
+./AlignColumns1.sh
+```
+
+**Output:**
+*(This output is formatted in a code block to preserve the exact spacing)*
+
+```
+one       *       two*          *          *
+three     *      four*          *          *
+one       *       two*     three*      four*
+five      *       six*          *          *
+one       *       two*     three*          *
+four      *      five*          *          *
+```
+
+**Output Analysis (Line by Line):**
+
+  * **`one * two* * *`**
+
+      * `%-10s` ($1="one") -\> `"one       "` (left-aligned)
+      * `%10s` ($2="two") -\> `"       two"` (right-aligned)
+      * `%10s` ($3="") -\> `"          "` (right-aligned)
+      * `%10s` ($4="") -\> `"          "` (right-aligned)
+
+  * **`one * two* three* four*`**
+
+      * `%-10s` ($1="one") -\> `"one       "` (left-aligned)
+      * `%10s` ($2="two") -\> `"       two"` (right-aligned)
+      * `%10s` ($3="three") -\> `"     three"` (right-aligned)
+      * `%10s` ($4="four") -\> `"      four"` (right-aligned)
+
+  * **`one * two* three* *`**
+
+      * `%-10s` ($1="one") -\> `"one       "` (left-aligned)
+      * `%10s` ($2="two") -\> `"       two"` (right-aligned)
+      * `%10s` ($3="three") -\> `"     three"` (right-aligned)
+      * `%10s` ($4="") -\> `"          "` (right-aligned)
+
+Keep in mind that `printf` is reasonably powerful, and as such, it has its own complex syntax, which is beyond the scope of this chapter. A search online can find the manual pages and also discussions of “how to do X with printf().”
+
+---
