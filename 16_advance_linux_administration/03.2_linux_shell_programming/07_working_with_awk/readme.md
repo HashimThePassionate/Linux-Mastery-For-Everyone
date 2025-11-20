@@ -717,3 +717,242 @@ Processing record for user: guest
       * The main block runs, and the `for` loop logic repeats, just as it did for the "admin" user.
 
 ---
+
+# ✂️ Deleting and Filtering Lines with `awk`
+
+This section explores how to use `awk` to selectively print specific lines from a dataset based on line numbers or the structure of the data itself.
+
+
+## 1\. Deleting Alternate Lines (Printing Odd Lines)
+
+Listing 7.4 displays the contents of `linepairs.csv`, and Listing 7.5 displays the content of `deletelines.sh`. This script illustrates how to print alternating lines from the dataset.
+
+### 📂 Listing 7.4: `linepairs.csv`
+
+First, let's create the data file.
+
+```bash
+nano linepairs.csv
+```
+
+Paste the following content and save:
+
+```
+a,b,c,d
+e,f,g,h
+1,2,3,4
+5,6,7,8
+```
+
+### 📜 Listing 7.5: `deletelines.sh`
+
+Now, let's create the script that processes this file.
+
+```bash
+nano deletelines.sh
+```
+
+Paste the following code and save:
+
+```bash
+#!/bin/bash
+inputfile="linepairs.csv"
+outputfile="linepairsdeleted.csv"
+
+# awk command to print only odd-numbered lines
+awk 'NR%2 {printf "%s", $0; print ""; next}' < $inputfile > $outputfile
+```
+
+### 🚀 How to Run
+
+Make the script executable and run it:
+
+```bash
+chmod +x deletelines.sh
+./deletelines.sh
+```
+
+To see the result, check the output file:
+
+```bash
+cat linepairsdeleted.csv
+```
+
+### 🖥️ Output
+
+```
+a,b,c,d
+1,2,3,4
+```
+
+### 👨‍💻 Detailed Explanation
+
+Let's break down the `awk` command: `'NR%2 {printf "%s", $0; print ""; next}'`
+
+1.  **`NR` (Number of Records):** This variable holds the current line number (1, 2, 3, 4...).
+2.  **`%2` (Modulo Operator):** This calculates the remainder when dividing by 2.
+      * Line 1: `1 % 2 = 1` (True in awk)
+      * Line 2: `2 % 2 = 0` (False in awk)
+      * Line 3: `3 % 2 = 1` (True)
+3.  **The Condition `NR%2`:** In `awk`, a non-zero value is treated as "True". Therefore, the code inside the `{}` braces **only executes for odd-numbered lines** (1, 3, 5...).
+4.  **`printf "%s", $0`**: Prints the content of the current line (`$0`) as a string (`%s`).
+5.  **`print ""`**: Prints a newline character to finish the line.
+6.  **`next`**: Tells `awk` to stop processing the current line immediately and move to the next one.
+
+**Summary:** The script checks if the line number is odd. If it is, it prints it. If it is even, it does nothing (effectively deleting it from the output).
+
+
+## 2\. Filtering Lines Based on Column Count
+
+*(Note: The original text titled this "Merging Lines," but the code provided actually demonstrates **filtering** lines based on how many columns they have. We will explain the code accurately as written.)*
+
+Listing 7.6 displays the contents of `columns.txt`, and Listing 7.7 displays the content of `ColumnCount1.sh`.
+
+### 📂 Listing 7.6: `columns.txt`
+
+Create the data file:
+
+```bash
+nano columns.txt
+```
+
+Paste the following content:
+
+```
+one two three
+one two
+one two three four
+one
+one three
+one four
+```
+
+### 📜 Listing 7.7: `ColumnCount1.sh`
+
+Create the script:
+
+```bash
+nano ColumnCount1.sh
+```
+
+Paste the code:
+
+```bash
+#!/bin/bash
+awk '
+{
+ # NF is the Number of Fields (columns)
+ if( NF == 2 ) { print $0 }
+}
+' columns.txt
+```
+
+### 🚀 How to Run
+
+```bash
+chmod +x ColumnCount1.sh
+./ColumnCount1.sh
+```
+
+### 🖥️ Output
+
+```
+one two
+one three
+one four
+```
+
+### 👨‍💻 Detailed Explanation
+
+The logic here relies on the built-in variable **`NF`**.
+
+  * **`NF` (Number of Fields):** `awk` automatically counts how many "words" (fields) are on the current line.
+  * **`if( NF == 2 )`**: This condition checks if the line has **exactly two** words.
+      * "one two three" -\> NF is 3. (Ignored)
+      * "one two" -\> NF is 2. (**Printed**)
+      * "one" -\> NF is 1. (Ignored)
+
+### 🔄 Inverse Logic
+
+If you want to display the lines that do **not** contain exactly 2 columns, you simply change the operator to `!=` (not equal).
+
+```bash
+awk '{ if( NF != 2 ) { print $0 } }' columns.txt
+```
+
+**Output:**
+
+```
+one two three
+one two three four
+one
+```
+
+
+## 🔗 Printing File Contents as a Single Line
+
+This section illustrates how to merge all lines of a file into one long string by removing newlines.
+
+### 📂 Setup: `test4.txt`
+
+Create the file (make sure to include the blank lines):
+
+```bash
+nano test4.txt
+```
+
+Content:
+
+```
+abc
+
+def
+
+abc
+abc
+```
+
+### 📜 The Command
+
+```bash
+awk '{printf("%s", $0)}' test4.txt
+```
+
+### 🖥️ Output
+
+```
+Abcdefabcabc
+```
+
+*(Note: The prompt will appear on the same line immediately after the output because there is no trailing newline).*
+
+### 👨‍💻 Detailed Explanation
+
+Why did the lines merge?
+
+1.  **`$0`**: This variable holds the content of the line **excluding** the newline character (`\n`) that usually sits at the end of a line in a text file.
+2.  **`printf("%s", ...)`**: The `printf` command gives you total control. Unlike the standard `print` command, `printf` **does not** add a newline automatically.
+3.  **The Loop:**
+      * Read Line 1 ("abc"). `$0` is "abc". Print "abc".
+      * Read Line 2 (Empty). `$0` is empty. Print nothing.
+      * Read Line 3 ("def"). `$0` is "def". Print "def".
+      * Since `printf` never added a "return" (Enter key press), "def" is printed directly next to "abc".
+
+**Adding Space:**
+If you wanted a space between the lines, you would simply add a space inside the quotes of the format string:
+
+```bash
+awk '{printf("%s ", $0)}' test4.txt
+```
+
+**Output:**
+
+```
+abc  def  abc abc 
+```
+
+*(Note the double spaces where the blank lines used to be).*
+
+
+---
+
