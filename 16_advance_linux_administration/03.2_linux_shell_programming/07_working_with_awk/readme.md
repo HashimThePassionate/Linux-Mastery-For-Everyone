@@ -801,8 +801,13 @@ Let's break down the `awk` command: `'NR%2 {printf "%s", $0; print ""; next}'`
 
 **Summary:** The script checks if the line number is odd. If it is, it prints it. If it is even, it does nothing (effectively deleting it from the output).
 
+# 🔗 Merging and Joining Lines in Datasets
 
-## 2\. Filtering Lines Based on Column Count
+This section explores techniques for manipulating the structure of text files using `awk`. Specifically, we will look at how to filter lines based on column counts, merge file contents into a single line, and join consecutive or alternating lines based on specific logic.
+
+-----
+
+## 1\. Filtering Lines Based on Column Count
 
 *(Note: The original text titled this "Merging Lines," but the code provided actually demonstrates **filtering** lines based on how many columns they have. We will explain the code accurately as written.)*
 
@@ -810,15 +815,15 @@ Listing 7.6 displays the contents of `columns.txt`, and Listing 7.7 displays the
 
 ### 📂 Listing 7.6: `columns.txt`
 
-Create the data file:
+First, let's create the data file.
 
 ```bash
 nano columns.txt
 ```
 
-Paste the following content:
+Paste the following content and save:
 
-```
+```text
 one two three
 one two
 one two three four
@@ -829,13 +834,13 @@ one four
 
 ### 📜 Listing 7.7: `ColumnCount1.sh`
 
-Create the script:
+Now, let's create the script that processes this file to print *only* the lines that have exactly two columns.
 
 ```bash
 nano ColumnCount1.sh
 ```
 
-Paste the code:
+Paste the following code and save:
 
 ```bash
 #!/bin/bash
@@ -849,6 +854,8 @@ awk '
 
 ### 🚀 How to Run
 
+Make the script executable and run it:
+
 ```bash
 chmod +x ColumnCount1.sh
 ./ColumnCount1.sh
@@ -856,7 +863,7 @@ chmod +x ColumnCount1.sh
 
 ### 🖥️ Output
 
-```
+```text
 one two
 one three
 one four
@@ -868,9 +875,9 @@ The logic here relies on the built-in variable **`NF`**.
 
   * **`NF` (Number of Fields):** `awk` automatically counts how many "words" (fields) are on the current line.
   * **`if( NF == 2 )`**: This condition checks if the line has **exactly two** words.
-      * "one two three" -\> NF is 3. (Ignored)
-      * "one two" -\> NF is 2. (**Printed**)
-      * "one" -\> NF is 1. (Ignored)
+      * "one two three" -\> `NF` is 3. (Ignored)
+      * "one two" -\> `NF` is 2. (**Printed**)
+      * "one" -\> `NF` is 1. (Ignored)
 
 ### 🔄 Inverse Logic
 
@@ -882,20 +889,21 @@ awk '{ if( NF != 2 ) { print $0 } }' columns.txt
 
 **Output:**
 
-```
+```text
 one two three
 one two three four
 one
 ```
 
+-----
 
-## 🔗 Printing File Contents as a Single Line
+## 2\. Printing File Contents as a Single Line
 
 This section illustrates how to merge all lines of a file into one long string by removing newlines.
 
 ### 📂 Setup: `test4.txt`
 
-Create the file (make sure to include the blank lines):
+Create the file (make sure to include the blank lines as shown):
 
 ```bash
 nano test4.txt
@@ -903,7 +911,7 @@ nano test4.txt
 
 Content:
 
-```
+```text
 abc
 
 def
@@ -920,7 +928,7 @@ awk '{printf("%s", $0)}' test4.txt
 
 ### 🖥️ Output
 
-```
+```text
 Abcdefabcabc
 ```
 
@@ -939,6 +947,7 @@ Why did the lines merge?
       * Since `printf` never added a "return" (Enter key press), "def" is printed directly next to "abc".
 
 **Adding Space:**
+
 If you wanted a space between the lines, you would simply add a space inside the quotes of the format string:
 
 ```bash
@@ -947,12 +956,224 @@ awk '{printf("%s ", $0)}' test4.txt
 
 **Output:**
 
-```
+```text
 abc  def  abc abc 
 ```
 
 *(Note the double spaces where the blank lines used to be).*
 
+-----
+
+## 3\. Joining Groups of Lines in a Text File
+
+This example demonstrates how to "join" consecutive lines. Specifically, we will take every three lines and merge them into one.
+
+### 📂 Listing 7.8: `digits.txt`
+
+Create the data file:
+
+```bash
+nano digits.txt
+```
+
+Content:
+
+```text
+1
+2
+3
+4
+5
+6
+7
+8
+9
+```
+
+### 📜 Listing 7.9: `digits.sh`
+
+Create the script:
+
+```bash
+nano digits.sh
+```
+
+Paste the following code:
+
+```bash
+#!/bin/bash
+awk -F" " '{
+ # Print the current line as a decimal number, NO newline
+ printf("%d",$0)
+ 
+ # If the Record Number (NR) is divisible by 3...
+ if(NR % 3 == 0) { 
+   # ...Print a newline
+   printf("\n") 
+ }
+}' digits.txt
+```
+
+### 🚀 How to Run
+
+```bash
+chmod +x digits.sh
+./digits.sh
+```
+
+### 🖥️ Output
+
+```text
+123
+456
+789
+```
+
+### 👨‍💻 Detailed Explanation
+
+  * **`printf("%d",$0)`**: Prints the number on the current line immediately.
+  * **`NR` (Number of Records):** This counts the lines as they are processed (1, 2, 3, 4...).
+  * **`NR % 3 == 0`**: This uses the modulo operator. It checks if the line number is a multiple of 3 (lines 3, 6, 9).
+      * Line 1: Print "1". Modulo is 1. (No newline).
+      * Line 2: Print "2". Modulo is 2. (No newline).
+      * Line 3: Print "3". Modulo is 0. **Print Newline**.
+      * *Result: "123"*
+
+-----
+
+## 4\. Joining Alternate Lines Based on a Pattern
+
+This example joins two consecutive lines based on the content of the text, rather than just counting lines.
+
+### 📂 Listing 7.10: `columns2.txt`
+
+Create the data file:
+
+```bash
+nano columns2.txt
+```
+
+Content:
+
+```text
+one two
+three four
+one two three four
+five six
+one two three
+four five
+```
+
+### 📜 Listing 7.11: `JoinLines.sh`
+
+Create the script:
+
+```bash
+nano JoinLines.sh
+```
+
+Paste the following code:
+
+```bash
+#!/bin/bash
+awk '
+{
+ # Print the current line
+ printf("%s",$0)
+ 
+ # Check if the first field ($1) does NOT match "one"
+ if( $1 !~ /one/) { print " " }
+}
+' columns2.txt
+```
+
+### 🚀 How to Run
+
+```bash
+chmod +x JoinLines.sh
+./JoinLines.sh
+```
+
+### 🖥️ Output
+
+```text
+one twothree four 
+one two three fourfive six 
+one two threefour five 
+```
+
+*(Note: The output in the source text has spaces between the joined words: `one two three four`. However, the code provided `printf("%s",$0)` does **not** add a space between the first and second line, resulting in `one twothree four`. The explanation below follows the logic of the provided code).*
+
+### 👨‍💻 Detailed Explanation
+
+  * **`printf("%s",$0)`**: Prints the current line without a newline.
+  * **`if( $1 !~ /one/)`**: Checks if the first word (`$1`) is **NOT** (`!~`) "one".
+      * Line 1 ("one two"): First word is "one". Condition fails. Do nothing. (Cursor stays at end of line).
+      * Line 2 ("three four"): First word is "three". Condition matches\! Print `" "` (space + newline via `print`).
+  * **Result**: Line 1 is printed, then Line 2 is printed immediately after it. Then a newline is added.
+
+-----
+
+## 5\. Joining Alternate Lines Based on Counting
+
+To merge every pair of lines strictly by counting (Line 1+2, Line 3+4), regardless of content, we use a counter variable.
+
+### 📜 Listing 7.12: `JoinLines2.sh`
+
+```bash
+awk '
+BEGIN { count = 0 }
+{
+ # Print the current line
+ printf("%s",$0)
+ 
+ # Increment count. If count is even...
+ if( ++count % 2 == 0) { print " " }
+}
+' columns2.txt
+```
+
+### 👨‍💻 Explanation
+
+1.  **`++count`**: Increments the counter *before* checking.
+2.  **Line 1**: Count becomes 1. `1 % 2` is not 0. No newline.
+3.  **Line 2**: Count becomes 2. `2 % 2` is 0. **Print newline**.
+
+-----
+
+## 6\. Joining Lines: The "Compact" Syntax
+
+This final example does exactly the same thing as Listing 7.12 (joining pairs of lines) but uses cryptic, compact `awk` syntax. This is common in one-liners.
+
+### 📜 Listing 7.13: `JoinLines3.sh`
+
+```bash
+#!/bin/bash
+inputfile="linepairs.csv"
+outputfile="linepairsjoined.csv"
+
+# Compact awk command
+awk 'NR%2 {printf "%s,", $0; next;}1' < $inputfile > $outputfile
+```
+
+### 👨‍💻 Code Explanation
+
+Let's decode `'NR%2 {printf "%s,", $0; next;}1'`:
+
+1.  **`NR%2`**: This is a condition. It checks if the Line Number is odd (1, 3, 5).
+2.  **`{...}`**: If the line is **Odd**:
+      * `printf "%s,", $0`: Print the line followed by a comma (no newline).
+      * `next`: **Stop processing** this line and jump immediately to the next line of input.
+3.  **`1`**: This is a "pattern" that evaluates to True. In `awk`, if a pattern is True and has no action block `{...}`, the default action is **`{print $0}`**.
+      * This part only runs for **Even** lines (because Odd lines hit the `next` command and skipped this part).
+      * It prints the even line (with its natural newline).
+
+**Summary of logic:**
+
+  * **Odd line:** Print text + comma.
+  * **Even line:** Print text + newline.
+  * **Result:** Two lines become one line, comma-separated.
+
+Would you like me to explain how to join lines using a different delimiter, or perhaps how to handle files with an odd number of lines where the last line might get stranded?
 
 ---
-
