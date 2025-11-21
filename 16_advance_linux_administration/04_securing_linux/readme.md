@@ -1,5 +1,67 @@
 # 🛡️ Understanding Linux Security
 
+<details>
+<summary><strong>Table of Contents</strong></summary>
+
+- [🛡️ Understanding Linux Security](#️-understanding-linux-security)
+  - [🔑 Discretionary Access Control (DAC)](#-discretionary-access-control-dac)
+    - [Practical Example (Standard `chmod` Permissions)](#practical-example-standard-chmod-permissions)
+  - [🗂️ Access Control Lists (ACLs)](#️-access-control-lists-acls)
+    - [Practical Example (`setfacl` and `getfacl`)](#practical-example-setfacl-and-getfacl)
+  - [🏷️ Mandatory Access Control (MAC)](#️-mandatory-access-control-mac)
+    - [Practical Example (SELinux Contexts)](#practical-example-selinux-contexts)
+  - [🧑‍💼 Role-Based Access Control (RBAC)](#-role-based-access-control-rbac)
+    - [Practical Example (The `sudoers` File)](#practical-example-the-sudoers-file)
+  - [🔒 Multi-Level Security (MLS)](#-multi-level-security-mls)
+  - [🗃️ Multi-Category Security (MCS)](#️-multi-category-security-mcs)
+- [🛡️ Introducing AppArmor](#️-introducing-apparmor)
+  - [🚀 Working with AppArmor](#-working-with-apparmor)
+    - [📜 Introducing AppArmor Profiles](#-introducing-apparmor-profiles)
+  - [🛠️ Creating a Profile](#️-creating-a-profile)
+    - [1. The `appackt` Script](#1-the-appackt-script)
+    - [2. Initial Setup and Run](#2-initial-setup-and-run)
+    - [3. Install AppArmor Utilities](#3-install-apparmor-utilities)
+    - [4. Generate the Profile with `aa-genprof`](#4-generate-the-profile-with-aa-genprof)
+    - [5. Refine the Profile with `aa-logprof`](#5-refine-the-profile-with-aa-logprof)
+    - [6. Clean Up Orphaned Profiles (Optional)](#6-clean-up-orphaned-profiles-optional)
+    - [7. Verify the Profile is Enforcing](#7-verify-the-profile-is-enforcing)
+    - [8. Test the Profile (Validation)](#8-test-the-profile-validation)
+  - [🚦 Managing Profile States](#-managing-profile-states)
+    - [Set to Enforce Mode](#set-to-enforce-mode)
+    - [Set to Complain Mode](#set-to-complain-mode)
+  - [🚫 Disabling and Enabling Profiles](#-disabling-and-enabling-profiles)
+    - [1. Locate the Profile File](#1-locate-the-profile-file)
+    - [2. Disable the Profile](#2-disable-the-profile)
+    - [3. Re-enable the Profile](#3-re-enable-the-profile)
+    - [Deleting AppArmor Security Profiles](#deleting-apparmor-security-profiles)
+  - [🏁 Final Considerations](#-final-considerations)
+- [🔥 Working with Firewalls](#-working-with-firewalls)
+  - [⛓️ Understanding the Firewall Chain](#️-understanding-the-firewall-chain)
+    - [Packet Flow](#packet-flow)
+    - [Filtering and Targets](#filtering-and-targets)
+  - [🛠️ Introducing Netfilter](#️-introducing-netfilter)
+    - [Netfilter Hooks](#netfilter-hooks)
+  - [🧱 Working with `iptables`](#-working-with-iptables)
+    - [Tables](#tables)
+    - [Configuring `iptables` (Practical Steps)](#configuring-iptables-practical-steps)
+  - [🆕 Introducing `nftables`](#-introducing-nftables)
+    - [Basic `nftables` Configuration](#basic-nftables-configuration)
+  - [🔥 Using Firewall Managers (`ufw` \& `firewalld`)](#-using-firewall-managers-ufw--firewalld)
+    - [Using `firewalld` (RHEL/Fedora)](#using-firewalld-rhelfedora)
+  - [🛡️ Implementing a Firewall with `ufw` on Ubuntu](#️-implementing-a-firewall-with-ufw-on-ubuntu)
+    - [1. Check Status](#1-check-status)
+    - [2. Set Defaults](#2-set-defaults)
+    - [3. Allow SSH (Critical!)](#3-allow-ssh-critical)
+    - [4. Allow Web Traffic (HTTP/HTTPS)](#4-allow-web-traffic-httphttps)
+    - [5. Enable the Firewall](#5-enable-the-firewall)
+    - [6. Verify Rules](#6-verify-rules)
+    - [7. Managing Rules (Delete/Insert)](#7-managing-rules-deleteinsert)
+    - [8. Reset](#8-reset)
+
+</details>
+
+<br>
+
 One significant consideration for securing a computer system or network is the means for system administrators to control how users and processes can access various resources, such as files, devices, and interfaces, across systems. The Linux kernel provides a handful of such mechanisms, collectively referred to as **Access Control Mechanisms (ACMs)**.
 
 Let’s describe them in detail.
