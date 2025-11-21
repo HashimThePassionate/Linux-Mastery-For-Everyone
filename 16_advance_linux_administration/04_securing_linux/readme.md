@@ -546,3 +546,281 @@ On the other hand, there might be no choice between the two, as some major Linux
 As a final note, we should reiterate that in the big picture of Linux security, SELinux and AppArmor are **ACMs** that act *locally* on a system, at the application level. When it comes to securing applications and computer systems from the *outside world*, **firewalls** come into play.
 
 ---
+
+# 🔥 Working with Firewalls
+
+Traditionally, a firewall is a network security device placed between two networks. It monitors network traffic and controls access to these networks. Generally speaking, a firewall protects a local network from unwanted intrusion or attacks from the outside. However, a firewall can also block unsolicited locally originated traffic targeting the public internet. Technically, a firewall allows or blocks incoming and outgoing network traffic based on specific security rules.
+
+For example, a firewall can:
+
+  * Block all but a select set of **inbound** networking protocols (such as SSH and HTTP/HTTPS).
+  * Block all but approved hosts within the local network from establishing specific **outbound** connections (e.g., allowing outbound SMTP connections only from local email servers).
+
+The outgoing security rules prevent bad actors, such as compromised computers, from directing attacks on the public internet. This protection benefits external networks and is essential for avoiding ISP flags for unruly traffic.
+
+Configuring a firewall usually requires a **default security policy** acting at a global scope (e.g., "Deny All"), and then configuring specific exceptions to this general rule based on ports, IP addresses, and other criteria.
+
+
+## ⛓️ Understanding the Firewall Chain
+
+The Linux kernel's TCP/IP stack performs workflows like serializing data into packets for transmission and deserializing incoming packets for applications. Ideally, the kernel shouldn't alter data, but security requires scrutiny.
+
+Firewalls and network security tools adapt to the kernel’s TCP/IP packet filtering interface to monitor and control packets. This blueprint is known as the **firewall chain**.
+
+### Packet Flow
+
+When incoming data enters the firewall chain:
+
+1.  **Routing Decision:** A decision is made based on the packet's destination.
+2.  **INPUT Chain:** If the destination is the local host (`localhost`), the packet enters the `INPUT` chain. This feeds into local processes (web servers, SSH, etc.).
+3.  **FORWARD Chain:** If the destination is a remote host, the packet enters the `FORWARD` chain.
+4.  **OUTPUT Chain:** Both forwarded packets and locally generated packets enter the `OUTPUT` chain before being placed on the network.
+
+### Filtering and Targets
+
+Any chain can filter packets based on criteria like Source/Destination IP, Port, or Network Interface. Each chain has a set of **rules**. If a packet matches a rule, it is routed to a **target**:
+
+  * **ACCEPT:** Allow the packet.
+  * **REJECT:** Reject the packet (send a "refused" error back).
+  * **DROP:** Silently ignore the packet (no error sent back).
+  * **QUEUE:** Pass packet to user-space.
+  * **RETURN:** Stop processing current chain and go back.
+
+
+## 🛠️ Introducing Netfilter
+
+**Netfilter** is the packet filtering framework *inside* the Linux kernel. It provides "hooks" that allow other programs (like `iptables` or `nftables`) to interact with network traffic.
+
+### Netfilter Hooks
+
+There are five main hooks, corresponding to the networking chains:
+
+1.  **NF\_IP\_PRE\_ROUTING:** Triggered by incoming traffic *before* routing decisions.
+2.  **NF\_IP\_LOCAL\_IN:** Triggered after routing if the packet is for the *local host*.
+3.  **NF\_IP\_FORWARD:** Triggered after routing if the packet is for a *remote host*.
+4.  **NF\_IP\_LOCAL\_OUT:** Triggered by locally initiated *outbound* traffic.
+5.  **NF\_IP\_POST\_ROUTING:** Triggered by outgoing traffic just *before* it leaves.
+
+
+## 🧱 Working with `iptables`
+
+`iptables` is the traditional, low-level command-line utility for configuring Netfilter. It uses **tables** to organize rules.
+
+### Tables
+
+  * **filter:** The default table for deciding if packets pass (`INPUT`, `FORWARD`, `OUTPUT`).
+  * **nat:** For Network Address Translation (`PREROUTING`, `INPUT`, `OUTPUT`, `POSTROUTING`).
+  * **mangle:** For specialized packet alteration (all chains).
+  * **raw:** For disabling connection tracking (`PREROUTING`, `OUTPUT`).
+  * **security:** For Mandatory Access Control (SELinux) rules.
+
+### Configuring `iptables` (Practical Steps)
+
+*(Note: These examples use Fedora syntax, but the `iptables` commands are universal. On Ubuntu, install via `sudo apt install iptables`)*.
+
+**1. View Current Rules:**
+
+```bash
+sudo iptables -L
+```
+
+This lists chains for the default `filter` table.
+
+**2. Flush Existing Rules:**
+
+```bash
+sudo iptables -F
+```
+
+*(Warning: This deletes all rules. Be careful not to lock yourself out of SSH\!)*
+
+**3. Set Default Policies:**
+Secure firewalls default to DROP.
+
+```bash
+sudo iptables -P INPUT DROP
+sudo iptables -P FORWARD DROP
+sudo iptables -P OUTPUT DROP
+```
+
+**4. Create Rules (Allow SSH, HTTPS, DNS):**
+
+  * **Allow SSH (Port 22) from local network:**
+    ```bash
+    sudo iptables -A INPUT -p tcp --dport 22 -m state --state NEW,ESTABLISHED -s 192.168.0.0/24 -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp --sport 22 -m state --state ESTABLISHED -s 192.168.0.0/24 -j ACCEPT
+    ```
+  * **Allow HTTPS (Port 443):**
+    ```bash
+    sudo iptables -A INPUT -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
+    sudo iptables -A OUTPUT -p tcp --sport 443 -m state --state ESTABLISHED,RELATED -j ACCEPT
+    ```
+  * **Allow DNS (Port 53):**
+    ```bash
+    sudo iptables -A INPUT -p udp --dport 53 -j ACCEPT
+    sudo iptables -A OUTPUT -p udp --sport 53 -j ACCEPT
+    ```
+
+**5. Save Configuration:**
+
+```bash
+sudo iptables-save > /etc/iptables/rules.v4  # Ubuntu path
+```
+
+
+## 🆕 Introducing `nftables`
+
+`nftables` is the modern successor to `iptables`, offering better performance and a unified framework for IPv4/IPv6. It uses a single command-line tool: `nft`.
+
+### Basic `nftables` Configuration
+
+**1. Flush Rules:**
+
+```bash
+sudo nft flush ruleset
+```
+
+**2. Create Table and Chain:**
+
+```bash
+sudo nft add table inet packt_table
+sudo nft add chain inet packt_table packt_chain { type filter hook input priority 0 \; }
+```
+
+**3. Add Rules:**
+
+```bash
+# Allow SSH, HTTP, HTTPS
+sudo nft add rule inet packt_table packt_chain tcp dport {ssh, http, https} accept
+# Allow Ping (ICMP)
+sudo nft add rule inet packt_table packt_chain ip protocol icmp accept
+# Reject everything else
+sudo nft add rule inet packt_table packt_chain reject with icmp type port-unreachable
+```
+
+**4. Save Config:**
+
+```bash
+sudo nft list ruleset | sudo tee /etc/nftables.conf
+```
+
+
+## 🔥 Using Firewall Managers (`ufw` & `firewalld`)
+
+Directly manipulating `iptables` or `nftables` can be complex. **Firewall managers** provide user-friendly interfaces.
+
+  * **`firewalld`**: Default on RHEL/Fedora/CentOS.
+  * **`ufw` (Uncomplicated Firewall)**: Default on Ubuntu/Debian.
+
+### Using `firewalld` (RHEL/Fedora)
+
+  * **Zones:** Group rules by trust level (e.g., `public`, `home`).
+  * **Services:** Allow pre-defined services (e.g., `ssh`, `http`).
+  * **Commands:**
+      * `sudo firewall-cmd --get-active-zones`
+      * `sudo firewall-cmd --zone=public --add-service=https`
+      * `sudo firewall-cmd --reload` (Make changes permanent)
+
+
+## 🛡️ Implementing a Firewall with `ufw` on Ubuntu
+
+Let's implement a basic firewall on **Ubuntu** using `ufw`.
+
+### 1\. Check Status
+
+```bash
+sudo ufw status
+# Output: Status: inactive
+```
+
+### 2\. Set Defaults
+
+It is best practice to deny all incoming traffic and allow all outgoing traffic by default.
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+```
+
+### 3\. Allow SSH (Critical\!)
+
+**Before enabling the firewall**, you *must* allow SSH connection to avoid locking yourself out of the server.
+
+```bash
+sudo ufw allow ssh
+```
+
+*(Or specify a port if you use a custom one: `sudo ufw allow 2222/tcp`)*
+
+### 4\. Allow Web Traffic (HTTP/HTTPS)
+
+Enable standard web server ports.
+
+```bash
+sudo ufw allow http   # Port 80
+sudo ufw allow https  # Port 443
+```
+
+Alternatively, if you use Nginx or Apache, `ufw` has app profiles:
+
+```bash
+sudo ufw app list
+sudo ufw allow 'Nginx Full'
+```
+
+### 5\. Enable the Firewall
+
+Now that rules are configured, enable `ufw`.
+
+```bash
+sudo ufw enable
+# Output: Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+# Firewall is active and enabled on system startup
+```
+
+### 6\. Verify Rules
+
+Check the status with verbose output to confirm your rules are active.
+
+```bash
+sudo ufw status verbose
+```
+
+**Output Example:**
+
+```
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                        -      ----
+22/tcp                     ALLOW IN    Anywhere
+80/tcp                     ALLOW IN    Anywhere
+443/tcp                    ALLOW IN    Anywhere
+22/tcp (v6)                ALLOW IN    Anywhere (v6)
+...
+```
+
+### 7\. Managing Rules (Delete/Insert)
+
+  * **Delete a rule:** `sudo ufw deny http` (This adds a deny rule). To actually *delete* the "allow" rule:
+    ```bash
+    sudo ufw delete allow http
+    ```
+  * **Numbered List:** View rules with numbers to delete by ID.
+    ```bash
+    sudo ufw status numbered
+    sudo ufw delete 2  # Deletes rule #2
+    ```
+
+### 8\. Reset
+
+If you mess up, you can reset to defaults (disables firewall and clears rules).
+
+```bash
+sudo ufw reset
+```
+
+---
