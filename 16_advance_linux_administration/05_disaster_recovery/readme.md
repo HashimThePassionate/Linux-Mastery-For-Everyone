@@ -162,3 +162,90 @@ While many infrastructure risks are transferred to the third party, new risks em
 * **On-Premises:** You manage all components in-house. Risk assessment is **challenging** because you own every risk.
 * **Cloud (IaaS/PaaS/SaaS):** Risk assessment becomes **less challenging** as responsibilities are gradually transferred to the external entity.
 
+---
+# 📝 Designing a Disaster Recovery Plan (DRP)
+
+A **Disaster Recovery Plan (DRP)** is a structured document outlining the specific steps to take when an incident occurs. It is usually a subset of a broader **Business Continuity Plan (BCP)**, which ensures a company keeps operating despite infrastructure failures.
+
+
+
+[Image of Disaster Recovery Plan Cycle]
+
+
+## 🏗️ The Pillars of a Good DRP
+
+To build an effective DRP, you must start with a solid foundation of knowledge about your current environment.
+
+### 1. Comprehensive Inventory
+You cannot protect what you don't know exists. A DRP starts with three accurate inventories:
+* **Hardware Inventory:** Servers, storage devices, network gear, user devices.
+* **Software Inventory:** OS versions, applications, licenses, dependencies.
+* **Data Inventory:** Where data lives, who owns it, and how critical it is.
+
+### 2. Standardization Policy
+There should be a clear policy for **standardized hardware**.
+* **Benefits:** Faulty hardware is easier to replace, drivers are better supported (crucial in Linux), and optimization is easier.
+* **Trade-off:** This limits **BYOD (Bring Your Own Device)** practices. Employees must use company-provided hardware to ensure the IT department has full control over the software environment and security configurations.
+
+### 3. Defining Responsibilities & Communication
+* **IT Role:** The IT department designs recovery strategies based on **RPO** (Recovery Point Objective - max data loss) and **RTO** (Recovery Time Objective - max downtime).
+* **Role Assignment:** Everyone must know exactly what to do during a crisis to reduce response time.
+* **Communication Strategy:** Clear procedures for every organizational level ensure centralized decision-making. There must be a **succession plan** for backup personnel (if the lead admin is unavailable, who takes over?).
+
+> **Critical Step:** DRPs must be tested **at least twice a year**. A plan that hasn't been tested is just a theory.
+
+---
+
+# 💾 Backing Up and Restoring the System
+
+Disasters can strike at any time. Backing up your system is the ultimate safety net. It is always better to practice prevention than to learn the hard way through data loss.
+
+Your strategy must be driven by your RTO and RPO requirements:
+* **RTO (How fast?):** How quickly must we be back online to avoid hurting business operations?
+* **RPO (How much?):** How much data can we afford to lose? (e.g., 1 hour's worth? 1 day's worth?)
+
+## 🗂️ Types of Backups
+
+Understanding the difference between these types is critical for balancing storage space vs. recovery speed.
+
+
+
+| Backup Type | What is Backed Up | Pros | Cons |
+| :--- | :--- | :--- | :--- |
+| **Full Backup** | **All files** in the destination target. | Easiest to restore (you only need one file). | Slowest to run; takes the most storage space. |
+| **Incremental Backup** | Only files changed since the **last backup** (whether it was full or incremental). | Fastest to run; uses the least storage. | Slowest to restore (must restore Full + all Incrementals in order). |
+| **Differential Backup** | Only files changed since the **previous FULL backup**. | Faster to restore than Incremental (Full + last Differential). | Uses more storage than Incremental; slower to run as time goes on. |
+
+## 🛠️ Methods of Backup
+
+| Method | Description |
+| :--- | :--- |
+| **Manual Backup** | User-initiated (e.g., dragging files to a USB). Unreliable because it depends on human memory. |
+| **Local Automated** | Scheduled scripts/software writing to local disks or tapes. Fast recovery but vulnerable to local disasters (fire/flood). |
+| **Remote Automated** | Scheduled backups sent over the network to a remote server or cloud. Slower recovery but protects against local site disasters. |
+
+---
+
+# 🛡️ The Golden Rule: The 3-2-1 Backup Strategy
+
+This is the industry standard for data protection. If you take away one thing from this section, let it be this rule.
+
+
+
+### 3️⃣ Copies of Data
+You should have at least **three** copies of your data:
+1.  The primary (production) data.
+2.  Backup copy #1.
+3.  Backup copy #2.
+
+### 2️⃣ Different Media
+Store the copies on **two** different types of media.
+* *Example:* One copy on an internal hard drive, one copy on an external tape drive or NAS (Network Attached Storage). This protects against a specific type of media failing (e.g., a batch of bad hard drives).
+
+### 1️⃣ Off-Site
+Keep at least **one** copy **off-site** (at a different geographical location).
+* *Why?* If your office burns down or gets flooded, your local backups will be destroyed along with your servers. Cloud storage is a common solution for this today.
+
+> **Note:** This rule can be adapted (e.g., 3-1-2, 3-2-2), but the core principle of redundancy and geographic separation remains checking **Backup Integrity** is also vital—a backup is worthless if it is corrupted and cannot be restored.
+
+---
