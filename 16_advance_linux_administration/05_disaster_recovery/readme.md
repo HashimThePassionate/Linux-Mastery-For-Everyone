@@ -1,9 +1,75 @@
+
+
 # 🌩️ Planning for Disaster Recovery & Risk Management
 
 Managing risks is a vital asset for every business and individual. For system administrators, this responsibility is immense. Managing risks should be an integral part of a broader **risk management strategy**.
 
 IT footprints within companies have grown exponentially over the last decade. Today, almost every activity—whether in small businesses, large corporations, government agencies, or the health and education sectors—relies on IT operations. Because every activity is unique, it requires a specific type of assessment. However, in information security, risk management has often become a "one-size-fits-all" practice based on checklists.
 
+<details>
+<summary><strong>Table of Contents</strong></summary>
+
+- [🌩️ Planning for Disaster Recovery \& Risk Management](#️-planning-for-disaster-recovery--risk-management)
+  - [🛡️ A Brief Introduction to Risk Management](#️-a-brief-introduction-to-risk-management)
+    - [📜 Origins and Standards](#-origins-and-standards)
+    - [🏗️ The Risk Management Framework (NIST SP 800-37r2)](#️-the-risk-management-framework-nist-sp-800-37r2)
+  - [⚠️ Types of IT Risks](#️-types-of-it-risks)
+  - [🔄 The Risk Management Strategy: 5 Distinct Steps](#-the-risk-management-strategy-5-distinct-steps)
+    - [1. 🕵️ Identifying Risk](#1-️-identifying-risk)
+    - [2. 📊 Analyzing Risk](#2--analyzing-risk)
+    - [3. ⚖️ Evaluating Risk](#3-️-evaluating-risk)
+    - [4. 🛡️ Responding to Risk](#4-️-responding-to-risk)
+    - [5. 📡 Monitoring and Reviewing Risk](#5--monitoring-and-reviewing-risk)
+- [📉 Risk Calculation \& Assessment](#-risk-calculation--assessment)
+  - [🧮 Basic Terms for Risk Impact](#-basic-terms-for-risk-impact)
+    - [Financial Metrics](#financial-metrics)
+    - [Operational \& Recovery Metrics](#operational--recovery-metrics)
+  - [🛡️ Risk Assessment Strategies](#️-risk-assessment-strategies)
+    - [1. Proactive Actions](#1-proactive-actions)
+    - [2. Non-Active Actions](#2-non-active-actions)
+  - [☁️ Risk in Cloud Computing](#️-risk-in-cloud-computing)
+    - [The Three Major Cloud Paradigms](#the-three-major-cloud-paradigms)
+      - [1. Software as a Service (SaaS)](#1-software-as-a-service-saas)
+      - [2. Platform as a Service (PaaS)](#2-platform-as-a-service-paas)
+      - [3. Infrastructure as a Service (IaaS)](#3-infrastructure-as-a-service-iaas)
+    - [Managing Cloud Risks](#managing-cloud-risks)
+- [📝 Designing a Disaster Recovery Plan (DRP)](#-designing-a-disaster-recovery-plan-drp)
+  - [🏗️ The Pillars of a Good DRP](#️-the-pillars-of-a-good-drp)
+    - [1. Comprehensive Inventory](#1-comprehensive-inventory)
+    - [2. Standardization Policy](#2-standardization-policy)
+    - [3. Defining Responsibilities \& Communication](#3-defining-responsibilities--communication)
+- [💾 Backing Up and Restoring the System](#-backing-up-and-restoring-the-system)
+  - [🗂️ Types of Backups](#️-types-of-backups)
+  - [🛠️ Methods of Backup](#️-methods-of-backup)
+- [🛡️ The Golden Rule: The 3-2-1 Backup Strategy](#️-the-golden-rule-the-3-2-1-backup-strategy)
+    - [3️⃣ Copies of Data](#3️⃣-copies-of-data)
+    - [2️⃣ Different Media](#2️⃣-different-media)
+    - [1️⃣ Off-Site](#1️⃣-off-site)
+- [💾 Disk Cloning Solutions](#-disk-cloning-solutions)
+  - [1. The `dd` Command (The "Data Duplicator")](#1-the-dd-command-the-data-duplicator)
+    - [📝 How to Clone an Entire Disk](#-how-to-clone-an-entire-disk)
+  - [2. The `ddrescue` Command (The Data Saver)](#2-the-ddrescue-command-the-data-saver)
+  - [3. Using Relax-and-Recover (ReaR)](#3-using-relax-and-recover-rear)
+    - [🅰️ Scenario A: Backing up to a Local NFS Server](#️-scenario-a-backing-up-to-a-local-nfs-server)
+    - [🅱️ Scenario B: Backing up directly to USB](#️-scenario-b-backing-up-directly-to-usb)
+- [🛠️ Introduction: Linux Troubleshooting](#️-introduction-linux-troubleshooting)
+  - [1. Tools for Troubleshooting Boot Issues](#1-tools-for-troubleshooting-boot-issues)
+    - [The Linux Boot Process](#the-linux-boot-process)
+    - [How to Repair GRUB2](#how-to-repair-grub2)
+  - [2. General System Issues](#2-general-system-issues)
+    - [A. Disk-Related Issues (Space)](#a-disk-related-issues-space)
+    - [B. Memory (RAM) Issues](#b-memory-ram-issues)
+    - [C. System Load Issues](#c-system-load-issues)
+  - [3. Tools for Troubleshooting Network Issues](#3-tools-for-troubleshooting-network-issues)
+    - [Layer 1: Physical (Cables \& Hardware)](#layer-1-physical-cables--hardware)
+    - [Layer 2: Data Link (MAC Addresses)](#layer-2-data-link-mac-addresses)
+    - [Layer 3: Internet Layer (IP Addresses \& Routing)](#layer-3-internet-layer-ip-addresses--routing)
+    - [Layers 4 \& 5: Transport (Ports)](#layers-4--5-transport-ports)
+  - [4. Tools for Troubleshooting Hardware Issues](#4-tools-for-troubleshooting-hardware-issues)
+
+</details>
+
+<br>
 
 ## 🛡️ A Brief Introduction to Risk Management
 
