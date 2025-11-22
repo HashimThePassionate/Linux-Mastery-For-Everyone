@@ -421,3 +421,465 @@ sudo rear -v mkbackup
 4.  ReaR handles the rest\!
 
 ---
+
+# 🛠️ Introduction: Linux Troubleshooting
+
+One of Linux's greatest strengths is its "openness." Because the system is open, there are many tools available to look under the hood and see exactly what is going on.
+
+**Troubleshooting** is simply the process of solving problems based on data (diagnostics) gathered by these tools. To make this easy to digest, we will divide the problems into four categories:
+
+1.  **Boot Issues:** The computer won't start.
+2.  **General System Issues:** Problems with storage, RAM, or the CPU being too busy.
+3.  **Network Issues:** Connection problems.
+4.  **Hardware Issues:** Physical component failures.
+
+-----
+
+## 1\. Tools for Troubleshooting Boot Issues
+
+To fix a computer that won't start, you first need to understand the sequence of events that happens when you press the power button.
+
+### The Linux Boot Process
+
+There are 4 main stages:
+
+1.  **BIOS POST:** The computer hardware checks itself (Power-On Self-Test). If this fails, it's a hardware issue, not a Linux issue. The BIOS looks for a bootable disk.
+2.  **GRUB2 Initialization:** This is the **Bootloader**. It’s the menu where you choose your OS. It loads the Linux Kernel into memory.
+3.  **Kernel Initialization:** The Kernel is the "brain" of the OS. It extracts itself, takes control of the hardware, and starts the first process.
+4.  **systemd Initialization:** This is the "Init system." It mounts your hard drives and starts background services (like the graphical interface).
+
+### How to Repair GRUB2
+
+If the bootloader (GRUB2) breaks, Linux won't start. To fix this, you need a **Live USB drive** (like an Ubuntu installation stick).
+
+**The Steps:**
+
+1.  Insert the Live USB and boot from it (select "Try Ubuntu").
+2.  Open a terminal.
+3.  Find your main Linux partition using `sudo fdisk -l`.
+4.  **Mount** that partition so you can access it. (Let's assume your Linux is on `/dev/sda1`):
+    ```bash
+    sudo mount -t ext4 /dev/sda1 /mnt
+    ```
+5.  **Reinstall GRUB** onto the disk. We use `chroot` to pretend the USB terminal is actually inside your hard drive's system:
+    ```bash
+    sudo chroot /mnt
+    grub-install /dev/sda
+    grub-install –recheck /dev/sda
+    update-grub
+    ```
+6.  **Exit and Reboot:**
+    ```bash
+    exit
+    sudo unmount /mnt
+    # Reboot the computer
+    ```
+
+-----
+
+## 2\. General System Issues
+
+These issues usually involve running out of space, running out of memory (RAM), or the computer running slowly (System Load).
+
+### A. Disk-Related Issues (Space)
+
+Hard drives (HDDs or SSDs) store your data. If they fill up, the system crashes.
+
+**Command: `df` (Disk Free)**
+This shows you how much space is used on your drives.
+
+  * `-h`: Makes the output "Human-readable" (e.g., shows "GB" instead of a long number).
+
+<!-- end list -->
+
+```bash
+df -h
+```
+
+*(If a disk is at 100%, you need to delete files).*
+
+**Command: `du` (Disk Usage)**
+This helps you find *which* folders are taking up the most space. The command below finds the top 5 largest directories in `/home`.
+
+```bash
+sudo du -h /home | sort -rh | head -5
+```
+
+**Output:**
+
+```text
+181M    /home/packt
+18M     /home
+16K     /home/alex
+12K     /home/packt/reports
+12K     /home/packt/.local
+```
+
+**The "Inode" Problem**
+Sometimes you have plenty of space (GBs free), but you can't create new files. This happens if you run out of **Inodes**. An Inode is like an index card for a file. If you have millions of tiny files, you run out of cards.
+
+**Command:**
+
+```bash
+df -i
+```
+
+**Output:**
+
+```text
+| Filesystem                              | Inodes   | IUsed   | IFree    | IUse% | Mounted on      |
+|-----------------------------------------|----------|---------|----------|-------|-----------------|
+| tmpfs                                   | 252890   | 810     | 252080   | 1%    | /run            |
+| /dev/mapper/ubuntu--vg-ubuntu--lv       | 655360   | 120212  | 535148   | 19%   | /               |
+| tmpfs                                   | 252890   | 1       | 252889   | 1%    | /dev/shm        |
+| tmpfs                                   | 252890   | 3       | 252887   | 1%    | /run/lock       |
+| tmpfs                                   | 252890   | 3       | 252887   | 1%    | /run/user/1000  |
+| tmpfs                                   | 50578    | 25      | 50553    | 1%    | /run/user/1000  |
+```
+
+-----
+
+### B. Memory (RAM) Issues
+
+If RAM fills up, the system slows down or apps crash.
+
+**Command: `free`**
+Shows total, used, and free RAM.
+
+  * `-h`: Human-readable.
+
+<!-- end list -->
+
+```bash
+free -h
+```
+
+**Output:**
+
+```text
+              total        used        free      shared  buff/cache   available
+Mem:          1.9Gi       251Mi       745Mi       1.0Mi       978Mi       1.5Gi
+Swap:         1.8Gi       0.0Ki       1.8Gi
+```
+
+  * **buff/cache:** Linux uses free RAM to store recently accessed files to speed things up. This is good.
+  * **available:** This is the real number indicating how much RAM is ready for new apps.
+
+**Command: `top`**
+This is a real-time dashboard showing running processes and memory usage.
+
+```bash
+# The command usually runs interactively. This is a snapshot of the memory section:
+PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+4157 root      20   0       0      0      0 I   0.0   0.0   0:00.15 kworker/0:2-events
+   1 root      20   0  167740  13212   8256 S   0.0   0.3   0:01.74 systemd
+...
+```
+
+**Command: `vmstat` (Virtual Memory Statistics)**
+Shows memory, swap, I/O, and CPU activity in one line.
+
+```bash
+vmstat
+```
+
+**Output:**
+
+```text
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 1  0    268 763164 552328 450412    0    0  1616  1418  511 1045  0  1 85 14  0
+```
+
+  * **si/so (Swap In/Out):** If these numbers are high, your RAM is full and the computer is using the hard drive as fake RAM (which is very slow).
+
+**Command: `sar` (System Activity Report)**
+This tool records system history. You usually need to install it (`sudo apt install sysstat`) and enable the service (`sysstat`). It helps you see what happened in the past.
+
+To check memory usage every 2 seconds, 5 times:
+
+```bash
+sudo sar -r 2 5
+```
+
+**Output:**
+
+```text
+07:52:29 PM kbmemfree   kbavail   kbmemused  %memused  ...
+07:52:31 PM    820640   1564124      219720     10.86  ...
+...
+Average:       820640   1564124      219726     10.86  ...
+```
+
+-----
+
+### C. System Load Issues
+
+System Load is a measurement of how "busy" the computer is.
+
+**Command: `uptime`**
+
+```bash
+uptime
+```
+
+**Output:**
+
+```text
+20:01:48 up 1:53,  2 users,  load average: 0.00, 0.00, 0.00
+```
+
+  * **Load Average:** The three numbers represent the load for the last 1, 5, and 15 minutes.
+  * If you have 1 CPU core, a load of 1.00 means it is 100% busy. If the load is 5.00, processes are waiting in line to be processed.
+
+**Command: `top` (Batch Mode)**
+Running `top` normally updates constantly. Using `-b` allows you to save a snapshot to a file.
+
+```bash
+top -b -n 1 | tee top-command-output
+```
+
+**Output:**
+
+```text
+top - 15:20:30 up 3 min,  2 users,  load average: 0.21, 0.17, 0.07
+Tasks: 154 total,   1 running, 153 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.0 sy,  0.0 ni,100.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+...
+```
+
+  * **%Cpu(s):**
+      * **us:** User time (apps).
+      * **sy:** System time (kernel).
+      * **id:** Idle time (doing nothing).
+      * **wa:** Wait time (waiting for the hard drive/IO). High `wa` means a slow disk.
+
+**Command: `iostat`**
+Used to see if the CPU is waiting on the Disk (Input/Output).
+
+```bash
+iostat
+```
+
+**Output:**
+
+```text
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           0.10    0.01    0.82    11.40    0.01    87.67
+
+Device       tps    kB_read/s    kB_wrtn/s    kB_dscd/s    kB_read      kB_wrtn      kB_dscd
+dm-0         8.14       78.94        39.11       446.01     558397       276624      3154984
+loop0        0.05        0.16         0.00         0.00       1698            0            0
+...
+sda        155.27      616.49      2329.90         0.00    4360936     16481240            0
+vda         21.32     2068.83        39.13       446.01   14634494       276780      3154984
+```
+
+**Command: `iotop`**
+Requires installation (`sudo apt install iotop`). It shows specifically *which* program is reading/writing to the disk.
+
+```bash
+sudo iotop
+```
+
+**Output:**
+
+```text
+Total DISK READ:        0.00 B/s | Total DISK WRITE:        0.00 B/s
+  TID  PRIO  USER      DISK READ  DISK WRITE  SWAPIN      IO>     COMMAND
+    1 be/4 root         0.00 B/s    0.00 B/s  ?unavailable?  init
+...
+```
+
+-----
+
+## 3\. Tools for Troubleshooting Network Issues
+
+Network troubleshooting is 80% of an administrator's job. We diagnose this by layers (like a cake), starting from the bottom (Physical) up to the applications.
+
+### Layer 1: Physical (Cables & Hardware)
+
+**Command: `ping`**
+The most basic test. Sends data to a server (like Google) and waits for a reply.
+
+```bash
+ping -c 4 google.com
+```
+
+**Output:**
+
+```text
+PING google.com (142.250.181.238) 56(84) bytes of data.
+64 bytes from fra16s56-in-f14.1e100.net (142.250.181.238): icmp_seq=1 ttl=51 time=34.7 ms
+...
+--- google.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3005ms
+```
+
+**Command: `ip link show`**
+Checks if your network card is recognized and turned on.
+
+  * Look for **state UP**. If it says DOWN, the interface is off or unplugged.
+
+<!-- end list -->
+
+```bash
+ip link show
+```
+
+**Output:**
+
+```text
+1: lo: <LOOPBACK,UP,LOWER_UP> ... state UNKNOWN ...
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> ... state UP ...
+```
+
+**Command: `ethtool`**
+Checks the physical speed of the cable/card (e.g., 1000Mb/s).
+
+```bash
+ethtool enp1s0
+```
+
+### Layer 2: Data Link (MAC Addresses)
+
+This layer handles connecting devices on the same local network using MAC addresses (hardware IDs).
+
+**Command: `arp -a`**
+Shows the mapping between IP addresses and MAC addresses.
+
+```bash
+arp -a
+```
+
+**Output:**
+
+```text
+fedora (192.168.124.1) at 52:54:00:4c:07:aa [ether] on enp1s0
+```
+
+**Command: `ip neighbor show`**
+A modern version of `arp`.
+
+```bash
+ip neighbor show
+```
+
+**Output:**
+
+```text
+192.168.0.1      dev enp4s0  lladdr [redacted]           DELAY
+192.168.124.112 dev virbr0  lladdr 52:54:00:c2:77:7f  REACHABLE
+```
+
+### Layer 3: Internet Layer (IP Addresses & Routing)
+
+**Command: `ip route show`**
+Shows how your computer sends data to the outside world.
+
+  * Look for "default via" — this is your Gateway (Router).
+
+**Command: `traceroute`**
+Shows the path (every router/hop) your data takes to reach Google.
+*(Requires `sudo apt install traceroute`)*.
+
+```bash
+traceroute google.com
+```
+
+**Output:**
+
+```text
+traceroute to google.com (142.250.181.238), 30 hops max, 60 byte packets
+ 1  fedora (192.168.124.1)  0.689 ms  0.641 ms  0.628 ms
+ 2  _gateway (192.168.0.1)  0.949 ms  0.967 ms  1.117 ms
+ ...
+ 8  bucuresti.nxdata.br01.[redacted].ro (81.22.150.2)  6.869 ms
+```
+
+**Command: `tracepath`**
+A newer tool installed by default on Ubuntu. Similar to traceroute.
+
+```bash
+tracepath google.com
+```
+
+**Output:**
+
+```text
+ 1?: [LOCALHOST]                       pmtu 1500
+ 1:  fedora                                                0.301ms
+ 2:  _gateway                                              1.589ms
+ ...
+```
+
+**Command: `nslookup`**
+Used to test DNS (converting "google.com" to an IP address). If `ping` fails but `nslookup` works, you have a routing issue, not a DNS issue.
+
+### Layers 4 & 5: Transport (Ports)
+
+This deals with TCP and UDP connections.
+
+**Command: `ss` (Socket Statistics)**
+Shows all open network connections on your computer.
+
+  * `-t`: Show TCP sockets.
+  * `-u`: Show UDP sockets.
+  * `-l`: Show only Listening sockets (servers waiting for connections).
+
+<!-- end list -->
+
+```bash
+ss -t
+```
+
+**Output:**
+
+```text
+Netid State       Recv-Q Send-Q Local Address:Port    Peer Address:Port    Process
+udp   UNCONN      0      0      127.0.0.53%lo:domain  0.0.0.0:*
+```
+
+**Checking `TIME_WAIT`**
+Sometimes connections get stuck closing. You can check this with:
+
+```bash
+ss -o state time-wait
+```
+
+**Output:**
+
+```text
+| Netid | Recv-Q | Send-Q | Local Address:Port       | Peer Address:Port | Process                        |
+|-------|--------|--------|--------------------------|-------------------|--------------------------------|
+| tcp   | 0      | 0      | 192.168.0.211:59832      |                   | timer (time-wait, 8.248ms, 0)  |
+```
+
+-----
+
+## 4\. Tools for Troubleshooting Hardware Issues
+
+If the software is fine, maybe a physical part is broken.
+
+**Command: `dmidecode`**
+Reads hardware info directly from the BIOS. It can tell you details about your RAM (Type 17) without opening the computer case.
+
+```bash
+sudo dmidecode -t 17
+```
+
+**Other Hardware Commands:**
+
+  * **`lspci`**: Lists devices connected to the motherboard (like Graphics Cards, Network Cards).
+  * **`lsblk`**: Lists all Hard Drives and Partitions.
+  * **`lscpu`**: Shows details about the Processor (CPU).
+
+**Command: `dmesg`**
+This prints the **Kernel Ring Buffer**. These are messages from the Linux kernel itself. If a hardware device fails (like a USB disconnecting or a hard drive error), it will appear here instantly.
+
+```bash
+dmesg | more
+```
+
+
+---
