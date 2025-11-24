@@ -147,3 +147,172 @@ Modern CPUs (Intel VT-x, AMD-V) have special features that allow the Guest OS to
 * **Result:** Better performance, less complexity, and secure isolation.
 
 ---
+
+# 🚀 Installing the KVM Hypervisor
+
+Installing KVM and its related tools (like QEMU and Libvirt) is a straightforward process that uses your Linux distribution's package manager.
+
+Here is how to install it on the major distributions:
+
+**Debian / Ubuntu**
+
+```bash
+sudo apt install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virtinst libvirt-daemon virt-manager
+```
+
+**Fedora**
+Fedora has a convenient group install:
+
+```bash
+sudo dnf group install --with-optional virtualization
+```
+
+**openSUSE**
+
+```bash
+sudo zypper install -t pattern kvm_server kvm_tools
+sudo zypper install libvirt-daemon
+```
+
+### 🏁 Starting the Service
+
+Once the packages are installed, you must enable and start the `libvirtd` daemon. This service runs in the background and manages your virtual machines.
+
+```bash
+sudo systemctl start libvirtd
+sudo systemctl enable libvirtd
+```
+
+### ✅ Validating Your Host
+
+Before creating VMs, it's good practice to ensure your hardware supports virtualization and everything is configured correctly.
+
+Run the validation tool:
+
+```bash
+sudo virt-host-validate
+```
+
+**Interpreting the Output (Figure 11.4):**
+
+  * **PASS:** Good news\! The feature is working.
+  * **WARN:** A warning. The feature might work, but not optimally.
+  * **FAIL:** The feature is missing or broken.
+
+```bash
+hashim@debian:~$ sudo virt-host-validate
+[sudo] password for hashim: 
+  QEMU: Checking for hardware virtualization                                 : PASS
+  QEMU: Checking if device /dev/kvm exists                                   : PASS
+  QEMU: Checking if device /dev/kvm is accessible                            : PASS
+  QEMU: Checking if device /dev/vhost-net exists                             : PASS
+  QEMU: Checking if device /dev/net/tun exists                               : PASS
+  QEMU: Checking for cgroup 'cpu' controller support                         : PASS
+  QEMU: Checking for cgroup 'cpuacct' controller support                     : PASS
+  QEMU: Checking for cgroup 'cpuset' controller support                      : PASS
+  QEMU: Checking for cgroup 'memory' controller support                      : PASS
+  QEMU: Checking for cgroup 'devices' controller support                     : PASS
+  QEMU: Checking for cgroup 'blkio' controller support                       : PASS
+  QEMU: Checking for device assignment IOMMU support                         : PASS
+  QEMU: Checking if IOMMU is enabled by kernel                               : PASS
+  QEMU: Checking for secure guest support                                    : WARN
+ (Unknown if this platform has Secure Guest support)
+   LXC: Checking for Linux >= 2.6.26                                         : PASS
+   LXC: Checking for namespace ipc                                           : PASS
+   LXC: Checking for namespace mnt                                           : PASS
+   LXC: Checking for namespace pid                                           : PASS
+   LXC: Checking for namespace uts                                           : PASS
+   LXC: Checking for namespace net                                           : PASS
+   LXC: Checking for namespace user                                          : PASS
+   LXC: Checking for cgroup 'cpu' controller support                         : PASS
+   LXC: Checking for cgroup 'cpuacct' controller support                     : PASS
+   LXC: Checking for cgroup 'cpuset' controller support                      : PASS
+   LXC: Checking for cgroup 'memory' controller support                      : PASS
+   LXC: Checking for cgroup 'devices' controller support                     : PASS
+   LXC: Checking for cgroup 'freezer' controller support                     : FAIL
+ (Enable 'freezer' in kernel Kconfig file or mount/enable cgroup controller in your system)
+   LXC: Checking for cgroup 'blkio' controller support                       : PASS
+   LXC: Checking if device /sys/fs/fuse/connections exists                   : PASS
+```
+
+In the example image, you might see a failure regarding "LXC" (Linux Containers). Since we are focusing on KVM virtualization in this section, you can safely ignore LXC errors. As long as the QEMU/KVM checks pass, you are ready to go.
+
+# 🛠️ Working with Basic KVM Commands
+
+Once KVM is installed, you manage it using the command line. The primary tool for this is `virsh` (Virtual Shell), along with `virt-install` for creating new machines.
+
+## 1\. Setting Up the Network
+
+Before creating a VM, your host needs a "bridge" network so the VMs can talk to the outside world. KVM usually creates a `default` network for this, but it might not be active.
+
+**Check Network Status:**
+
+```bash
+sudo virsh net-list --all
+```
+
+*(The `--all` flag ensures you see inactive networks too).*
+
+**Start the Network:**
+If the default network is inactive, start it:
+
+```bash
+sudo virsh net-start default
+```
+
+**Auto-Start the Network:**
+Ensure this network starts automatically every time you reboot your computer:
+
+```bash
+sudo virsh net-autostart default
+```
+
+Figure 11.5 shows the output of these commands, confirming the network is now `active` and `autostart` is set to `yes`.
+
+## 2\. Creating a Virtual Machine (CLI)
+
+Now we can create our first VM. We will deploy an **Ubuntu 22.04 Server** virtual machine.
+
+**Step A: Download the ISO**
+First, download the operating system installation image (ISO).
+
+```bash
+wget https://releases.ubuntu.com/22.04.2/ubuntu-22.04.2-live-server-amd64.iso
+```
+
+**Step B: Move the ISO**
+For security reasons, KVM often cannot access files in your home directory. Move the ISO to the default KVM image directory:
+
+```bash
+sudo mv ubuntu-22.04.2-live-server-amd64.iso /var/lib/libvirt/images/
+```
+
+**Step C: Run `virt-install`**
+This single command defines the VM's hardware and starts the installation.
+
+```bash
+sudo virt-install \
+  --virt-type=kvm \
+  --name ubuntu-vm1 \
+  --vcpus=2 \
+  --memory=2048 \
+  --os-variant=ubuntufocal \
+  --cdrom=/var/lib/libvirt/images/ubuntu-22.04.2-live-server-amd64.iso \
+  --network=default \
+  --disk size=20
+```
+
+**Command Breakdown:**
+
+  * **`--virt-type=kvm`**: Tells the system to use the KVM hypervisor (hardware acceleration).
+  * **`--name ubuntu-vm1`**: The name you will use to manage this VM later.
+  * **`--vcpus=2`**: Give the VM 2 virtual CPU cores.
+  * **`--memory=2048`**: Allocate 2048 MB (2 GB) of RAM.
+  * **`--os-variant=ubuntufocal`**: Optimizes settings for Ubuntu 20.04/22.04. (Use `osinfo-query os` to see a full list of variants).
+  * **`--cdrom=...`**: The path to the installation ISO we downloaded.
+  * **`--network=default`**: Connects the VM to the bridge network we enabled earlier.
+  * **`--disk size=20`**: Creates a 20 GB virtual hard drive.
+
+Once you run this, a graphical window (`virt-viewer`) should pop up showing the Ubuntu installer running inside your new VM\!
+
+---
