@@ -316,3 +316,126 @@ sudo virt-install \
 Once you run this, a graphical window (`virt-viewer`) should pop up showing the Ubuntu installer running inside your new VM\!
 
 ---
+
+# 🕹️ Basic VM Management
+
+Managing VMs involves a few core tasks: listing them, starting them, stopping them, and connecting to them. You can do this via the GUI (`virt-manager`), but the Command Line Interface (CLI) using **`virsh`** is far more powerful and what most system administrators use.
+
+### Listing VMs
+
+To see what virtual machines are currently running or defined on your system, use the following command.
+
+> **Important Note:** You must run these commands as `root` or with `sudo` to see the system-wide VMs.
+
+```bash
+sudo virsh list --all
+```
+
+  * `list`: Shows running VMs.
+  * `--all`: Shows *all* VMs, including those that are shut down.
+
+### Basic Lifecycle Commands
+
+Here is a quick reference for controlling your VMs using `virsh`. Replace `ubuntu-vm1` with your VM's name.
+
+| Action | Command | Description |
+| :--- | :--- | :--- |
+| **Start** | `sudo virsh start ubuntu-vm1` | Boots up the VM. |
+| **Reboot** | `sudo virsh reboot ubuntu-vm1` | Sends a restart signal to the Guest OS (graceful reboot). |
+| **Stop (Force)** | `sudo virsh destroy ubuntu-vm1` | Like pulling the power plug. Immediate shutdown. |
+| **Shutdown** | `sudo virsh shutdown ubuntu-vm1` | Sends a shutdown signal (ACPI) for a graceful stop. |
+| **Suspend** | `sudo virsh suspend ubuntu-vm1` | Pauses the VM in memory (freezes it). |
+| **Resume** | `sudo virsh resume ubuntu-vm1` | Unpauses a suspended VM. |
+| **Delete** | `sudo virsh undefine ubuntu-vm1` | Deletes the VM configuration (but keeps the disk file). |
+
+For a full list of options, you can always check the manual: `man virsh`.
+
+
+# 🚀 Advanced KVM Management
+
+Managing VMs goes beyond just turning them on and off. Let's look at how to manage multiple VMs and connect to them remotely.
+
+### Creating Additional VMs
+
+For these exercises, we will assume you have created two more VMs (`ubuntu-vm2` and `ubuntu-vm3`) using the same `virt-install` command we learned earlier.
+
+```bash
+# Create VM 2
+sudo virt-install --name ubuntu-vm2 ... --noautoconsole
+
+# Create VM 3
+sudo virt-install --name ubuntu-vm3 ... --noautoconsole
+```
+
+  * `--noautoconsole`: This flag prevents the graphical viewer from popping up automatically, which is useful when creating multiple VMs via script.
+
+
+## 📡 Connecting to a VM
+
+You usually want to connect to your server VMs using **SSH** from your terminal, rather than using a graphical console window. To do this, you need the VM's **IP address**.
+
+### Finding the IP Address
+
+Since KVM uses a virtual network (usually `virbr0`), you can't just guess the IP.
+
+**Method 1: `ip neighbor` (The Hard Way)**
+You can check the ARP table on your host:
+
+```bash
+ip neighbor
+```
+
+This shows IP addresses (like `192.168.122.129`) associated with the `virbr0` interface. However, it doesn't tell you *which* IP belongs to *which* VM.
+
+**Method 2: `virsh domifaddr` (The Easy Way)**
+This command queries the VM directly to ask for its network interface address.
+
+1.  **List your VMs:**
+    ```bash
+    sudo virsh list --all
+    ```
+2.  **Get the IP for a specific VM:**
+    ```bash
+    sudo virsh domifaddr ubuntu-vm1
+    ```
+
+**Output:**
+
+```
+ Name       MAC address          Protocol     Address----
+ vnet0      52:54:00:3b:56:e5    ipv4         192.168.122.129/24
+```
+
+Now we know that `ubuntu-vm1` is at `192.168.122.129`.
+
+### Connecting via SSH
+
+Now that you have the IP, you can connect just like any other server.
+
+```bash
+ssh hashim@192.168.122.129
+```
+
+*(Replace `hashim` with the username you created when installing Ubuntu).*
+
+### Connecting via Graphical Console (`virt-viewer`)
+
+If networking isn't working, or you need to see the boot screen, you can use `virt-viewer` to open a direct console window.
+
+```bash
+virt-viewer --connect qemu:///system ubuntu-vm1
+```
+
+This opens a window that acts like a physical monitor connected to the VM.
+
+> **Note:** If you run this command in a terminal, closing the terminal (Ctrl+C) will close the viewer window, but the VM will keep running in the background.
+
+
+### 🖥️ GUI Tools
+
+While the CLI is powerful, modern Linux distributions with GNOME include excellent GUI tools:
+
+  * **Virtual Machine Manager (`virt-manager`):** A full-featured interface for `libvirt`. It lets you manage networks, storage, and VM hardware details visually.
+  * **GNOME Boxes:** A simplified, user-friendly tool for quickly spinning up VMs for desktop use.
+
+---
