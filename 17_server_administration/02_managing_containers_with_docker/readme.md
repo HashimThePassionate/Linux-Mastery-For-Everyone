@@ -82,3 +82,32 @@ Figure 12.2 shows the output of `lsns`. Each row represents a namespace.
 * **COMMAND:** The command that created or is running in that namespace.
 
 This command is a great way to "peek under the hood" and see the isolation boundaries the kernel is enforcing.
+
+# 🧠 Linux cgroups (Control Groups)
+
+**Cgroups** (short for Control Groups) are a Linux kernel feature that allows you to allocate resources—such as CPU time, system memory, network bandwidth, or combinations of these resources—among hierarchically ordered groups of processes.
+
+While **namespaces** isolate *what* a process can see (like files or network interfaces), **cgroups** restrict *how much* of the system's resources a process can use.
+
+### ⚙️ What do Cgroups Control?
+Cgroups provide a mechanism to limit, account for, and isolate the resource usage (CPU, memory, disk I/O, network, etc.) of a collection of processes.
+
+Key resources managed by cgroups include:
+* **🧠 Memory:** Limits how much RAM a group of processes can use. If they exceed the limit, the Out of Memory (OOM) killer might terminate them.
+* **💻 CPU:** Limits the amount of CPU time a group can consume (e.g., "Container A gets 20% of the CPU").
+* **💾 I/O (Input/Output):** Limits read/write speeds to block devices (hard drives), preventing one container from hogging all disk performance.
+* **🌐 Network:** (Often managed via `net_cls` or `net_prio`) Tags network packets to control bandwidth priority.
+
+### 🌳 The Hierarchy Concept
+Cgroups are organized hierarchically, similar to a file system tree.
+* **Inheritance:** Every child group inherits the attributes and limits of its parent group.
+* **Multiple Hierarchies:** You can have different hierarchies for different resources. For example, you might group processes one way for CPU usage and a completely different way for Memory usage, though modern implementations (cgroups v2) tend to unify this into a single hierarchy for simplicity.
+
+### 🤝 The Power Couple: Cgroups + Namespaces
+This is the secret sauce behind modern containers like Docker:
+
+1.  **Namespaces:** Provide **Isolation**. (The container thinks it's the only thing running on the system).
+2.  **Cgroups:** Provide **Resource Management**. (The container is stopped from using 100% of the host's RAM or CPU).
+
+By combining these two technologies, resources are allocated and managed for each container separately. This architecture allows containers to be lightweight and run as isolated entities compared to the heavier hardware emulation required by Virtual Machines.
+
