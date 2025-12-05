@@ -111,3 +111,68 @@ This is the secret sauce behind modern containers like Docker:
 
 By combining these two technologies, resources are allocated and managed for each container separately. This architecture allows containers to be lightweight and run as isolated entities compared to the heavier hardware emulation required by Virtual Machines.
 
+# 🐳 Understanding Docker
+
+**Docker** is a platform designed for developing, shipping, and running applications. Like LXC/LXD, it is built on fundamental Linux kernel technologies, specifically **namespaces** and **cgroups**.
+
+The Docker platform provides the infrastructure that allows containers to operate securely. Docker containers are lightweight, standalone units that run directly on the host's kernel. The platform offers a suite of tools to create and manage these isolated, containerized applications.
+
+The **container** is the base unit for modern application development, testing, and distribution. When an app is ready for production, it can be shipped as a container or as part of an orchestrated service (often managed by tools like Kubernetes).
+
+---
+
+## 🏗️ Docker Architecture
+
+To understand how Docker works, we must look at its layered architecture.
+
+<div align="center">
+  <img src="./images/02.png" width="500"/>
+</div>
+
+As shown in **Figure 12.3**, the architecture is built on the Host Operating System (Linux) and relies on core kernel features like **Namespaces** and **cgroups**. Above these kernel features sit the **Container Runtime** and the **Docker Engine**, topped by the **REST API** which allows for automation.
+
+Let's break down these two major components in detail.
+
+### 1. Container Runtime
+The **Container Runtime** is the low-level component responsible for actually running containers. It adheres to the standards set by the **Open Container Initiative (OCI)**, which defines the open industry standards for container formats and runtimes.
+
+The runtime is split into two key pieces:
+* **`containerd`**: A high-level daemon that manages the complete container lifecycle of its host system: image transfer and storage, container execution and supervision, and networking. It is responsible for downloading Docker images and then running them.
+* **`runc`**: A low-level CLI tool for spawning and running containers according to the OCI specification. It is directly responsible for interacting with the kernel to set up namespaces and cgroups for each container.
+
+> **Note:** Docker donated `runc` and `containerd` to the **Cloud Native Computing Foundation (CNCF)**. This move was crucial as it allowed broader industry collaboration and standardization, ensuring these core components weren't controlled by a single company.
+
+<div align="center">
+  <img src="./images/03.png" width="500"/>
+</div>
+
+**Figure 12.4** provides a more detailed view of this hierarchy. You can see how the API Interface communicates with `dockerd`, which talks to `containerd`, which finally uses `runc` to spawn the actual container processes.
+
+### 2. The Docker Engine
+The **Docker Engine** is the higher-level component that users interact with. It is split into:
+* **The `dockerd` daemon:** A long-running process that listens for Docker API requests and manages Docker objects such as images, containers, networks, and volumes.
+* **The API Interface:** A REST API that specifies interfaces that programs can use to talk to the daemon and instruct it what to do.
+* **The Command-Line Interface (CLI):** The `docker` command you type in your terminal. It uses the Docker API to control or interact with the Docker daemon.
+
+---
+
+## 🔄 Docker Workflow
+
+Docker uses a **client-server architecture**. The workflow involves three main players: the Client, the Host (Server Daemon), and the Registry.
+
+<div align="center">
+  <img src="./images/04.png" width="500"/>
+</div>
+
+**Figure 12.5** illustrates this workflow clearly:
+
+1.  **The Client:** This is how users interact with Docker (e.g., running `docker build`, `docker pull`, `docker run`). The client sends these commands to the Docker daemon via the API.
+2.  **The Docker Host (Server):** This is the machine running the `dockerd` daemon. The daemon listens for API requests and manages the heavy lifting of building, running, and distributing your containers. It manages **Images** and **Containers**.
+3.  **The Registry:** This is where Docker images are stored.
+    * **Docker Hub** is the default public registry that anyone can use.
+    * You can also host your own **Private Registries**.
+
+**Typical Workflow:**
+* When you run `docker pull ubuntu`, the daemon checks if it has the image locally. If not, it downloads it from the configured **Registry** (like Docker Hub).
+* When you run `docker run ubuntu`, the daemon takes that **Image** and creates a runnable **Container** from it.
+
