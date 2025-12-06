@@ -457,3 +457,119 @@ sudo systemctl enable docker
 ### 👨‍💻 Detailed Explanation
 
 This creates a symbolic link in the system's initialization directory, ensuring the Docker daemon (`dockerd`) launches as soon as the operating system boots up. Docker is now fully installed and configured\!
+
+# 🛠️ Using Docker Commands
+
+Working with Docker means using its Command Line Interface (CLI). It has a significant number of sub-commands available. To see them all, you can run `docker --help`.
+
+We will not discuss all commands here, but we will focus on the essential ones needed to get started with Docker.
+
+-----
+
+## 1\. Verifying the Installation (`docker run`)
+
+Before learning anything about the commands, let’s first perform a test to see whether the installation is working. We will use the `docker run` command to check whether we can access **Docker Hub** (the public registry) and run containers.
+
+### The Command
+
+```bash
+sudo docker run hello-world
+```
+
+### 🖥️ Expected Output
+
+```text
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+719385e32844: Pull complete
+Digest: sha256:9eabfcf6034695c4f6208296be9090b0a3487e20fb6a5cb0565242621cf73d
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+...
+```
+
+### 👨‍💻 What just happened?
+
+This message confirms your installation is working. Behind the scenes, the Docker Daemon took the following steps:
+
+1.  **Check Local Cache:** It checked if the `hello-world` image existed locally. It didn't ("Unable to find image...").
+2.  **Pull from Registry:** It contacted Docker Hub and downloaded the image.
+3.  **Create Container:** It created a new container from that image.
+4.  **Run & Output:** It ran the executable inside the container, which printed the "Hello from Docker\!" message, and streamed that output to your terminal.
+
+-----
+
+## 2\. Searching for Images (`docker search`)
+
+Let’s now dig deeper and search for other images available on Docker Hub. For example, let's search for an **Ubuntu** image.
+
+### The Command
+
+```bash
+docker search ubuntu
+```
+
+### 🖥️ Expected Output
+
+The output displays a list of images that match your search term.
+
+```text
+NAME                             DESCRIPTION                                     STARS     OFFICIAL   AUTOMATED
+ubuntu                           Ubuntu is a Debian-based Linux operating sys…   15927     [OK]
+websphere-liberty                WebSphere Liberty multi-architecture images …   293       [OK]
+open-liberty                     Open Liberty multi-architecture images based…   59        [OK]
+...
+```
+
+### 📊 Understanding the Output Columns
+
+  * **NAME:** The name of the image (e.g., `ubuntu`, `ubuntu/nginx`).
+  * **DESCRIPTION:** A short text describing what the image does.
+  * **STARS:** A popularity metric based on user likes (similar to GitHub stars). High star counts usually indicate reliability.
+  * **OFFICIAL:** If marked `[OK]`, this image is officially supported and maintained by the company behind the software (e.g., Canonical for Ubuntu). These are the safest images to use.
+  * **AUTOMATED:** Shows whether the image is built automatically from a source repository.
+
+-----
+
+## 3\. Downloading Images (`docker pull`)
+
+Once you find the image you are looking for, you can download it onto your system without running it immediately. Let's download the official **Ubuntu** image.
+
+### The Command
+
+```bash
+docker pull ubuntu
+```
+
+### 👨‍💻 Explanation
+
+With this command, the `ubuntu` image is downloaded locally onto your computer. It is now stored in your local Docker cache, ready to spawn containers instantly.
+
+-----
+
+## 4\. Listing Local Images (`docker images`)
+
+To see what images are currently stored on your computer, use the `docker images` command.
+
+### The Command
+
+```bash
+docker images
+```
+
+### 🖥️ Expected Output
+
+```text
+REPOSITORY    TAG       IMAGE ID       CREATED       SIZE
+hello-world   latest    9c7a54a9a43c   4 days ago    13.3kB
+ubuntu        latest    3b418d7b466a   13 days ago   77.8MB
+```
+
+### 🧐 Note on Image Size
+
+Notice the small size of the Ubuntu image (\~78MB). A full Ubuntu Server install is usually much larger.
+
+  * **Why?** Docker images contain *only* the base minimum packages and libraries needed to run the OS userspace. They do not include a kernel (since they share the host's kernel) or unnecessary tools like UI or documentation. This makes containers extremely efficient.
+
