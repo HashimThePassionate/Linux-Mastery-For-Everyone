@@ -573,3 +573,128 @@ Notice the small size of the Ubuntu image (\~78MB). A full Ubuntu Server install
 
   * **Why?** Docker images contain *only* the base minimum packages and libraries needed to run the OS userspace. They do not include a kernel (since they share the host's kernel) or unnecessary tools like UI or documentation. This makes containers extremely efficient.
 
+# 🏗️ Managing Docker Containers
+
+In this section, we will learn the essential lifecycle commands for Docker containers: running, listing, starting, stopping, and removing them.
+
+-----
+
+## 🚀 Running Containers
+
+We will use the Ubuntu image that we previously downloaded. To launch it interactively, we use the `docker run` command with two critical arguments:
+
+  * **`-i` (interactive):** Keeps STDIN open even if not attached.
+  * **`-t` (tty):** Allocates a pseudo-TTY (terminal). This is what makes it feel like a real terminal session.
+
+### The Command
+
+```bash
+docker run -it ubuntu
+```
+
+### 👨‍💻 What happens next?
+
+Once you run this, your command prompt will change immediately.
+
+  * **Before:** `hashim@debian:~$` (You are on your host machine).
+  * **After:** `root@f02e14e61e2b:/#` (You are inside the container).
+
+You are now the **root** user inside a fresh Ubuntu environment. You can run commands like `apt update`, install software, create files, etc. Just remember: **containers are ephemeral**. Any changes you make stay *inside* that specific container instance. If you delete the container, your changes are gone (unless you use volumes or commit the image).
+
+To exit the container and return to your host machine, simply type:
+
+```bash
+exit
+```
+
+*(Note: Exiting the shell usually stops the container unless it was started in detached mode).*
+
+-----
+
+## 📋 Listing Containers
+
+You can check the status of your containers using the `docker ps` command.
+
+### 1\. List Running Containers
+
+Open a **new terminal window** (while keeping your Ubuntu container running in the first one) and run:
+
+```bash
+docker ps
+```
+
+**Output:**
+
+```text
+CONTAINER ID   IMAGE     COMMAND       CREATED         STATUS         PORTS     NAMES
+f02e14e61e2b   ubuntu    "/bin/bash"   3 minutes ago   Up 3 minutes             amazing_hopper
+```
+
+This shows only containers that are currently **Up** (running).
+
+### 2\. List All Containers (Active and Inactive)
+
+To see containers that have stopped (like the "hello-world" one from earlier), add the `-a` flag.
+
+```bash
+docker ps -a
+```
+
+**Output:**
+
+```text
+CONTAINER ID   IMAGE         STATUS                     NAMES
+f02e14e61e2b   ubuntu        Up 3 minutes               amazing_hopper
+3a340db56d48   hello-world   Exited (0) 1 hour ago      recursing_murdock
+```
+
+### 3\. List the Latest Container
+
+To see just the most recently created container (running or not), use `-l`.
+
+```bash
+docker ps -l
+```
+
+### 🏷️ A Note on Names
+
+Notice the names `amazing_hopper` and `recursing_murdock`. Docker automatically assigns a random name (an adjective + a famous scientist/hacker) to every container if you don't specify one yourself using `--name`.
+
+-----
+
+## 🚦 Starting, Stopping, and Removing
+
+You can manage containers using either their **Container ID** (e.g., `f02e14e61e2b`) or their **Name** (e.g., `amazing_hopper`).
+
+### Stopping a Container
+
+If a container is running, you can stop it gracefully.
+
+```bash
+docker stop amazing_hopper
+```
+
+After running this, `docker ps` will show an empty list because the container is no longer running.
+
+### Starting a Container
+
+To start a stopped container again (preserving its state from when it stopped):
+
+```bash
+docker start amazing_hopper
+```
+
+It will now appear in `docker ps` again.
+
+### Removing a Container
+
+Containers take up disk space even when stopped. To permanently delete a container, use `rm`.
+
+```bash
+docker rm recursing_murdock
+```
+
+*(Note: You generally cannot remove a running container. You must `stop` it first, or use `docker rm -f` to force removal).*
+
+> **Important Note:**
+> Removing a container deletes the *instance* (the writable layer where your changes lived). It **does not** delete the underlying **Image** (Ubuntu, Hello-World) from your system. You can always spawn new containers from that image.
