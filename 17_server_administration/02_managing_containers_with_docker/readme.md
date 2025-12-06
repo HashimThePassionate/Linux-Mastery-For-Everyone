@@ -698,3 +698,188 @@ docker rm recursing_murdock
 
 > **Important Note:**
 > Removing a container deletes the *instance* (the writable layer where your changes lived). It **does not** delete the underlying **Image** (Ubuntu, Hello-World) from your system. You can always spawn new containers from that image.
+
+
+# 🌐 Docker Networking
+
+In this section, we will perform a practical exercise: modifying a running Ubuntu container by installing Python packages and then saving that modified state as a new, custom Docker image.
+
+## 🐍 The Scenario: Installing Python 3
+
+We start by running our Ubuntu container and checking if Python is pre-installed.
+
+### 1\. Launch and Check
+
+```bash
+docker run -it ubuntu
+```
+
+Once inside the container (`root@...:/#`), check for Python:
+
+```bash
+python -v
+# Output: bash: python: command not found
+
+python3 -v
+# Output: bash: python3: command not found
+```
+
+### 2\. Attempting Installation (and Troubleshooting Networking)
+
+Since Python is missing, we try to install it using the container's package manager (`apt`).
+
+```bash
+apt install python3
+```
+
+**Potential Error:**
+You might see an error like `E: Unable to locate package python3`. This usually means the container cannot reach the internet (the Ubuntu repositories).
+
+**Troubleshooting with `docker network`:**
+To investigate, we use the `docker network` command family. Open a **new terminal** on your host machine to run these.
+
+  * **List Networks:**
+    ```bash
+    docker network ls
+    ```
+    **Output:**
+    ```text
+    hashim@debian:~$ docker network ls
+    NETWORK ID     NAME      DRIVER    SCOPE
+    f8b50039d02e   bridge    bridge    local
+    2d35dbd91efc   host      host      local
+    4ae4f24c96be   none      null      local
+    ```
+      * **`bridge`**: The default network. Containers usually attach here to talk to the outside world.
+      * **`host`**: The container shares the host's networking stack directly.
+      * **`none`**: The container has no networking.
+
+### 3\. Connecting a Running Container
+
+If your container isn't connected, you can attach it to a network on the fly.
+
+1.  **Find Container Name/ID:**
+
+    ```bash
+    docker ps
+    ```
+
+    Let's assume the name is `peaceful_euler`.
+
+2.  **Connect to Bridge:**
+
+    ```bash
+    docker network connect bridge peaceful_euler
+    ```
+
+3.  **Test Connectivity (Inside the Container):**
+    Go back to your container terminal and try updating again.
+
+    ```bash
+    apt update -y
+    ```
+
+    **Output:**
+
+    ```text
+    Get:1 http://archive.ubuntu.com/ubuntu jammy InRelease [270 kB]
+    Get:2 http://security.ubuntu.com/ubuntu jammy-security InRelease [110 kB]
+    ...
+    ```
+
+    If you see lines like `Get:1 ...`, success\! You are online.
+
+**Pro Tip:** To avoid this manual step, you can specify the network when you *start* the container:
+
+```bash
+docker run -itd --network=bridge ubuntu
+```
+
+### 4\. Installing Python 3
+
+Now that we are online, run the installation command inside the container again:
+
+```bash
+apt install python3
+```
+
+**Output:**
+
+```text
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libexpat1 libmpdec3 libpython3-stdlib ...
+0 upgraded, 13 newly installed, 0 to remove and 0 not upgraded.
+```
+
+This time, it will download the packages and install Python 3.
+
+-----
+
+## 💾 Committing the New Image
+
+We now have a container that is different from the base `ubuntu` image—it has Python 3 installed. If we delete this container, that work is lost. To save this state, we **commit** it as a new image.
+
+### 1\. Get Container ID
+
+Open a terminal on your host and find the ID of your modified container.
+
+```bash
+docker ps
+```
+
+**Output:**
+
+```text
+hashim@debian:~$ docker ps
+CONTAINER ID    IMAGE     COMMAND       CREATED          STATUS          PORTS     NAMES
+260ead99f7ca    ubuntu    "/bin/bash"   35 seconds ago   Up 34 seconds             peaceful_euler
+```
+
+  * **Container ID:** `260ead99f7ca`
+
+### 2\. Run `docker commit`
+
+We will save this container as a new image named `packt/ubuntu-python3`.
+
+```bash
+docker commit -m "added python3 to ubuntu" -a "packt user" 260ead99f7ca packt/ubuntu-python3
+```
+
+**Command Breakdown:**
+
+  * **`-m "..."`**: A commit **m**essage (like in Git) describing what you changed.
+  * **`-a "..."`**: The **a**uthor of the change (e.g., your name).
+  * **`260ead99f7ca`**: The **Source Container ID** you are saving.
+  * **`packt/ubuntu-python3`**: The **Target Image Name** (Repository/Tag).
+
+**Output:**
+
+```text
+sha256:d02e16cc3a1f3d976cd97347d57c9ec7869a303c4a8b14d014e8c744b9720a90
+```
+
+This long string is the ID of the new image you just created.
+
+### 3\. Verify the New Image
+
+Check your local image list to see the result.
+
+```bash
+docker images
+```
+
+**Output:**
+
+```text
+hashim@debian:~$ docker images
+REPOSITORY             TAG       IMAGE ID       CREATED         SIZE
+packt/ubuntu-python3   latest    d02e16cc3a1f   4 seconds ago   149MB
+hello-world            latest    9c7a54a9a43c   6 days ago      13.3kB
+ubuntu                 latest    3b418d7b466a   2 weeks ago     77.8MB
+```
+
+**Notice the Size:**
+The base `ubuntu` image was \~78MB. Our new `packt/ubuntu-python3` image is \~149MB. This confirms that our changes (Python 3 and its dependencies) have been saved into the new image layer. You can now spawn new containers from `packt/ubuntu-python3` and they will have Python pre-installed\!
