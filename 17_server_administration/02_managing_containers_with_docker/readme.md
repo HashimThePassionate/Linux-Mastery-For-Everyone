@@ -1024,3 +1024,135 @@ CONTAINER ID   IMAGE    COMMAND   CREATED          STATUS          PORTS     NAM
 ```
 
 You now have a running container named `gifted_chatelet` (randomly assigned) built from your custom `pydeb` image\!
+
+
+# 🚀 Deploying a Containerized Application with Docker
+
+So far, we have covered the basics of using Docker and managing containers. Now, let's put that knowledge into practice by deploying a real application: a simple website.
+
+Docker is an excellent tool for developers because it streamlines deployment by removing the need to manually replicate development environments.
+
+## 🌐 The Scenario: Hosting a Static Website
+
+We will download a free website template and serve it using an **NGINX** web server running inside a Docker container.
+
+### Step 1: Download the Website Template
+
+We will use a free CSS template called "Focus".
+
+1.  **Copy the Link:** The download link is `https://www.free-css.com/assets/files/free-css-templates/download/page262/focus.zip`.
+2.  **Download:** Use `wget` to download the file to your home directory.
+    ```bash
+    wget https://www.free-css.com/assets/files/free-css-templates/download/page262/focus.zip
+    ```
+
+### Step 2: Unzip the File
+
+The file is a compressed ZIP archive. Extract it using `unzip`.
+
+```bash
+unzip focus.zip
+```
+
+### Step 3: Organize Your Workspace
+
+It is best practice to keep your projects organized. We will create a specific directory for this project and move the website files there.
+
+1.  **Create Directory:**
+    ```bash
+    mkdir -p ~/my_docker_images/docker_webapp
+    ```
+2.  **Move Files:**
+    ```bash
+    mv focus ~/my_docker_images/docker_webapp/
+    ```
+3.  **Navigate:**
+    ```bash
+    cd ~/my_docker_images/docker_webapp/focus
+    ```
+    *(Note: Ensure you are inside the folder containing the `index.html` file).*
+
+### Step 4: Create the Dockerfile
+
+Now we need to tell Docker how to build our image. Create a file named `webapp_dockerfile`.
+
+```bash
+touch webapp_dockerfile
+nano webapp_dockerfile
+```
+
+**Add the following content:**
+
+```dockerfile
+FROM nginx
+COPY . /usr/share/nginx/html
+```
+
+**Code Explanation:**
+
+  * **`FROM nginx`**: Specifies the base image. We are using the official NGINX image from Docker Hub. NGINX is a high-performance web server.
+  * **`COPY . /usr/share/nginx/html`**: Copies everything from the **current directory** (`.`) on your host machine into the `/usr/share/nginx/html` directory inside the container. This is the default location where NGINX looks for website files.
+
+### Step 5: Build the Docker Image
+
+Run the `docker build` command to create your custom image.
+
+```bash
+docker build . -f webapp_dockerfile -t webapp
+```
+
+  * **`.`**: Context (current directory).
+  * **`-f`**: Specifies the Dockerfile name.
+  * **`-t`**: Names the image `webapp`.
+
+**Verify the Image:**
+Check if the image exists locally.
+
+```bash
+docker images
+```
+
+**Output:**
+
+```text
+REPOSITORY             TAG       IMAGE ID       CREATED          SIZE
+webapp                 latest    c9b453cafff52  49 seconds ago   144MB
+pydeb                  latest    5f925117827e   13 hours ago     175MB
+packt/ubuntu-python3   latest    d02e16cc3a1f   19 hours ago     149MB
+hello-world            latest    9c7a5499a43c   7 days ago       13.3kB
+ubuntu                 latest    3b418d7b466a   2 weeks ago      77.8MB
+```
+
+### Step 6: Run the Container
+
+Now for the final step: running your web server. We need to map a port on our host machine to port 80 inside the container so we can access the website.
+
+**The Command:**
+
+```bash
+docker run -it -d -p 8080:80 webapp
+```
+
+**Command Breakdown:**
+
+  * **`-d` (Detached):** Runs the container in the background. It won't lock up your terminal.
+  * **`-p 8080:80` (Publish Port):** Maps **Host Port 8080** to **Container Port 80**.
+      * You will access the site at `http://localhost:8080`.
+      * The container serves it on its internal port 80.
+  * **`webapp`**: The name of the image we built.
+
+**Output:**
+
+```text
+1d5e08e9f4e55326fb57ff04e571c1aa7778afc656ef5025d4d081033059765f
+```
+
+*(This long string is the Container ID).*
+
+### 🏁 Test Your Website
+
+Open your web browser and go to `http://localhost:8080` (or `http://<your-server-ip>:8080`). You should see the "Focus" website template running successfully\!
+
+<div align="center">
+  <img src="./images/05.png" width="500"/>
+</div>
