@@ -883,3 +883,144 @@ ubuntu                 latest    3b418d7b466a   2 weeks ago     77.8MB
 
 **Notice the Size:**
 The base `ubuntu` image was \~78MB. Our new `packt/ubuntu-python3` image is \~149MB. This confirms that our changes (Python 3 and its dependencies) have been saved into the new image layer. You can now spawn new containers from `packt/ubuntu-python3` and they will have Python pre-installed\!
+
+# 🐳 Working with Dockerfiles
+
+Before starting to work with Dockerfiles, let’s see what a **Dockerfile** is. It is a text file that consists of instructions defined by the user for Docker to execute. It respects a basic structure:
+
+```dockerfile
+INSTRUCTION arguments
+```
+
+The Dockerfile is mainly used for **creating new container images**. Docker reads this file and automatically builds images based on the instructions inside.
+
+### Key Dockerfile Instructions
+
+  * **`FROM`**: This **must** be the first instruction. It tells Docker which existing image to build upon (the "Base Image").
+  * **`LABEL`**: Adds metadata, such as the author's name, version, or description. (Note: `MAINTAINER` is the older, deprecated version of this).
+  * **`RUN`**: Executes commands *inside* the image during the build process (e.g., `apt install python`). Each `RUN` instruction adds a new layer to the image.
+  * **`ADD`**: Copies files/directories from your computer into the image. It can also handle URLs and automatically extract tarballs.
+  * **`COPY`**: Similar to `ADD`, but simpler. It copies local files into the image without the extra "magic" features of `ADD`. This is preferred for simple file copying.
+  * **`CMD`**: Specifies the *default* command to run when a container starts. There can only be one `CMD`.
+  * **`USER`**: Sets the username (or UID) to use when running the image.
+  * **`WORKDIR`**: Sets the working directory for subsequent instructions (`RUN`, `CMD`, `COPY`, etc.). It acts like `cd` inside the build process.
+  * **`ENTRYPOINT`**: Configures the container to run as an executable.
+
+For a complete list, visit the [official Docker documentation](https://docs.docker.com/engine/reference/builder/).
+
+-----
+
+## 🛠️ Building Container Images from Dockerfiles
+
+In this section, we will create a Dockerfile to build a custom Docker image.
+
+**Scenario:** We want to create a lightweight image based on **Debian** that comes pre-installed with a **Python 3** programming environment.
+
+### Step 1: Create a Workspace
+
+First, create a clean directory to work in.
+
+```bash
+mkdir ~/my_docker_images && cd ~/my_docker_images
+```
+
+### Step 2: Create the File
+
+Create an empty file named `py_env_dockerfile`.
+
+```bash
+touch py_env_dockerfile
+```
+
+### Step 3: Edit the Dockerfile
+
+Open the file in your text editor and add the following content.
+
+```dockerfile
+# Use the official Debian image as a base
+FROM debian
+
+# Add metadata about the author
+MAINTAINER packt
+
+# Update repositories
+RUN apt update -y
+
+# Upgrade installed packages
+RUN apt upgrade -y
+
+# Install Python 3
+RUN apt install python3 -y
+```
+
+**Code Explanation:**
+
+  * `FROM debian`: We start with the official Debian Linux image.
+  * `MAINTAINER packt`: Identifies the author.
+  * `RUN ...`: These commands execute standard Linux shell commands inside the image to update the system and install Python 3. The `-y` flag is crucial because the build process cannot answer "yes/no" prompts interactively.
+
+### Step 4: Build the Image
+
+Now, run the `docker build` command to process the Dockerfile and create the image.
+
+```bash
+docker build ~/my_docker_images -f py_env_dockerfile -t pydeb
+```
+
+  * **`~/my_docker_images`**: The "context" directory (where to look for files).
+  * **`-f py_env_dockerfile`**: Specifies the filename of our Dockerfile.
+  * **`-t pydeb`**: Tags (names) the resulting image `pydeb`.
+
+**Command Output:**
+
+```text
+packt@debian:~/my_docker_images$ docker build ~/my_docker_images -f py_env_dockerfile -t pydeb
+[+] Building 8.9s (8/8) FINISHED
+ => [internal] load .dockerignore                                      0.0s
+ => => transferring context: 2B                                        0.0s
+ => [internal] load build definition from py_env_dockerfile            0.0s
+ => => transferring dockerfile: 140B                                   0.0s
+ => [internal] load metadata for docker.io/library/debian:latest       1.5s
+ => [1/4] FROM docker.io/library/debian@sha256:63d6...                 0.0s
+ => CACHED [2/4] RUN apt update -y                                     0.0s
+ => CACHED [3/4] RUN apt upgrade -y                                    0.0s
+ => [4/4] RUN apt install python3 -y                                   7.1s
+ => exporting to image                                                 0.2s
+ => => exporting layers                                                0.2s
+ => => writing image sha256:5f925117827e...                            0.0s
+ => => naming to docker.io/library/pydeb                               0.0s
+```
+
+**Success\!** The output shows that Docker executed each step (`[1/4]`, `[2/4]`, etc.) and successfully exported the final image `pydeb`.
+
+### Step 5: Verify and Run
+
+We can verify the image exists and run a container from it.
+
+**Check Image List:**
+
+```bash
+docker images
+```
+
+You should see `pydeb` in the list.
+
+**Run a Container:**
+
+```bash
+docker run -it pydeb
+```
+
+This launches a container based on your new image. Since we didn't specify a `CMD` in our Dockerfile, it defaults to running `bash`.
+
+### Step 6: Verify Running Container
+
+Open a new terminal and run `docker ps` to see your active container.
+
+```bash
+hashim@debian:~$ docker ps
+CONTAINER ID   IMAGE    COMMAND   CREATED          STATUS          PORTS     NAMES
+8d133fd5f7f8   pydeb    "bash"    29 seconds ago   Up 28 seconds             gifted_chatelet
+```
+
+You now have a running container named `gifted_chatelet` (randomly assigned) built from your custom `pydeb` image\!
