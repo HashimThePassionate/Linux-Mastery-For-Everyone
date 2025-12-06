@@ -176,3 +176,66 @@ Docker uses a **client-server architecture**. The workflow involves three main p
 * When you run `docker pull ubuntu`, the daemon checks if it has the image locally. If not, it downloads it from the configured **Registry** (like Docker Hub).
 * When you run `docker run ubuntu`, the daemon takes that **Image** and creates a runnable **Container** from it.
 
+# 🐳 Working with Docker
+
+This section introduces the practical side of working with Docker. Before running commands, it is essential to understand the environment we are working in, the licensing model of Docker, and the best strategy for installation to ensure stability and security.
+
+## 💻 The Lab Environment
+
+For the exercises in this section, the text specifies a specific setup to ensure consistency.
+
+* **Operating System:** Debian GNU/Linux 12 (Bookworm).
+* **Hardware Resources:**
+    * **vCPUs:** 2
+    * **RAM:** 2 GB
+* **Role:** This machine acts as the **Docker Host**.
+
+---
+
+## 🏷️ Choosing the Right Docker Version
+
+Docker, Inc. has evolved its business model over time. Understanding this evolution helps clarify which version you should install.
+
+### 1. The History: CE vs. EE
+In the past, Docker offered two distinct products:
+* **Docker CE (Community Edition):** The free, open-source version.
+* **Docker EE (Enterprise Edition):** The paid version with support and advanced features, which generated the company's revenue.
+
+### 2. The Current Model: Subscription Tiers
+Recently, Docker restructured its portfolio into four main tiers. This change affects how users access tools like Docker Desktop.
+
+| Product Tier | Cost | Target Audience |
+| :--- | :--- | :--- |
+| **Docker Personal** | **Free** | Individual developers, education, open-source communities, and small businesses. |
+| **Docker Pro** | Paid | Individual professional developers requiring advanced tools. |
+| **Docker Team** | Paid | Development teams requiring collaboration features. |
+| **Docker Business** | Paid | Large organizations requiring centralized management and security. |
+
+### 3. Our Choice: Docker Personal
+For the purpose of learning and general server administration in this guide, we will use **Docker Personal**.
+* **Cost:** Free.
+* **Includes:** Docker Engine (for servers) and Docker Desktop (for Linux/Mac/Windows).
+* **Requirement:** It usually implies the existence of a Docker user account (Docker ID).
+
+> **Note on Architecture:** Docker Engine is highly versatile. It supports both **x86** (Intel/AMD) and **ARM** architectures and provides native packages (`.deb` for Debian/Ubuntu and `.rpm` for Fedora/CentOS/RHEL).
+
+---
+
+## 📥 Installation Strategy: Repo vs. Repo
+
+When installing software on Linux, you generally have two choices. The text advises on the best path for Docker.
+
+### Option A: The OS Repository (Not Recommended)
+You can install Docker directly from Debian's default repositories (e.g., `sudo apt install docker.io`).
+* **Pros:** Easy, no setup required.
+* **Cons:** The version is often **out of date**. Linux distributions freeze package versions for stability, meaning you might miss out on the latest Docker features and security patches.
+
+### Option B: The Official Docker Repository (Recommended)
+This method involves adding Docker's official package repository to your system's package manager (`apt`).
+* **Pros:** You always get the **latest stable version** directly from the source.
+* **Cons:** Requires a few extra setup steps.
+
+### 🏆 The Decision
+Since we are using a fresh Debian system with no prior Docker installation, we do not need to worry about conflicts with older versions.
+
+We will proceed using **Option B (Docker's official `apt` repository)**. This ensures our environment is current, secure, and compatible with modern container standards.
