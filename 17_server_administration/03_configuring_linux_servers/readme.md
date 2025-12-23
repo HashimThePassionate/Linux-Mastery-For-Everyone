@@ -253,16 +253,16 @@ The system will ask you where to save the file (press Enter for default) and for
 
 ### 2. Copy the Public Key to the Server
 
-Now, we transfer your public key to the server so it recognizes you. Replace `192.168.0.113` with your server's actual IP address.
+Now, we transfer your public key to the server so it recognizes you. Replace `10.0.2.15` with your server's actual IP address.
 
 ```bash
-ssh-copy-id hashim@192.168.0.113
+ssh-copy-id hashim@10.0.2.15
 
 ```
 
 * **`ssh-copy-id`**: A utility that automatically copies your public key to the remote server's `authorized_keys` file.
 * **`hashim`**: The username on the remote server.
-* **`192.168.0.113`**: The IP address of the remote server.
+* **`10.0.2.15`**: The IP address of the remote server.
 
 You will be asked for **hashim**'s password one last time to authorize this copy.
 
@@ -338,13 +338,13 @@ sudo systemctl restart ssh
 Now, try to connect from your local machine.
 
 ```bash
-ssh hashim@192.168.0.113
+ssh hashim@10.0.2.15
 
 ```
 
 * **`ssh`**: The client command to connect.
 * **`hashim`**: Your username.
-* **`192.168.0.113`**: The target server IP.
+* **`10.0.2.15`**: The target server IP.
 
 If configured correctly, you should be logged in immediately without being asked for a user password (though you may be asked for your key passphrase if you set one).
 
@@ -355,5 +355,135 @@ OpenSSH is a powerful tool with many more options. For advanced configurations, 
 
 * [Ubuntu Server OpenSSH Documentation](https://ubuntu.com/server/docs/service-openssh)
 * [OpenSSH Manual Pages](https://www.openssh.com/manual.html)
+
+---
+
+
+# 🌐 Setting Up a DNS Server with BIND9
+
+This guide details how to configure a DNS server using **Berkeley Internet Name Domain 9 (BIND 9)** on **Ubuntu Server 22.04.2 LTS**. BIND 9 is one of the most widely used DNS services.
+
+The goal is to set up a **caching name server** and a **primary name server** to manage hostnames and private IP addresses on a local network.
+
+### 🧠 Key Concepts
+
+* **Caching Name Server:** This type of server handles recursive requests from clients, remembering (caching) the answers to speed up future requests.
+* **Primary/Secondary (Authoritative) Servers:** These hold the actual DNS records for specific zones. The primary server is the source of truth, while the secondary gets its data from the primary.
+
+---
+
+## 🛠️ Phase 1: Installation and Initial Testing
+
+### 1. Install BIND9 Packages
+
+First, install the necessary software packages on your Ubuntu server.
+
+```bash
+sudo apt install bind9 bind9utils bind9-doc
+
+```
+
+* **`bind9`**: The main DNS server software.
+* **`bind9utils`**: Utility tools for testing and management.
+* **`bind9-doc`**: Documentation.
+
+### 2. Verify Installation
+
+After installation, test if BIND is running correctly by querying itself (localhost) using the `nslookup` command.
+
+```bash
+nslookup google.com 127.0.0.1
+
+```
+
+**Expected Output:**
+The output should show a server address of `127.0.0.1` and a non-authoritative answer for `google.com` (showing IP addresses), confirming the service is active.
+
+---
+
+## ⚡ Phase 2: Configuring a Caching DNS Server
+
+A caching server is the default behavior for BIND9, so the setup is straightforward.
+
+### ⚠️ Pre-requisite: Backup Configuration Files
+
+Before making changes, it is highly advised to back up these critical configuration files:
+
+* `/etc/bind/named.conf`
+* `/etc/bind/named.conf.options`
+* `/etc/hosts`
+* `/etc/resolv.conf`
+
+### 1. Configure the Firewall
+
+Allow DNS traffic through the firewall.
+
+```bash
+sudo ufw allow Bind9
+
+```
+
+### 2. Edit the Options File
+
+Open the configuration file `/etc/bind/named.conf.options` in a text editor. We will modify the `options` directive (everything between the curly brackets `{ }`).
+
+**Step A: Disable IPv6 (Optional)**
+If you are only using IPv4, comment out the IPv6 listening option by adding `//` at the start of the line:
+
+```bash
+// listen-on-v6 { any; };
+
+```
+
+**Step B: Configure Forwarders**
+Define where the server should look if it doesn't know an answer (forwarding queries). We will use Google's Public DNS, but you can use your ISP's DNS.
+Add/Edit the `forwarders` block:
+
+```bash
+forwarders {
+    8.8.8.8;
+    8.8.4.4;
+};
+
+```
+
+**Step C: Define Allowed Queries**
+Restrict who can query your server for security. Add the `allow-query` block to include your local network (e.g., `10.0.2.0/24`) and localhost, to find ip address use this command `ip a` on a terminal.
+
+```bash
+allow-query {
+    localhost;
+    10.0.2.0/24;
+};
+
+```
+
+**Step D: Define Listening Interfaces**
+Specify which network interfaces the server should listen on for IPv4 queries.
+
+```bash
+listen-on {
+    10.0.2.15/24;
+};
+
+```
+
+### 3. Verify and Restart
+
+1. **Check Syntax:** Run `named-checkconf`. If there is no output, your syntax is correct.
+2. **Restart Service:** Restart BIND9 to apply changes.
+
+### 4. Final Testing
+
+Test your new DNS server from **another computer** on the same network. Replace `10.0.2.15` with your server's actual IP address.
+
+```bash
+nslookup google.com 10.0.2.15
+
+```
+
+**Expected Output:**
+You should see your server's IP (`10.0.2.15`) returning the answer. This confirms you have a working caching DNS server on your private network.
+
 
 ---
