@@ -798,3 +798,121 @@ sudo ufw allow Bind9 && sudo systemctl restart bind9
 You now have a fully redundant DNS system with one Primary and one Secondary server!
 
 ---
+
+# 🌐 Setting Up a DHCP Server
+
+## ❓ Why Use a DHCP Server?
+
+**DHCP (Dynamic Host Configuration Protocol)** is a network service designed to automatically assign IP addresses to hosts on a network.
+
+We use a DHCP server for several key reasons:
+
+* **Automation:** It assigns settings without any manual control needed from the host machine.
+* **Centralized Management:** Instead of configuring every device individually, the DHCP server provides essential network details to all clients at once, including:
+* IP addresses and netmasks.
+* The default gateway IP.
+* The DNS server's IP address.
+
+
+* **Conflict Resolution:** It helps resolve invalid IP numbers on the network automatically when configured as authoritative.
+
+---
+
+## 🛠️ Installation Guide
+
+To install the DHCP service on an Ubuntu system, we use the `isc-dhcp-server` package.
+
+### 1. Install the Package
+
+Run the following command in your terminal:
+
+```bash
+sudo apt install isc-dhcp-server
+
+```
+
+---
+
+## ⚙️ Configuration Steps
+
+After installation, we need to configure two specific files: the main configuration file (`dhcpd.conf`) and the interface definition file (`isc-dhcp-server`).
+
+### Step 1: Configure the Subnet
+
+Open the main configuration file located at `/etc/dhcp/dhcpd.conf`. We need to define the network (subnet) that the DHCP server will manage.
+
+You can add a new subnet configuration like the example below. This configuration defines a network on `192.168.1.0` and assigns IPs in the range of `.100` to `.200`.
+
+```bash
+# Hashim's VirtualBox DHCP Configuration
+subnet 10.0.2.0 netmask 255.255.255.0 {
+    range 10.0.2.50 10.0.2.100;
+    option routers 10.0.2.1;
+    option domain-name-servers 10.0.2.15, 8.8.8.8;
+    option domain-name "hashim.net";
+    option broadcast-address 10.0.2.255;
+}
+```
+
+### Step 2: Enable Authoritative Mode
+
+Inside the same file (`/etc/dhcp/dhcpd.conf`), find and uncomment the line `authoritative;`.
+
+* **Why?** This ensures the server can automatically reassess and assign valid IPs to new devices if they attempt to connect with invalid numbers, without requiring manual user intervention.
+
+### Step 3: Define the Network Interface
+
+The server needs to know *which* network card to use to hand out addresses. This is configured in `/etc/default/isc-dhcp-server`.
+
+1. **Find your interface name:** Run `ip addr show`. In this example, we identify the Ethernet interface as `enp0s25`.
+2. **Edit the file:** Open `/etc/default/isc-dhcp-server` and modify the `INTERFACESv4` line:
+
+```bash
+INTERFACESv4="enp0s3"
+```
+
+### Step 4: Restart the Service
+
+Save your changes and restart the DHCP server to apply the new settings:
+
+```bash
+sudo systemctl restart isc-dhcp-server.service
+
+```
+
+---
+
+## ⚠️ Troubleshooting & Network Conflicts
+
+**Important Warning:**
+Most home network routers already provide a fully functional DHCP service out of the box. Running a second DHCP server on the same network will likely cause conflicts.
+
+### Diagnosing Errors
+
+If the service fails to start, it is often because it cannot connect to the interface due to network conflicts. You can check the status using:
+
+```bash
+sudo systemctl status isc-dhcp-server.service
+
+```
+
+**Example Error Output:**
+If the server fails, you might see an error log indicating it exited with a **FAILURE** status.
+
+```text
+isc-dhcp-server.service - ISC DHCP IPv4 server
+   Loaded: loaded ...
+   Active: failed (Result: exit-code) ...
+   Main PID: 1716 (code=exited, status=1/FAILURE)
+
+Jun 22 11:33:43 nuc5 dhcpd[1716]: Not configured to listen on any interfaces!
+...
+Jun 22 11:33:43 nuc5 dhcpd[1716]: exiting.
+
+```
+
+**Solution:**
+To fix this, you must isolate the new DHCP server from your local network or disable the DHCP service on your router to avoid the conflict. Once isolated, the service should run as intended.
+
+---
+
