@@ -487,3 +487,154 @@ You should see your server's IP (`10.0.2.15`) returning the answer. This confirm
 
 
 ---
+
+# 🌐 Creating a Primary DNS Server
+
+This guide explains how to configure a **Primary DNS Server** using BIND9. A primary server acts as the authoritative source of truth for a specific domain name (zone).
+
+For this exercise, the text uses the domain `hashim.net` and the server IP `10.0.2.15`. You should replace these with your own domain and IP address when performing the setup.
+
+---
+
+## ⚙️ Step 1: Define the Zone in Configuration
+
+First, we must tell BIND that it is responsible for the new domain. We do this by editing the local configuration file.
+
+### 1. Edit the File
+
+Open `/etc/bind/named.conf.local` and add the new zone definition.
+
+```bash
+zone "hashim.net" {
+    type master;
+    file "/etc/bind/db.hashim.net";
+    allow-transfer { 10.0.2.15; };
+    also-notify { 10.0.2.15; };
+};
+
+```
+
+### 👨‍💻 Configuration Breakdown
+
+* **`zone "hashim.net"`**: Defines the specific domain name this zone will serve.
+* **`type master;`**: Designates this server as the **Primary** (Authoritative) source for this domain. Other types include `slave` (secondary), `forward`, or `hint`.
+* **`file "...";`**: Specifies the file path where the actual DNS records (IPs, hostnames) will be stored.
+* **`allow-transfer { ... };`**: Security setting. Lists the IP addresses of secondary DNS servers allowed to download (transfer) this zone data.
+* **`also-notify { ... };`**: Lists the IPs of servers that should be automatically notified whenever this zone file changes.
+
+---
+
+## 📝 Step 2: Create the Zone File
+
+Now we must create the actual file referenced in the step above (`db.hashim.net`). It is best practice to use an existing default file as a template to avoid syntax errors.
+
+### 1. Copy the Template
+
+We copy the standard `db.local` file to create our new zone file.
+
+```bash
+cd /etc/bind/
+sudo cp db.local db.hashim.net
+
+```
+
+### 2. Verify Creation
+
+Running `ls` should show your new file alongside the defaults:
+
+```text
+bind.keys          db.hashim.net   named.conf.default-zones   zones.rfc1918
+db.0               db.empty           named.conf.local
+db.127             db.local           named.conf.options
+db.255             named.conf         rndc.key
+
+```
+
+---
+
+## ✍️ Step 3: Configure DNS Records
+
+Open your new file (`/etc/bind/db.hashim.net`) and populate it with your domain's data.
+
+### 1. The Zone File Content
+
+Here is the configuration for the `hashim.net` domain:
+
+```dns
+;
+; BIND data file for hashim.net
+;
+$TTL    604800
+@       IN      SOA     ns.hashim.net. admin.hashim.net. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      ns.hashim.net.
+@       IN      A       10.0.2.15
+ns      IN      A       10.0.2.15
+
+```
+
+### 🔍 Detailed Explanation of the Records
+
+The file format follows a specific structure: **Hostname | Class | Type | Value**.
+
+1. **Global Variables:**
+* **`$TTL`**: Time To Live. Default time (in seconds) that other servers should cache these records.
+* **`@` Symbol**: Represents the "Origin" or the root of the zone (in this case, `hashim.net`).
+
+
+2. **SOA (Start of Authority) Record:**
+* **`IN`**: Class "Internet".
+* **`SOA`**: Indicates the authoritative server (`ns.hashim.net.`) and the admin email (`admin.hashim.net.`). *Note: The first dot in the email acts as the `@` symbol.*
+* **Parameters inside parentheses:**
+* **Serial:** A version number. You **must** increment this number every time you edit the file so secondary servers know to update.
+* **Refresh/Retry/Expire:** Timers controlling how secondary servers sync data.
+
+
+
+
+3. **Resource Records:**
+* **`NS` (Name Server):** Defines which server answers DNS queries for this zone.
+* **`A` (Address):** Maps a hostname to an IPv4 address.
+* The line `@ IN A 10.0.2.15` maps the bare domain `hashim.net` to the IP.
+* The line `ns IN A 10.0.2.15` maps `ns.hashim.net` to the IP.
+
+
+
+
+
+---
+
+## 🔄 Step 4: Apply and Test
+
+After saving your files, you must instruct the BIND service to reload the configurations.
+
+### 1. Reload Configuration
+
+We use the **RNDC** (Remote Name Daemon Control) utility.
+
+```bash
+sudo rndc reload
+
+```
+
+### 2. Verify with `nslookup`
+
+Test the server from a *different* computer on the network to ensure it is resolving correctly.
+
+```bash
+nslookup hashim.net 10.0.2.15
+
+```
+
+* **`hashim.net`**: The domain we are looking for.
+* **`10.0.2.15`**: The specific DNS server we are querying (our new server).
+
+**Expected Outcome:**
+The command should return the IP address `10.0.2.15`, confirming that your primary DNS server is fully operational and correctly serving the zone file.
+
+---
