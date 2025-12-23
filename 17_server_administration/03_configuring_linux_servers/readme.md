@@ -638,3 +638,163 @@ nslookup hashim.net 10.0.2.15
 The command should return the IP address `10.0.2.15`, confirming that your primary DNS server is fully operational and correctly serving the zone file.
 
 ---
+
+# 🔄 Setting Up a Secondary DNS Server
+
+A **Secondary DNS Server** acts as a backup and load balancer. It holds a read-only copy of the zone data, which it automatically downloads from the Primary server.
+
+**Infrastructure Setup:**
+
+* **Primary Server:** `10.0.2.15` (Already configured)
+* **Secondary Server:** `10.0.2.20` (New machine, also running Ubuntu Server 22.04.2 LTS)
+
+---
+
+## 🛠️ Phase 1: Configuring the Primary Server
+
+Before touching the new machine, we must authorize the Primary server (`10.0.2.15`) to share its data with the new Secondary server (`10.0.2.20`).
+
+### 1. Update Zone Transfer Settings
+
+We need to tell the primary server that `10.0.2.20` is a trusted friend allowed to copy the zone.
+
+**File:** `/etc/bind/named.conf.local`
+Edit the zone definition to include the secondary IP in `allow-transfer` and `also-notify`.
+
+```conf
+zone "hashim.net" {
+    type master;
+    file "/etc/bind/db.hashim.net";
+    allow-transfer { 10.0.2.15; 10.0.2.20; };
+    also-notify { 10.0.2.15; 10.0.2.20; };
+};
+
+```
+
+* **`allow-transfer`**: Permits the listed IPs to download the zone data.
+* **`also-notify`**: Tells the primary server to actively send a "poke" (notification) to these IPs whenever the zone data changes.
+
+### 2. Configure Global Options and ACLs
+
+Next, we secure the server by defining exactly who is "trusted" and setting recursion rules.
+
+**File:** `/etc/bind/named.conf.options`
+
+**Step A: Create an ACL (Access Control List)**
+Add this block *above* the `options { ... };` block. This defines a group called "trusted" containing both your servers.
+
+```conf
+acl "trusted" {
+    10.0.2.15;
+    10.0.2.20;
+};
+
+```
+
+**Step B: Update the Options Block**
+Inside the `options` block, add the following security directives:
+
+```conf
+options {
+    directory "/var/cache/bind";
+    
+    recursion yes;
+    allow-recursion { trusted; };
+    listen-on { 10.0.2.15; };
+    allow-transfer { none; };
+    
+    // ... (other existing options)
+};
+
+```
+
+**Directive Explanation:**
+
+* **`recursion yes;`**: Allows the server to perform recursive queries (looking up answers it doesn't know by asking other servers).
+* **`allow-recursion { trusted; };`**: Restricts recursive queries only to the IPs listed in our "trusted" ACL. This prevents strangers from using your server to attack others.
+* **`allow-transfer { none; };`**: Sets the *default* rule to deny zone transfers. This is overridden by the specific `allow-transfer` rule we set in the zone file in Step 1.
+
+### 3. Restart Primary Service
+
+Apply the changes by restarting BIND9.
+
+```bash
+sudo systemctl restart bind9.service
+
+```
+
+---
+
+## 🖥️ Phase 2: Configuring the Secondary Server
+
+Now move to the second machine (`10.0.2.20`). Ensure BIND9 is installed (`sudo apt install bind9`).
+
+### 1. Configure Global Options
+
+Just like the primary, we need to define our trusted network and listening interfaces.
+
+**File:** `/etc/bind/named.conf.options`
+
+Add the **ACL** and update the **Options** block:
+
+```conf
+acl "trusted" {
+    10.0.2.15;
+    10.0.2.20;
+};
+
+options {
+    directory "/var/cache/bind";
+    
+    recursion yes;
+    allow-recursion { trusted; };
+    listen-on { 10.0.2.20; };   // Note: Secondary Server IP
+    allow-transfer { none; };
+    
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+};
+
+```
+
+### 2. Define the Secondary Zone
+
+This is the most critical step. We tell the server that for `hashim.net`, it is **not** the master; it is a secondary (slave) and must get its data from the primary.
+
+**File:** `/etc/bind/named.conf.local`
+
+Add the following zone definition:
+
+```conf
+zone "hashim.net" {
+    type secondary;
+    file "/etc/bind/db.hashim.net";
+    primaries { 10.0.2.15; };
+};
+
+```
+
+### 🆚 Comparison: Primary vs. Secondary Config
+
+Here is a side-by-side view of how the `named.conf.local` file differs between the two servers.
+
+| Feature | Primary Server (`.113`) | Secondary Server (`.140`) |
+| --- | --- | --- |
+| **Zone Type** | `type master;` | `type secondary;` |
+| **Source of Data** | Is the source. Defines transfers. | `primaries { 10.0.2.15; };` |
+| **Transfer Rule** | `allow-transfer { ... };` | N/A (Does not send data) |
+
+### 3. Finalize Secondary Setup
+
+Allow the service through the firewall and restart it to initiate the first zone transfer.
+
+```bash
+sudo ufw allow Bind9 && sudo systemctl restart bind9
+
+```
+
+You now have a fully redundant DNS system with one Primary and one Secondary server!
+
+---
