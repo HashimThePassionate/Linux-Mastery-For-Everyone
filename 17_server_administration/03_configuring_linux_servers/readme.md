@@ -916,3 +916,192 @@ To fix this, you must isolate the new DHCP server from your local network or dis
 
 ---
 
+# 📂 Setting Up an NFS (Network File System) Server
+
+## 🧠 Background: What is NFS?
+
+**NFS (Network File System)** is a standard and time-tested protocol used to share files between Linux computers over a network.
+
+### The Problem it Solves
+
+Imagine a scenario in an office with **10 distinct computers**. Each computer has its own hard drive. If you need to transfer a file from **Computer A** to **Computer B**, you would typically have to use a physical storage device, like a USB drive. This is inefficient.
+
+### The NFS Solution
+
+NFS solves this by taking a specific folder on **Computer A** and sharing it over the network. To **Computer B**, it appears as if that shared folder is located physically inside its own hard drive, even though it is accessed remotely.
+
+> **Analogy:** Think of how Google Drive or Dropbox creates a folder on your laptop. You interact with files in that folder locally, but the actual data resides on a cloud server. NFS functions similarly, but within your local network.
+
+### 📍 The Scenario
+
+In this guide, we are working with an **Ubuntu** operating system installed inside **VirtualBox**.
+
+1. We will create a specific folder inside this system.
+2. We will **"Export"** (Share) this folder to the network.
+3. Later, we will act as a "Client" to access and test this folder to ensure the setup is working correctly.
+
+---
+
+## 🛠️ Practical Steps: Installing & Configuring the NFS Server
+
+We are now beginning work on the **Server Side**. This is the machine that will host and share the files.
+
+### Step 1: Install the Package
+
+First, we must install the necessary NFS software.
+
+#### Command
+
+```bash
+sudo apt install nfs-kernel-server
+
+```
+
+#### 👨‍💻 Code Explanation
+
+* `sudo`: Executes the command with administrative (root) privileges.
+* `apt install`: The command to download and install packages.
+* `nfs-kernel-server`: This is the core software package required to turn your Linux machine into a "File Server."
+
+---
+
+### Step 2: Start the Service
+
+Once the installation is complete, we need to ensure the service is running correctly.
+
+#### Commands
+
+```bash
+# Start the service immediately
+sudo systemctl start nfs-kernel-server.service
+
+# Enable the service to start automatically on boot
+sudo systemctl enable nfs-kernel-server.service
+
+# Check the current status of the service
+sudo systemctl status nfs-kernel-server.service
+
+```
+
+#### 👨‍💻 Code Explanation
+
+* `systemctl start`: Launches the application right now.
+* `systemctl enable`: Configures the system so that if you restart (reboot) your machine, the NFS server will start up automatically without you needing to type the command again.
+* `systemctl status`: Verifies the health of the service.
+* **Expected Output:** You should see `Active: active (exited)` or `active (running)`.
+
+
+
+---
+
+### Step 3: Create the Shared Folder
+
+Now we will create the specific directory that we intend to share. It is a best practice to keep all shared resources in a structured location. We plan to create a folder at the path `/home/export/shares`.
+
+#### Commands
+
+```bash
+# 1. Create the parent and child folders
+sudo mkdir -p /home/export/shares
+
+# 2. Set permissions (Open for everyone)
+sudo chmod 777 /home/export/shares
+
+```
+
+#### 👨‍💻 Code Explanation
+
+* `mkdir -p`: The `-p` (parent) flag is very useful. If the folder `export` does not exist, this command creates it first, and then creates the `shares` folder inside it in one go.
+* `chmod 777`: This changes the directory permissions.
+* It stands for **Read, Write, and Execute** access for **Everyone** (Owner, Group, and Others).
+* *Note:* In a real professional office environment, we would use strict user-specific permissions. However, for this learning exercise, we are keeping it open to ensure connectivity.
+
+
+
+---
+
+### Step 4: Edit the Configuration File (`/etc/exports`)
+
+This is the most critical step. The `/etc/exports` file acts as the access control list. It tells the server **which folder** to share and **who** is allowed to access it.
+
+#### 1. Open the File
+
+```bash
+sudo nano /etc/exports
+
+```
+
+#### 2. Add the Configuration Line
+
+Scroll to the very bottom of the file and type the following line exactly:
+
+```text
+/home/export/shares  10.0.2.0/24(rw,sync,no_subtree_check)
+
+```
+
+#### 👨‍💻 Configuration Breakdown
+
+Let's examine every part of this line:
+
+* **`/home/export/shares`**: **What to share.** This is the path to the folder we created in Step 3.
+* **`10.0.2.0/24`**: **Who can access it.**
+* This specifies the network range. Since your VirtualBox IP is likely `10.0.2.15`, specifying `10.0.2.0/24` allows the entire subnet (any computer with an IP starting with `10.0.2.x`) to connect.
+
+
+* **`(rw)`**: **Read & Write.** This gives the client permission to view files as well as create, modify, or delete them.
+* **`(sync)`**: **Data Safety.** This forces the server to write any changes to the physical hard disk before telling the client the task is "Done." While slightly slower, it prevents data corruption.
+* **`(no_subtree_check)`**: **Performance Boost.** This tells the server not to constantly verify if the shared folder's path (or its parent folders) has changed or is part of a larger filesystem. Disabling this check speeds up operations.
+
+#### 3. Save and Exit
+
+Press `Ctrl + O`, hit `Enter` to save, and then `Ctrl + X` to exit the editor.
+
+---
+
+### Step 5: Restart and Apply
+
+Whenever configuration files are changed, the server must be refreshed to recognize the new settings.
+
+#### Commands
+
+```bash
+# 1. Restart the NFS Service
+sudo systemctl restart nfs-kernel-server.service
+
+# 2. Force Export
+sudo exportfs -a
+
+```
+
+#### 👨‍💻 Code Explanation
+
+* `systemctl restart`: Stops and starts the service to load the new config.
+* `exportfs -a`: This command forces the NFS server to re-read the `/etc/exports` file and publish (export) all the shares defined in it immediately.
+
+---
+
+### Step 6: Configure Firewall (UFW)
+
+If the Firewall on your Ubuntu machine is active, it will block outside connections. We must explicitly open the "gate" for NFS traffic. NFS primarily uses **Port 2049**.
+
+#### Commands
+
+```bash
+# 1. Allow NFS traffic
+sudo ufw allow nfs
+
+# 2. Check Firewall Status
+sudo ufw status
+
+```
+
+#### 👨‍💻 Code Explanation
+
+* `ufw allow nfs`: Updates the firewall rules to permit incoming connections for the NFS protocol.
+* `ufw status`: Displays the current rule list.
+* **Success Criteria:** The status should be `active` and you should see `2049` or `nfs` listed as **ALLOW**.
+
+
+
+---
