@@ -1379,3 +1379,254 @@ sudo apt autoremove -y
 **Result:** Your system is now completely free of NFS services! 🚀
 
 ---
+
+# 📂 Samba Server Setup (Linux to Windows File Sharing)
+
+We will now proceed to set up a **Samba Server**. This is distinct from the previous topic (NFS) and is the ideal solution for your specific scenario involving a mix of operating systems.
+
+## 🧠 Background: Why Samba?
+
+* **NFS (Previous Topic):** This protocol is excellent for **Linux-to-Linux** communication but lacks native compatibility with Windows.
+* **Samba (SMB/CIFS):** Samba is a software implementation of the **SMB/CIFS** networking protocol. Essentially, it teaches Linux how to speak the "Windows language."
+* **The Use Case:** This allows a folder on your Ubuntu Virtual Machine to appear on your Windows Host (your physical computer) as if it were a standard USB drive or a Local Network Disk.
+
+---
+
+## 🛠️ Step 1: Installing Samba
+
+First, we must install the Samba software packages on your Ubuntu system.
+
+### The Commands
+
+```bash
+# 1. Update package lists
+sudo apt update
+
+# 2. Install Samba
+sudo apt install samba -y
+
+```
+
+### 👨‍💻 Code Explanation
+
+* **`sudo apt update`**: Refreshes your local package index to ensure you download the latest version.
+* **`sudo apt install samba -y`**: Installs the Samba server files. The `-y` flag automatically answers "Yes" to prompts asking for permission to use disk space.
+
+### Verification
+
+Once installed, verify that the service is active.
+
+```bash
+sudo systemctl status smbd
+
+```
+
+**Expected Output:** You should see `Active: active (running)`.
+
+---
+
+## 📂 Step 2: Creating the Shared Folder
+
+We will now create the specific directory that we intend to display on Windows. We will name this folder `sambashare`.
+
+### The Commands
+
+```bash
+# 1. Create the directory
+mkdir /home/hashim/sambashare
+
+# 2. Set Permissions (Open for practice)
+sudo chmod 777 /home/hashim/sambashare
+
+```
+
+### 👨‍💻 Code Explanation
+
+* **`mkdir`**: Creates a new directory in your user's home folder.
+* **`chmod 777`**: Grants **Read, Write, and Execute** permissions to **Everyone**.
+* *Note:* In a strict production environment, we would limit these permissions. However, for this learning exercise, setting it to 777 ensures you will not face "Permission Denied" errors while testing.
+
+
+
+---
+
+## ⚙️ Step 3: Editing the Configuration File
+
+Samba's behavior is controlled by the file `/etc/samba/smb.conf`. We must edit this file to define *what* we are sharing and *who* can access it.
+
+### 1. Create a Backup (Safety First)
+
+Before editing configuration files, it is best practice to create a backup so you can restore the original state if mistakes occur.
+
+```bash
+sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.backup
+
+```
+
+### 2. Edit the File
+
+Open the file using the Nano text editor.
+
+```bash
+sudo nano /etc/samba/smb.conf
+
+```
+
+### 3. Add the Configuration Block
+
+Scroll to the very **bottom** of the file. Paste the following configuration block (customized for your VirtualBox network environment):
+
+```ini
+[MyShare]
+   comment = Ubuntu Share for Windows
+   path = /home/hashim/sambashare
+   read only = no
+   browsable = yes
+   writable = yes
+   guest ok = no
+   valid users = hashim
+   create mask = 0775
+   directory mask = 0775
+
+```
+
+### 👨‍💻 Configuration Breakdown
+
+* **`[MyShare]`**: This is the "Service Name." When you look at your computer from Windows, the folder will appear with this name.
+* **`path`**: The physical location of the folder on your Ubuntu system (`/home/hashim/sambashare`).
+* **`writable = yes`**: Allows the Windows user to create, edit, and delete files in this folder.
+* **`valid users = hashim`**: A security measure ensuring only the user `hashim` can access this share.
+* **`guest ok = no`**: Disables anonymous access; authentication is required.
+
+**Save and Exit:** Press `Ctrl + O`, hit `Enter`, and then press `Ctrl + X`.
+
+---
+
+## 🔐 Step 4: Setting the User Password (Critical)
+
+To connect from Windows, you need a password. However, **Samba does not use your standard Linux login password.** It maintains its own database of passwords.
+
+You must add your current user (`hashim`) to the Samba database and set a specific password for file sharing.
+
+### The Command
+
+```bash
+sudo smbpasswd -a hashim
+
+```
+
+* **Action:** The system will prompt you to enter and confirm a password. You can set a simple one (e.g., `1234`) for this lab, but ensure you remember it.
+
+---
+
+## 🔄 Step 5: Restart the Service
+
+For the changes in the configuration file and the password database to take effect, the Samba daemon (`smbd`) must be restarted.
+
+### The Command
+
+```bash
+sudo systemctl restart smbd
+
+```
+
+---
+
+## 🖥️ Step 6: Accessing from Windows (The Client)
+
+Now, let's move to your **Main Operating System (Windows)** to access the files.
+
+### 1. Get your Ubuntu IP
+
+In your Ubuntu terminal, find your IP address:
+
+```bash
+ip addr show
+
+```
+
+*(Let's assume the IP is `10.0.2.15` for this example).*
+
+### 2. Open the Run Dialog in Windows
+
+On your Windows physical keyboard, press: **Windows Key + R**.
+
+### 3. Enter the Network Address
+
+In the box that appears, type the IP address using **Backslashes** (`\`), which is the Windows standard for network paths:
+
+```text
+\\10.0.2.15
+
+```
+
+Press **Enter**.
+
+### 4. Login
+
+Windows will ask for network credentials.
+
+* **User:** `hashim`
+* **Password:** (The password you set in Step 4).
+
+### 🚀 Result
+
+A window will open showing a folder named **MyShare**. You can now drag and drop files into this window, and they will immediately appear inside the `/home/hashim/sambashare` folder on your Ubuntu VM!
+
+---
+
+## 🧹 Cleanup: Disconnecting and Uninstalling
+
+As per your request to keep the system clean, follow this order to completely remove the setup once you are done testing.
+
+### 1. Disconnect from Windows
+
+* Close any open folders in Windows accessing the share.
+* If you mapped it as a Network Drive, right-click it in "This PC" and select **Disconnect**.
+
+### 2. Stop the Samba Service
+
+Return to Ubuntu and stop the service.
+
+```bash
+sudo systemctl stop smbd
+sudo systemctl disable smbd
+
+```
+
+### 3. Delete the Shared Folder (Optional)
+
+If you no longer need the data inside the folder:
+
+```bash
+sudo rm -rf /home/hashim/sambashare
+
+```
+
+### 4. Reset Configuration
+
+We will restore the original configuration file from the backup we created in Step 3.
+
+```bash
+# Remove the modified file
+sudo rm /etc/samba/smb.conf
+
+# Restore the backup
+sudo mv /etc/samba/smb.conf.backup /etc/samba/smb.conf
+
+```
+
+### 5. Uninstall Samba (Deep Clean)
+
+Remove the software and its dependencies.
+
+```bash
+# Purge removes the package and configuration files
+sudo apt purge samba samba-common -y
+
+# Autoremove cleans up unused dependencies
+sudo apt autoremove -y
+
+```
+
+---
