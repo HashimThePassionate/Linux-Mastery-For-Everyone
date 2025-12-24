@@ -1174,14 +1174,14 @@ This is the most critical step. While standard networking books might use an ext
 ### The Command (For Single VM/Loopback)
 
 ```bash
-sudo mount 127.0.0.1:/home/export/shares /home/shares
+sudo mount 10.0.2.15:/home/export/shares /home/shares
 
 ```
 
 ### 👨‍💻 Command Breakdown
 
 1. **`sudo mount`**: The command to attach a storage device or filesystem to a specific directory.
-2. **`127.0.0.1`**: **The Source.** This IP address represents "This Computer" (Localhost). It tells the system to look for the server on itself.
+2. **`10.0.2.15`**: **The Source.** This IP address represents "This Computer" (Localhost). It tells the system to look for the server on itself.
 3. **`:/home/export/shares`**: **The Source Path.** This is the specific folder *on the Server* that we want to access.
 4. **`/home/shares`**: **The Destination (Mount Point).** This is the folder *on the Client* where we want the files to appear.
 
@@ -1260,5 +1260,122 @@ You have successfully configured your Ubuntu machine to act as **both a Server a
 * Will immediately be visible and accessible in `/home/shares` (The Client).
 
 This confirms that the NFS service is operational, the permissions are correct, and the network mounting is functioning perfectly.
+
+---
+
+# 🛑 Stopping and Removing NFS Services
+
+If you want to completely stop NFS operations and return your system to its normal state, you must follow a specific **Order of Operations**.
+
+### ⚠️ Critical Warning: The Sequence Matters
+
+If you stop the services in the wrong order (for example, shutting down the Server while the Client is still connected), your system may **Hang** or freeze. This happens because the Client will indefinitely try to reconnect to a Server that no longer exists.
+
+Follow the steps below in this exact order to ensure a clean shutdown.
+
+---
+
+## 🔌 Step 1: Disconnect the Client (Priority #1)
+
+You **must** disconnect the Client side (`/home/shares`) from the Server before doing anything else. If you have a mounted folder, this step is mandatory.
+
+### The Command
+
+```bash
+sudo umount /home/shares
+
+```
+
+### 👨‍💻 Troubleshooting: "Target is Busy"
+
+If you get an error saying **"target is busy"**, it means a terminal or file explorer window is currently open inside that folder. Close those windows or use the "Force" command:
+
+```bash
+sudo umount -f -l /home/shares
+
+```
+
+* **`-f`**: Force unmount.
+* **`-l`**: Lazy unmount (detaches immediately and cleans up references later).
+
+---
+
+## 🛑 Step 2: Stop the NFS Server Service
+
+Now that no Clients are connected, it is safe to shut down the Server.
+
+### 1. Stop the Service
+
+Immediately halt the running process.
+
+```bash
+sudo systemctl stop nfs-kernel-server
+
+```
+
+### 2. Disable Auto-Start
+
+Prevent the NFS server from starting automatically the next time you reboot the computer.
+
+```bash
+sudo systemctl disable nfs-kernel-server
+
+```
+
+---
+
+## 🧹 Step 3: Clean Firewall Rules (Optional)
+
+If you previously opened a "door" in your Firewall (UFW) for NFS, you should close it to maintain security.
+
+### The Command
+
+```bash
+sudo ufw delete allow nfs
+
+```
+
+---
+
+## ✅ Step 4: Verification (Confirm Success)
+
+Always double-check that the services are actually stopped and the connections are gone.
+
+### 1. Check Server Status
+
+```bash
+sudo systemctl status nfs-kernel-server
+
+```
+
+**Expected Output:** You should see `Active: inactive (dead)`.
+
+### 2. Check Client Mounts
+
+```bash
+df -h | grep shares
+
+```
+
+**Expected Output:** The output should be **empty**. If you see a line, the unmount failed.
+
+---
+
+## 🗑️ Extra: Uninstalling the Software (Optional)
+
+If you want to completely remove the NFS software from your computer (delete the program files), run the following commands. If you just wanted to stop it temporarily, you can skip this.
+
+### The Commands
+
+```bash
+# Remove the packages
+sudo apt remove nfs-kernel-server nfs-common -y
+
+# Clean up unused dependencies
+sudo apt autoremove -y
+
+```
+
+**Result:** Your system is now completely free of NFS services! 🚀
 
 ---
