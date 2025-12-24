@@ -1105,3 +1105,160 @@ sudo ufw status
 
 
 ---
+
+
+# 📂 NFS Client Configuration & Testing (Localhost Method)
+
+In this section, we will configure the **Client Side**. Since you are operating with a single Ubuntu machine inside VirtualBox, we will utilize a technique known as **Loopback Mounting**.
+
+**The Concept:** We will configure your single machine to act as **both** the Server and the Client simultaneously. The "Server" part of the machine will provide the files, and the "Client" part of the same machine will receive and access those files.
+
+---
+
+## 🧠 Background: What is an NFS Client?
+
+An **NFS Client** is the computer or software that sends a request to the Server, asking to view and access specific files.
+
+### 🏢 Real-World Scenario
+
+In a corporate office, the Server Room houses the physical hard drives. However, when you sit at your desk, you might open a `Z:` drive to access files. In this case, your desk computer is the **Client**.
+
+### 💻 VirtualBox Scenario
+
+Since we do not have a second physical computer for this lab, we will simulate this environment locally.
+
+* **The Server Folder:** `/home/export/shares` (Created in the previous section).
+* **The Client Folder:** `/home/shares` (We will create this now).
+* **The Action:** We will **Connect (Mount)** the Client folder to the Server folder.
+
+---
+
+## 🛠️ Step 1: Installing NFS Client Software
+
+Even though we previously installed the Server software, the Client requires a specific package called `nfs-common` to function correctly.
+
+### The Command
+
+```bash
+sudo apt install nfs-common
+
+```
+
+### 👨‍💻 Deep Dive Explanation
+
+* **`nfs-common`**: This package contains the necessary binaries and libraries that allow the `mount` command to understand the NFS protocol. Without this package, your system would not know how to speak the "language" required to connect to NFS shares.
+
+---
+
+## 📂 Step 2: Creating the Client Directory (Mount Point)
+
+The Client needs a specific location—a "Window"—through which it can view the Server's files. We will create a new, empty folder for this purpose.
+
+### The Command
+
+```bash
+sudo mkdir /home/shares
+
+```
+
+### 👨‍💻 Deep Dive Explanation
+
+* **`/home/shares`**: Currently, this is just an empty directory on your local file system. However, once we perform the **mount** operation, this folder will act as a portal. Any file existing on the Server will magically appear inside this folder.
+
+---
+
+## 🔗 Step 3: Connecting the Client to the Server (Mounting)
+
+This is the most critical step. While standard networking books might use an external IP like `192.168.0.113`, we are working on a single machine. Therefore, we will use the **Localhost IP** (`127.0.0.1`) or your LAN IP (`10.0.2.15`).
+
+### The Command (For Single VM/Loopback)
+
+```bash
+sudo mount 127.0.0.1:/home/export/shares /home/shares
+
+```
+
+### 👨‍💻 Command Breakdown
+
+1. **`sudo mount`**: The command to attach a storage device or filesystem to a specific directory.
+2. **`127.0.0.1`**: **The Source.** This IP address represents "This Computer" (Localhost). It tells the system to look for the server on itself.
+3. **`:/home/export/shares`**: **The Source Path.** This is the specific folder *on the Server* that we want to access.
+4. **`/home/shares`**: **The Destination (Mount Point).** This is the folder *on the Client* where we want the files to appear.
+
+---
+
+## 📊 Step 4: Verification (Did it Connect?)
+
+To confirm that the connection was successful, we use the `df` (Disk Free) command. This tool displays all currently connected filesystems.
+
+### The Command
+
+```bash
+df -h
+
+```
+
+*(The `-h` flag makes the output "human-readable", showing sizes in MB/GB).*
+
+### 🔍 What to Look For
+
+Scan the output, specifically at the very bottom of the list. You should see a line resembling this:
+
+```plaintext
+Filesystem                       Size  Used Avail Use% Mounted on
+...
+127.0.0.1:/home/export/shares    ...   ...  ...   ...  /home/shares
+
+```
+
+**Success Criteria:** If you see the line above mapping the IP address to your `/home/shares` folder, **Congratulations!** Your NFS Client has successfully connected.
+
+---
+
+## 🧪 Step 5: Testing (Witness the Magic)
+
+Now, we will prove that the setup works. We will create a file in the Server folder, and it should automatically appear in the Client folder.
+
+### Test 1: Create a File on the Server Side
+
+Run the following command to create a dummy text file inside the server's export directory.
+
+```bash
+sudo touch /home/export/shares/server_file.txt
+
+```
+
+### Test 2: Check the Client Side
+
+Now, list the contents of your Client directory to see if the file arrived.
+
+```bash
+ls /home/shares
+
+```
+
+### 🎯 Expected Result
+
+The output should list:
+
+```text
+server_file.txt
+
+```
+
+### Test 3: GUI Verification (Optional)
+
+If you prefer a visual check, open your **Files Manager** and navigate to `/home/shares`. You will see the files residing on the server, exactly as if they were local files.
+
+---
+
+## 🚀 Conclusion
+
+You have successfully configured your Ubuntu machine to act as **both a Server and a Client** simultaneously.
+
+* Any data you place in `/home/export/shares` (The Server)...
+* Will immediately be visible and accessible in `/home/shares` (The Client).
+
+This confirms that the NFS service is operational, the permissions are correct, and the network mounting is functioning perfectly.
+
+---
